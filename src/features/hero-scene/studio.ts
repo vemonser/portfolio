@@ -3,44 +3,51 @@ import * as THREE from "three";
 /**
  * A procedural studio, baked once into a PMREM.
  *
- * The whole look depends on this. Chrome is a mirror, so every straight edge
- * in the environment comes back as a straight bright line across the metal —
- * thin panel strips made the surface read as a sphere under a light rig
- * instead of as molten chrome. So there are no panels: the dome is a vertical
- * gradient with a few soft, round highlights, and the surface's own lobes do
- * the warping.
+ * Chrome is a mirror, so every straight edge in the environment comes back as
+ * a bright line across the metal and every round light comes back as a dot.
+ * The reference is built almost entirely from *filaments*, and a filament is
+ * the reflection of a ring: a band of directions perpendicular to an axis.
  *
- * Keeping it in code also means no HDR file and no network request.
+ * So the environment is a near-black dome plus five rings at different axes
+ * and a couple of small hot spots. Five rings at five angles is what turns
+ * "grey fog" into "molten metal".
+ *
+ * It is all code: no HDR file, no CDN, no network request.
  */
+const RING_COUNT = 5;
+
+const RINGS: Array<{ axis: [number, number, number]; color: number; width: number }> = [
+  { axis: [0, 1, 0], color: 2.6, width: 0.011 },
+  { axis: [0.72, 0.32, -0.61], color: 1.7, width: 0.007 },
+  { axis: [-0.42, 0.86, 0.29], color: 1.3, width: 0.006 },
+  { axis: [0.31, -0.28, 0.91], color: 1.05, width: 0.005 },
+  { axis: [-0.86, -0.12, 0.49], color: 1.45, width: 0.008 },
+];
+
 export function createStudioEnvironment(): THREE.Scene {
   const scene = new THREE.Scene();
 
+  const axes = RINGS.map((ring) => new THREE.Vector3(...ring.axis).normalize());
+  const colors = RINGS.map(
+    (ring) => new THREE.Color(ring.color, ring.color * 0.99, ring.color * 0.96),
+  );
+  const widths = RINGS.map((ring) => ring.width);
+
   const dome = new THREE.Mesh(
-    new THREE.SphereGeometry(50, 64, 48),
+    new THREE.SphereGeometry(50, 128, 96),
     new THREE.ShaderMaterial({
       side: THREE.BackSide,
       depthWrite: false,
       uniforms: {
-        uSky: { value: new THREE.Color(0.035, 0.035, 0.034) },
-        uHorizon: { value: new THREE.Color(0.012, 0.012, 0.012) },
-        uFloor: { value: new THREE.Color(0.012, 0.012, 0.012) },
+        uSky: { value: new THREE.Color(0.012, 0.012, 0.012) },
+        uHorizon: { value: new THREE.Color(0.004, 0.004, 0.004) },
+        uFloor: { value: new THREE.Color(0.002, 0.002, 0.002) },
         uKeyDir: { value: new THREE.Vector3(-0.55, 0.62, 0.56).normalize() },
-        uKeyColor: { value: new THREE.Color(5.6, 5.55, 5.4) },
-        uKeySize: { value: 0.1 },
-        uFillDir: { value: new THREE.Vector3(0.82, 0.1, 0.56).normalize() },
-        uFillColor: { value: new THREE.Color(2.2, 2.18, 2.1) },
-        uFillSize: { value: 0.055 },
-        uRimDir: { value: new THREE.Vector3(0.15, 0.98, -0.4).normalize() },
-        uRimColor: { value: new THREE.Color(1.4, 1.39, 1.34) },
-        uRimSize: { value: 0.05 },
-        // Ring lights. A round light reflects as a dot; a ring reflects as a
-        // long thin line, which is what gives the reference its filaments.
-        uRingA: { value: new THREE.Vector3(0.0, 1.0, 0.0).normalize() },
-        uRingAColor: { value: new THREE.Color(1.45, 1.43, 1.38) },
-        uRingAWidth: { value: 0.13 },
-        uRingB: { value: new THREE.Vector3(0.72, 0.32, -0.61).normalize() },
-        uRingBColor: { value: new THREE.Color(0.95, 0.94, 0.91) },
-        uRingBWidth: { value: 0.08 },
+        uKeyColor: { value: new THREE.Color(3.4, 3.37, 3.28) },
+        uKeySize: { value: 0.03 },
+        uAxes: { value: axes },
+        uColors: { value: colors },
+        uWidths: { value: widths },
       },
       vertexShader: /* glsl */ `
         varying vec3 vDir;
@@ -56,39 +63,26 @@ export function createStudioEnvironment(): THREE.Scene {
         uniform vec3 uKeyDir;
         uniform vec3 uKeyColor;
         uniform float uKeySize;
-        uniform vec3 uFillDir;
-        uniform vec3 uFillColor;
-        uniform float uFillSize;
-        uniform vec3 uRimDir;
-        uniform vec3 uRimColor;
-        uniform float uRimSize;
-        uniform vec3 uRingA;
-        uniform vec3 uRingAColor;
-        uniform float uRingAWidth;
-        uniform vec3 uRingB;
-        uniform vec3 uRingBColor;
-        uniform float uRingBWidth;
-        varying vec3 vDir;
+        uniform vec3 uAxes[${RING_COUNT}];
+        uniform vec3 uColors[${RING_COUNT}];
+        uniform float uWidths[${RING_COUNT}];
 
-        // Soft, round falloff — never an edge, so reflections stay liquid.
-        float blob(vec3 dir, vec3 lightDir, float size) {
-          float d = 1.0 - dot(dir, lightDir);
-          return pow(smoothstep(size, 0.0, d), 2.2);
-        }
+        varying vec3 vDir;
 
         void main() {
           float y = vDir.y;
           vec3 color = mix(uFloor, uHorizon, smoothstep(-0.95, -0.05, y));
           color = mix(color, uSky, smoothstep(-0.05, 0.85, y));
 
-          color += uKeyColor * blob(vDir, uKeyDir, uKeySize);
-          color += uFillColor * blob(vDir, uFillDir, uFillSize);
-          color += uRimColor * blob(vDir, uRimDir, uRimSize);
+          // One small hot spot for the tight, near-white highlight.
+          float keyD = 1.0 - dot(vDir, uKeyDir);
+          color += uKeyColor * pow(smoothstep(uKeySize, 0.0, keyD), 2.6);
 
-          // A ring is a band of directions perpendicular to an axis: bright
-          // along a great circle, black either side of it.
-          color += uRingAColor * pow(smoothstep(uRingAWidth, 0.0, abs(dot(vDir, uRingA))), 1.8);
-          color += uRingBColor * pow(smoothstep(uRingBWidth, 0.0, abs(dot(vDir, uRingB))), 1.8);
+          // The filaments.
+          for (int i = 0; i < ${RING_COUNT}; i++) {
+            float band = smoothstep(uWidths[i], 0.0, abs(dot(vDir, uAxes[i])));
+            color += uColors[i] * pow(band, 3.2);
+          }
 
           gl_FragColor = vec4(color, 1.0);
         }

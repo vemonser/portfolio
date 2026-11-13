@@ -29,7 +29,7 @@ const PLANE_HEIGHT = 4.6;
 const SEGMENTS = 340;
 const RINGS = 220;
 
-const AMPLITUDE = 0.3;
+const AMPLITUDE = 0.62;
 const FLOW = 0.1;
 const FOV = 42;
 const CAMERA_Z = 3.4;
@@ -54,16 +54,23 @@ export function createSurfaceScene({
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 50);
   camera.position.set(0, 0, CAMERA_Z);
 
-  const pmrem = new THREE.PMREMGenerator(renderer);
+  // A plain high-resolution cube map rather than a PMREM: the filaments here
+  // are ~0.01 radians wide, and the PMREM mip chain smears them into haze.
   const studio = createStudioEnvironment();
-  scene.environment = pmrem.fromScene(studio, 0.012).texture;
+  const cubeTarget = new THREE.WebGLCubeRenderTarget(1024, {
+    type: THREE.HalfFloatType,
+    generateMipmaps: true,
+    minFilter: THREE.LinearMipmapLinearFilter,
+  });
+  const cubeCamera = new THREE.CubeCamera(0.1, 200, cubeTarget);
+  cubeCamera.update(renderer, studio);
+  scene.environment = cubeTarget.texture;
   studio.traverse((object) => {
     if (object instanceof THREE.Mesh) {
       object.geometry.dispose();
       (object.material as THREE.Material).dispose();
     }
   });
-  pmrem.dispose();
 
   const uniforms = {
     uTime: { value: initialTime * FLOW },
@@ -141,7 +148,7 @@ export function createSurfaceScene({
         #include <beginnormal_vertex>
 
         vec2 heroP = position.xy;
-        float heroEps = 0.06;
+        float heroEps = 0.02;
 
         float heroH = heroField(heroP);
         float heroHx = heroField(heroP + vec2(heroEps, 0.0));
@@ -303,6 +310,7 @@ export function createSurfaceScene({
       geometry.dispose();
       material.dispose();
       scene.environment?.dispose();
+      cubeTarget.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
     },
