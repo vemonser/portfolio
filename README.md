@@ -48,10 +48,11 @@ driven from ScrollTrigger later — without touching the page.
 
 ### The scene
 
-The reference is a macro photograph of molten metal, not an object in a scene:
-a surface with no silhouette and no horizon. So the scene is a densely
-tessellated plane sitting just in front of the camera, displaced along its
-normal by animated 3D noise, shaded by a chrome material.
+One dark chrome mass. The reference is a molten form with a readable
+silhouette — a *thing*, not a surface filling the frame. An earlier version
+used a displaced plane and it read as a curtain, so this is a dense sphere:
+low-frequency noise gives it lobes, the silhouette stays visible, and the
+environment does all the shading.
 
 - **No lights.** `metalness: 1` plus low roughness means the environment map is
   the entire lighting rig. Adding a light would flatten exactly what makes it
@@ -60,15 +61,15 @@ normal by animated 3D noise, shaded by a chrome material.
   emissive strips, and large near-black panels, then bakes it into a PMREM.
   No HDR file, no CDN, no network request. The black panels are not decoration:
   chrome only reads as chrome when half of it is reflecting nothing.
-- **The normal is analytic.** The height field's gradient is computed from two
-  extra samples per vertex, so shading stays smooth instead of showing the
-  tessellation.
+- **The normal comes from the displaced surface.** Two extra samples per vertex
+  give the real gradient, so shading follows the lobes instead of the base
+  sphere and the tessellation never shows.
 - **Roughness is not zero on purpose.** A near-mirror aliases the hard edges of
-  the environment into visible blocks; `0.22` both removes that and matches the
+  the environment into visible blocks; `0.16` removes that and keeps the
   soft-focus look of the reference.
-- **The field is low frequency.** Two octaves with a weak second one, plus a
-  gentle domain warp. More detail reads as crumpled foil; the reference is one
-  dark mass with a soft sheen.
+- **The noise is low frequency.** Two octaves with a weak second one, and a
+  restrained domain warp. More detail reads as crumpled foil; the reference is
+  one dark mass with a soft sheen.
 
 ### Whether the engine runs at all
 
@@ -104,8 +105,8 @@ Measured on this machine, production build (`gzip -9`), 1440×900.
 |---|---|
 | Initial route JS (`/en`) | 176 KB gz |
 | Scene chunk (three + GSAP + scene) | 161 KB gz / 135 KB br |
-| Poster, desktop AVIF | 4.8 KB |
-| Poster, mobile AVIF | 3.7 KB |
+| Poster, desktop AVIF | 3.3 KB |
+| Poster, mobile AVIF | 3.0 KB |
 | Frame time, p95 | 7 ms |
 | Mobile (390px) requests for the scene chunk | 0 |
 

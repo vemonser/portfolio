@@ -16,3 +16,19 @@ export function heroScrollProgress(
   if (travel <= 0) return 0;
   return clamp(-rectTop / travel, 0, 1);
 }
+
+/**
+ * Camera distance that makes a blob of `radius` occupy a chosen share of the
+ * frame. On portrait the width becomes the limit, so the form still reads as
+ * a form instead of being cropped into a wall.
+ */
+export function cameraDistance(
+  radius: number,
+  aspect: number,
+  fovDeg: number,
+  fill: number,
+): number {
+  const tanHalf = Math.tan((fovDeg * Math.PI) / 360);
+  const share = aspect >= 1 ? fill : fill * aspect;
+  return clamp((2 * radius) / (share * 2 * tanHalf), 2.4, 14);
+}

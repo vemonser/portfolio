@@ -1,37 +1,34 @@
 import gsap from "gsap";
 import * as THREE from "three";
 
-import { clamp } from "./math";
+import { cameraDistance, clamp } from "./math";
 import { SIMPLEX_3D } from "./noise";
 import { createStudioEnvironment } from "./studio";
 
 /**
- * Liquid chrome, full bleed.
+ * One dark chrome mass.
  *
- * The reference is not an object in a scene — it is a macro photograph of
- * molten metal: a surface that fills the frame, no silhouette, no horizon.
- * So this is a tall, densely tessellated plane sitting just in front of the
- * camera, displaced along its normal by animated 3D noise.
+ * The reference is a single molten form with a readable silhouette — a
+ * *thing*, not a surface filling the frame. A displaced plane read as a
+ * curtain, so this is a dense sphere: low-frequency noise gives it lobes,
+ * the silhouette stays visible, and the environment does all the shading.
  *
- * A plane rather than a sphere on purpose. Seen this close, a sphere is only
- * a slightly curved patch anyway, but its silhouette and its folds produce
- * grazing-angle artefacts which a height field cannot: the normal here is an
- * analytic gradient, so the shading is smooth at any zoom.
- *
- * There are no lights. Metal with roughness near zero is shaded entirely by
- * the studio cubemap — which is why the contrast is built into the
- * environment rather than recovered in the shader.
+ * No lights. Metal with low roughness is lit entirely by the studio cubemap,
+ * which is why the contrast lives in `studio.ts` and nowhere else.
  */
 
-const PLANE_WIDTH = 7.2;
-const PLANE_HEIGHT = 4.6;
-const SEGMENTS = 340;
-const RINGS = 220;
+const RADIUS = 1;
+const SEGMENTS = 300;
+const RINGS = 180;
 
-const AMPLITUDE = 0.34;
+// Low frequency on purpose: a few large lobes read as molten, high frequency
+// reads as crumpled foil.
+const NOISE_SCALE = 0.62;
+const AMPLITUDE = 0.18;
+
+const FOV = 35;
+const FILL = 0.62;
 const FLOW = 0.1;
-const FOV = 42;
-const CAMERA_Z = 3.1;
 
 export type HeroScene = {
   setPointer(x: number, y: number): void;
@@ -65,11 +62,11 @@ export function createHeroScene({
   });
   renderer.setClearAlpha(0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.8;
+  renderer.toneMappingExposure = 0.95;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 50);
-  camera.position.set(0, 0, CAMERA_Z);
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 60);
+  camera.position.set(0, 0, 6);
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   const studio = createStudioEnvironment();
@@ -85,23 +82,23 @@ export function createHeroScene({
   const uniforms = {
     uTime: { value: initialTime * FLOW },
     uAmplitude: { value: AMPLITUDE },
-    uPointer: { value: new THREE.Vector2() },
+    uPointerDir: { value: new THREE.Vector3(0, 0, 1) },
     uHover: { value: 0 },
   };
 
   const material = new THREE.MeshPhysicalMaterial({
-    color: "#e4e1da",
+    color: "#dedbd4",
     metalness: 1,
-    roughness: 0.22,
+    roughness: 0.16,
     clearcoat: 1,
-    clearcoatRoughness: 0.12,
-    envMapIntensity: 1.5,
+    clearcoatRoughness: 0.06,
+    envMapIntensity: 1.35,
   });
 
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uTime = uniforms.uTime;
     shader.uniforms.uAmplitude = uniforms.uAmplitude;
-    shader.uniforms.uPointer = uniforms.uPointer;
+    shader.uniforms.uPointerDir = uniforms.uPointerDir;
     shader.uniforms.uHover = uniforms.uHover;
 
     shader.vertexShader = shader.vertexShader
@@ -111,42 +108,41 @@ export function createHeroScene({
         #include <common>
         uniform float uTime;
         uniform float uAmplitude;
-        uniform vec2 uPointer;
+        uniform vec3 uPointerDir;
         uniform float uHover;
         vec3 heroDisplaced;
 
         ${SIMPLEX_3D}
 
-        // Two octaves, second one deliberately weak. More detail here reads as
-        // foil; the reference is one mass with a soft sheen.
+        // Two octaves, the second weak. More detail reads as foil.
         float heroFbm(vec3 p) {
           float value = 0.0;
           float amplitude = 0.5;
           for (int i = 0; i < 2; i++) {
             value += amplitude * heroSnoise(p);
-            p *= 1.9;
-            amplitude *= 0.3;
+            p *= 2.1;
+            amplitude *= 0.28;
           }
           return value;
         }
 
-        float heroField(vec2 p) {
+        // Height of the molten surface above the base sphere, at a direction.
+        float heroHeight(vec3 dir) {
           float t = uTime;
+          vec3 q = dir * ${NOISE_SCALE.toFixed(3)};
 
-          // Domain warp. This is the difference between "noise" and "liquid":
-          // every point is pushed by another slice of the same field, so the
-          // surface folds instead of bumping.
+          // Domain warp: the difference between noise and liquid.
           vec3 warp = vec3(
-            heroSnoise(vec3(p * 0.12, t * 0.4)),
-            heroSnoise(vec3(p * 0.12 + 8.7, t * 0.4)),
-            0.0
+            heroSnoise(q * 0.7 + vec3(0.0, 0.0, t * 0.7)),
+            heroSnoise(q * 0.7 + vec3(9.3, 2.7, t * 0.7)),
+            heroSnoise(q * 0.7 + vec3(4.1, 8.6, t * 0.7))
           );
 
-          float height = heroFbm(vec3(p * 0.245 + warp.xy * 0.62, t * 0.55));
+          float height = heroFbm(q + warp * 0.18 + vec3(0.0, 0.0, t * 0.9));
 
-          // The pointer presses into the surface rather than moving a light.
-          float d = length(p - uPointer);
-          height += exp(-d * d * 0.62) * uHover * 1.25;
+          // A soft, wide press where the pointer is.
+          float angle = acos(clamp(dot(dir, uPointerDir), -1.0, 1.0));
+          height += smoothstep(1.15, 0.0, angle) * uHover * 0.55;
 
           return height * uAmplitude;
         }
@@ -157,21 +153,25 @@ export function createHeroScene({
         /* glsl */ `
         #include <beginnormal_vertex>
 
-        vec2 heroP = position.xy;
+        vec3 heroDir = normalize(position);
+        vec3 heroUp = abs(heroDir.y) > 0.99 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
+        vec3 heroT1 = normalize(cross(heroDir, heroUp));
+        vec3 heroT2 = normalize(cross(heroDir, heroT1));
+
         float heroEps = 0.06;
+        vec3 heroDir1 = normalize(heroDir + heroT1 * heroEps);
+        vec3 heroDir2 = normalize(heroDir + heroT2 * heroEps);
 
-        float heroH = heroField(heroP);
-        float heroHx = heroField(heroP + vec2(heroEps, 0.0));
-        float heroHy = heroField(heroP + vec2(0.0, heroEps));
+        vec3 heroP0 = heroDir * (1.0 + heroHeight(heroDir));
+        vec3 heroP1 = heroDir1 * (1.0 + heroHeight(heroDir1));
+        vec3 heroP2 = heroDir2 * (1.0 + heroHeight(heroDir2));
 
-        // Analytic gradient. No cross products, no folded triangles.
-        objectNormal = normalize(vec3(
-          -(heroHx - heroH) / heroEps,
-          -(heroHy - heroH) / heroEps,
-          1.0
-        ));
+        heroDisplaced = heroP0;
 
-        heroDisplaced = vec3(heroP, heroH);
+        // Analytic-ish normal from the displaced surface itself, so the
+        // shading follows the lobes instead of the base sphere.
+        vec3 heroNormal = normalize(cross(heroP1 - heroP0, heroP2 - heroP0));
+        objectNormal = dot(heroNormal, heroDir) < 0.0 ? -heroNormal : heroNormal;
         `,
       )
       .replace(
@@ -183,9 +183,9 @@ export function createHeroScene({
       );
   };
 
-  material.customProgramCacheKey = () => "hero-liquid-plane-v1";
+  material.customProgramCacheKey = () => "hero-chrome-mass-v1";
 
-  const geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT, SEGMENTS, RINGS);
+  const geometry = new THREE.SphereGeometry(RADIUS, SEGMENTS, RINGS);
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
@@ -195,13 +195,15 @@ export function createHeroScene({
   const eased = { x: 0, y: 0 };
   const hover = { value: 0 };
   const scroll = { value: 0 };
+  const intro = { value: 0 };
 
   const easeX = gsap.quickTo(eased, "x", { duration: 0.8, ease: "power2.out" });
   const easeY = gsap.quickTo(eased, "y", { duration: 0.8, ease: "power2.out" });
-  const easeHover = gsap.quickTo(hover, "value", { duration: 0.65, ease: "power2.out" });
+  const easeHover = gsap.quickTo(hover, "value", { duration: 0.6, ease: "power2.out" });
   const easeScroll = gsap.quickTo(scroll, "value", { duration: 0.9, ease: "power2.out" });
 
   const ray = new THREE.Vector3();
+  const quaternion = new THREE.Quaternion();
 
   let running = false;
   let frameId = 0;
@@ -215,19 +217,17 @@ export function createHeroScene({
     uniforms.uTime.value = seconds * FLOW;
     uniforms.uHover.value = hover.value;
 
-    // Pointer → world position on the surface plane.
     ray.set(eased.x, eased.y, 0.5).unproject(camera).sub(camera.position).normalize();
-    const distance = -camera.position.z / ray.z;
-    uniforms.uPointer.value.set(
-      camera.position.x + ray.x * distance,
-      camera.position.y + ray.y * distance,
-    );
+    mesh.getWorldQuaternion(quaternion).invert();
+    uniforms.uPointerDir.value.copy(ray).applyQuaternion(quaternion).normalize();
 
-    // Steady flow comes from the field itself. The mesh only answers input.
-    mesh.rotation.x = eased.y * 0.06;
-    mesh.rotation.y = eased.x * 0.08;
-    mesh.position.y = scroll.value * 0.5;
-    camera.position.z = CAMERA_Z * (1 - 0.06 * scroll.value);
+    // The flow lives in the noise; the mesh only answers input.
+    mesh.rotation.y = eased.x * 0.22 + scroll.value * Math.PI * 0.5;
+    mesh.rotation.x = eased.y * 0.16;
+    mesh.position.y = 0.16 + scroll.value * 0.35;
+    mesh.scale.setScalar(0.88 + intro.value * 0.12);
+
+    camera.position.z = cameraDistance(RADIUS + AMPLITUDE, camera.aspect, FOV, FILL);
 
     renderer.render(scene, camera);
 
@@ -272,7 +272,7 @@ export function createHeroScene({
   const pulse = () => {
     gsap
       .timeline({ overwrite: true })
-      .to(hover, { value: 1.15, duration: 0.28, ease: "power2.out" })
+      .to(hover, { value: 1, duration: 0.3, ease: "power2.out" })
       .to(hover, { value: 0, duration: 1.1, ease: "power3.inOut" });
   };
 
@@ -303,6 +303,14 @@ export function createHeroScene({
   };
   canvas.addEventListener("webglcontextlost", onLost);
 
+  uniforms.uTime.value = initialTime * FLOW;
+
+  if (frozen) {
+    intro.value = 1;
+  } else {
+    gsap.to(intro, { value: 1, duration: 1.4, ease: "power3.out" });
+  }
+
   resize();
 
   return {
@@ -316,7 +324,7 @@ export function createHeroScene({
       stop();
       observer.disconnect();
       canvas.removeEventListener("webglcontextlost", onLost);
-      gsap.killTweensOf([eased, hover, scroll]);
+      gsap.killTweensOf([eased, hover, scroll, intro]);
       geometry.dispose();
       material.dispose();
       scene.environment?.dispose();
