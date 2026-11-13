@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
-  Fraunces,
   IBM_Plex_Sans_Arabic,
   Inter,
   JetBrains_Mono,
@@ -14,22 +13,15 @@ import "../globals.css";
 
 /*
  * Fonts are downloaded at build time and self-hosted: no request ever leaves
- * for fonts.gstatic.com at runtime. Only the two display faces are preloaded
- * — they paint the largest text on the page. The rest use `swap` and
- * metric-adjusted fallbacks so a late arrival cannot shift layout.
+ * for fonts.gstatic.com at runtime. Inter paints the wordmark on Latin pages
+ * and is preloaded; the rest use `swap` plus metric-adjusted fallbacks so a
+ * late arrival cannot shift layout.
  */
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-  preload: true,
-});
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 const plexArabic = IBM_Plex_Sans_Arabic({
@@ -48,7 +40,6 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const fontVariables = [
-  fraunces.variable,
   inter.variable,
   plexArabic.variable,
   jetbrainsMono.variable,

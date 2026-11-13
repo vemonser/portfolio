@@ -19,7 +19,7 @@
   --text-t-64: 4rem;
   --text-t-96: 6rem;
 
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-label: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
 }
@@ -83,7 +83,7 @@ html[lang="ar"] {
    * Measured for Fraunces at line-height .76: overflow ≈ .233em, so a .113em
    * drop leaves ≈ .12em clipped — the brief's `bottom: -0.12em`.
    */
-  --wordmark-drop: 0.113em;
+  --wordmark-drop: 0.072em;
 
   display: block;
   width: 100%;
@@ -91,10 +91,10 @@ html[lang="ar"] {
   text-align: center;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 13.2vw, 13rem);
+  font-size: clamp(2rem, 8.4vw, 8.5rem);
   font-weight: 600;
-  line-height: 0.76;
-  letter-spacing: -0.045em;
+  line-height: 0.86;
+  letter-spacing: -0.035em;
   color: var(--color-bone);
   margin: 0;
   margin-block-end: var(--wordmark-drop);

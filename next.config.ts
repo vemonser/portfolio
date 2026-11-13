@@ -4,6 +4,13 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  // Turbopack's dev filesystem cache has been serving stale compiled CSS after
+  // edits to globals.css, which silently undoes style changes. Not worth the
+  // confusion for the few hundred ms it saves.
+  experimental: {
+    turbopackFileSystemCacheForDev: false,
+  },
+
   turbopack: {
     rules: {
       "*.css": {

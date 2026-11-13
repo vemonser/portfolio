@@ -1,28 +1,46 @@
 import * as THREE from "three";
 
 /**
- * A procedural studio, captured once into a PMREM.
+ * A procedural studio, baked once into a PMREM.
  *
- * three's RoomEnvironment is a *small room*, so a mirror sphere ends up
- * showing a miniature room inside the marble. What reads as chrome is a much
- * simpler thing: a huge gradient dome for the broad falloff, plus a handful
- * of hard emissive strips that become the highlights, plus large near-black
- * panels so half the sphere reflects nothing at all. Contrast is the metal.
+ * The whole look depends on this. Chrome is a mirror, so every straight edge
+ * in the environment comes back as a straight bright line across the metal —
+ * thin panel strips made the surface read as a sphere under a light rig
+ * instead of as molten chrome. So there are no panels: the dome is a vertical
+ * gradient with a few soft, round highlights, and the surface's own lobes do
+ * the warping.
  *
- * It is also a few hundred bytes of code and no network request.
+ * Keeping it in code also means no HDR file and no network request.
  */
 export function createStudioEnvironment(): THREE.Scene {
   const scene = new THREE.Scene();
 
   const dome = new THREE.Mesh(
-    new THREE.SphereGeometry(50, 32, 24),
+    new THREE.SphereGeometry(50, 64, 48),
     new THREE.ShaderMaterial({
       side: THREE.BackSide,
       depthWrite: false,
       uniforms: {
-        uSky: { value: new THREE.Color(0.3, 0.3, 0.29) },
-        uHorizon: { value: new THREE.Color(0.075, 0.075, 0.075) },
-        uFloor: { value: new THREE.Color(0.02, 0.02, 0.02) },
+        uSky: { value: new THREE.Color(0.035, 0.035, 0.034) },
+        uHorizon: { value: new THREE.Color(0.012, 0.012, 0.012) },
+        uFloor: { value: new THREE.Color(0.012, 0.012, 0.012) },
+        uKeyDir: { value: new THREE.Vector3(-0.55, 0.62, 0.56).normalize() },
+        uKeyColor: { value: new THREE.Color(5.6, 5.55, 5.4) },
+        uKeySize: { value: 0.1 },
+        uFillDir: { value: new THREE.Vector3(0.82, 0.1, 0.56).normalize() },
+        uFillColor: { value: new THREE.Color(2.2, 2.18, 2.1) },
+        uFillSize: { value: 0.055 },
+        uRimDir: { value: new THREE.Vector3(0.15, 0.98, -0.4).normalize() },
+        uRimColor: { value: new THREE.Color(1.4, 1.39, 1.34) },
+        uRimSize: { value: 0.05 },
+        // Ring lights. A round light reflects as a dot; a ring reflects as a
+        // long thin line, which is what gives the reference its filaments.
+        uRingA: { value: new THREE.Vector3(0.0, 1.0, 0.0).normalize() },
+        uRingAColor: { value: new THREE.Color(1.45, 1.43, 1.38) },
+        uRingAWidth: { value: 0.13 },
+        uRingB: { value: new THREE.Vector3(0.72, 0.32, -0.61).normalize() },
+        uRingBColor: { value: new THREE.Color(0.95, 0.94, 0.91) },
+        uRingBWidth: { value: 0.08 },
       },
       vertexShader: /* glsl */ `
         varying vec3 vDir;
@@ -35,68 +53,49 @@ export function createStudioEnvironment(): THREE.Scene {
         uniform vec3 uSky;
         uniform vec3 uHorizon;
         uniform vec3 uFloor;
+        uniform vec3 uKeyDir;
+        uniform vec3 uKeyColor;
+        uniform float uKeySize;
+        uniform vec3 uFillDir;
+        uniform vec3 uFillColor;
+        uniform float uFillSize;
+        uniform vec3 uRimDir;
+        uniform vec3 uRimColor;
+        uniform float uRimSize;
+        uniform vec3 uRingA;
+        uniform vec3 uRingAColor;
+        uniform float uRingAWidth;
+        uniform vec3 uRingB;
+        uniform vec3 uRingBColor;
+        uniform float uRingBWidth;
         varying vec3 vDir;
+
+        // Soft, round falloff — never an edge, so reflections stay liquid.
+        float blob(vec3 dir, vec3 lightDir, float size) {
+          float d = 1.0 - dot(dir, lightDir);
+          return pow(smoothstep(size, 0.0, d), 2.2);
+        }
+
         void main() {
           float y = vDir.y;
-          vec3 color = mix(uFloor, uHorizon, smoothstep(-0.95, -0.02, y));
-          color = mix(color, uSky, smoothstep(-0.02, 0.9, y));
+          vec3 color = mix(uFloor, uHorizon, smoothstep(-0.95, -0.05, y));
+          color = mix(color, uSky, smoothstep(-0.05, 0.85, y));
+
+          color += uKeyColor * blob(vDir, uKeyDir, uKeySize);
+          color += uFillColor * blob(vDir, uFillDir, uFillSize);
+          color += uRimColor * blob(vDir, uRimDir, uRimSize);
+
+          // A ring is a band of directions perpendicular to an axis: bright
+          // along a great circle, black either side of it.
+          color += uRingAColor * pow(smoothstep(uRingAWidth, 0.0, abs(dot(vDir, uRingA))), 1.8);
+          color += uRingBColor * pow(smoothstep(uRingBWidth, 0.0, abs(dot(vDir, uRingB))), 1.8);
+
           gl_FragColor = vec4(color, 1.0);
         }
       `,
     }),
   );
+
   scene.add(dome);
-
-  const panel = (
-    width: number,
-    height: number,
-    intensity: number,
-    position: [number, number, number],
-  ) => {
-    const mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(width, height),
-      new THREE.MeshBasicMaterial({
-        color: new THREE.Color(intensity, intensity * 0.99, intensity * 0.96),
-        side: THREE.DoubleSide,
-      }),
-    );
-    mesh.position.set(...position);
-    mesh.lookAt(0, 0, 0);
-    scene.add(mesh);
-  };
-
-  // A broad softbox, a hard key, a rim, and an overhead strip. Different
-  // sizes and distances are what separate "studio" from "two glowing bars".
-  panel(9, 5, 0.55, [-3, 8, -7]);
-  panel(1.2, 15, 7, [7.5, 5, 6]);
-  panel(0.55, 9, 4.2, [-8.5, 3.6, 3.2]);
-  panel(11, 0.8, 2.8, [0, 9, -2]);
-  panel(3.4, 2.6, 1.7, [5.5, -3.4, 4.6]);
-  panel(0.45, 8, 5.2, [-3.4, 4.2, 7.2]);
-  panel(0.28, 6, 3.4, [3.6, -1.2, 8]);
-  panel(6.5, 0.32, 2.6, [-2.2, -4.2, 7.4]);
-  panel(0.6, 5, 3, [6.2, -3, -2.4]);
-  panel(0.35, 4, 2.2, [-6.5, -1, 4]);
-
-  /*
-   * A face-on mirror reflects the cone directly behind the camera. That cone
-   * has to be full of edges or the metal reads as flat grey, no matter how
-   * good the shading is. These panels sit just in front of it, so a ±15°
-   * change in surface normal slides the reflection across bright/dark
-   * boundaries — which is the entire visual language of liquid chrome.
-   */
-  panel(17, 17, 0.005, [0, 0, 20]);
-  panel(4.5, 11, 3.4, [-5.4, 3.2, 22]);
-  panel(3.2, 9, 1.4, [5.6, -1.8, 22]);
-  panel(15, 1.9, 2.6, [-1, 6.4, 22]);
-  panel(15, 1.4, 0.01, [-1, -6.6, 22]);
-  panel(1.1, 7, 3.9, [2.4, 4.4, 21]);
-  panel(10, 5, 0.01, [-7.5, -3.5, 21]);
-
-  // Negative space — the black halves of the reflection.
-  panel(18, 22, 0.006, [-9, 1, -11]);
-  panel(16, 20, 0.006, [10, -2, -10]);
-  panel(20, 6, 0.004, [0, -7, 0]);
-
   return scene;
 }
