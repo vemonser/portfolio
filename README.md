@@ -48,28 +48,27 @@ driven from ScrollTrigger later — without touching the page.
 
 ### The scene
 
-One dark chrome mass. The reference is a molten form with a readable
-silhouette — a *thing*, not a surface filling the frame. An earlier version
-used a displaced plane and it read as a curtain, so this is a dense sphere:
-low-frequency noise gives it lobes, the silhouette stays visible, and the
-environment does all the shading.
+A molten chrome surface that fills the frame, so the hero has no silhouette
+at all — the surface *is* the page. It is a densely tessellated plane sitting
+just in front of the camera, displaced along its normal by animated 3D noise,
+shaded by a mirror.
 
-- **No lights.** `metalness: 1` plus low roughness means the environment map is
-  the entire lighting rig. Adding a light would flatten exactly what makes it
-  read as metal.
-- **The environment is code.** `studio.ts` builds a gradient dome, a few hard
-  emissive strips, and large near-black panels, then bakes it into a PMREM.
-  No HDR file, no CDN, no network request. The black panels are not decoration:
-  chrome only reads as chrome when half of it is reflecting nothing.
-- **The normal comes from the displaced surface.** Two extra samples per vertex
-  give the real gradient, so shading follows the lobes instead of the base
-  sphere and the tessellation never shows.
-- **Roughness is not zero on purpose.** A near-mirror aliases the hard edges of
-  the environment into visible blocks; `0.16` removes that and keeps the
-  soft-focus look of the reference.
-- **The noise is low frequency.** Two octaves with a weak second one, and a
-  restrained domain warp. More detail reads as crumpled foil; the reference is
-  one dark mass with a soft sheen.
+- **No lights.** `metalness: 1` with roughness near zero means the environment
+  map is the entire lighting rig.
+- **The environment is code.** `studio.ts` builds a near-black dome with two
+  broad soft sources and one small hot spot, baked into a PMREM. No HDR file,
+  no CDN, no network request. Broad sources give the gradients that read as
+  liquid; the small one gives the single crisp glint that reads as polished.
+- **The field is anisotropic.** Squashed on one axis and stretched on the
+  other, so forms elongate and flow instead of sitting there as round hills.
+  This is most of "liquid" for free.
+- **The normal is analytic.** Two extra samples per vertex give the gradient,
+  so shading stays smooth instead of showing the tessellation.
+- **Amplitude is deliberately under the fold threshold.** Push it further and
+  the surface folds over itself, which shows up as a stray dark line — the
+  exact artefact that made earlier versions look wrong.
+- **No ring lights.** A ring reflects off a near-flat surface as a closed loop
+  that appears from nowhere and reads as an artefact, not as metal.
 
 ### Whether the engine runs at all
 
@@ -105,8 +104,7 @@ Measured on this machine, production build (`gzip -9`), 1440×900.
 |---|---|
 | Initial route JS (`/en`) | 176 KB gz |
 | Scene chunk (three + GSAP + scene) | 161 KB gz / 135 KB br |
-| Poster, desktop AVIF | 3.3 KB |
-| Poster, mobile AVIF | 3.0 KB |
+| Poster, desktop AVIF | regenerated per run |
 | Frame time, p95 | 7 ms |
 | Mobile (390px) requests for the scene chunk | 0 |
 

@@ -1,37 +1,19 @@
 import * as THREE from "three";
 
 /**
- * A procedural studio, baked once into a PMREM.
+ * A procedural studio, baked once into a cube map.
  *
- * Chrome is a mirror, so every straight edge in the environment comes back as
- * a bright line across the metal and every round light comes back as a dot.
- * The reference is built almost entirely from *filaments*, and a filament is
- * the reflection of a ring: a band of directions perpendicular to an axis.
- *
- * So the environment is a near-black dome plus five rings at different axes
- * and a couple of small hot spots. Five rings at five angles is what turns
- * "grey fog" into "molten metal".
+ * The first version used ring lights to draw thin filaments, but a ring
+ * reflects off a near-flat surface as a closed loop — a line that appears
+ * from nowhere and reads as an artefact, not as metal. So: no rings. Two
+ * broad, soft sources give the gradients that make the surface look liquid,
+ * and one small hot spot gives the single crisp glint that makes it look
+ * polished.
  *
  * It is all code: no HDR file, no CDN, no network request.
  */
-const RING_COUNT = 5;
-
-const RINGS: Array<{ axis: [number, number, number]; color: number; width: number }> = [
-  { axis: [0, 1, 0], color: 2.6, width: 0.011 },
-  { axis: [0.72, 0.32, -0.61], color: 1.7, width: 0.007 },
-  { axis: [-0.42, 0.86, 0.29], color: 1.3, width: 0.006 },
-  { axis: [0.31, -0.28, 0.91], color: 1.05, width: 0.005 },
-  { axis: [-0.86, -0.12, 0.49], color: 1.45, width: 0.008 },
-];
-
 export function createStudioEnvironment(): THREE.Scene {
   const scene = new THREE.Scene();
-
-  const axes = RINGS.map((ring) => new THREE.Vector3(...ring.axis).normalize());
-  const colors = RINGS.map(
-    (ring) => new THREE.Color(ring.color, ring.color * 0.99, ring.color * 0.96),
-  );
-  const widths = RINGS.map((ring) => ring.width);
 
   const dome = new THREE.Mesh(
     new THREE.SphereGeometry(50, 128, 96),
@@ -39,15 +21,24 @@ export function createStudioEnvironment(): THREE.Scene {
       side: THREE.BackSide,
       depthWrite: false,
       uniforms: {
-        uSky: { value: new THREE.Color(0.012, 0.012, 0.012) },
-        uHorizon: { value: new THREE.Color(0.004, 0.004, 0.004) },
+        uSky: { value: new THREE.Color(0.028, 0.028, 0.027) },
+        uHorizon: { value: new THREE.Color(0.008, 0.008, 0.008) },
         uFloor: { value: new THREE.Color(0.002, 0.002, 0.002) },
-        uKeyDir: { value: new THREE.Vector3(-0.55, 0.62, 0.56).normalize() },
-        uKeyColor: { value: new THREE.Color(3.4, 3.37, 3.28) },
-        uKeySize: { value: 0.03 },
-        uAxes: { value: axes },
-        uColors: { value: colors },
-        uWidths: { value: widths },
+
+        // Broad, soft key: the large gradient across the form.
+        uKeyDir: { value: new THREE.Vector3(-0.62, 0.5, 0.6).normalize() },
+        uKeyColor: { value: new THREE.Color(1.25, 1.24, 1.2) },
+        uKeySize: { value: 0.75 },
+
+        // Second, cooler fill from the opposite side.
+        uFillDir: { value: new THREE.Vector3(0.8, -0.15, 0.58).normalize() },
+        uFillColor: { value: new THREE.Color(0.55, 0.55, 0.54) },
+        uFillSize: { value: 0.42 },
+
+        // One small hot spot for a single crisp highlight.
+        uDotDir: { value: new THREE.Vector3(0.12, 0.72, 0.68).normalize() },
+        uDotColor: { value: new THREE.Color(4.2, 4.16, 4.05) },
+        uDotSize: { value: 0.022 },
       },
       vertexShader: /* glsl */ `
         varying vec3 vDir;
@@ -63,26 +54,32 @@ export function createStudioEnvironment(): THREE.Scene {
         uniform vec3 uKeyDir;
         uniform vec3 uKeyColor;
         uniform float uKeySize;
-        uniform vec3 uAxes[${RING_COUNT}];
-        uniform vec3 uColors[${RING_COUNT}];
-        uniform float uWidths[${RING_COUNT}];
+        uniform vec3 uFillDir;
+        uniform vec3 uFillColor;
+        uniform float uFillSize;
+        uniform vec3 uDotDir;
+        uniform vec3 uDotColor;
+        uniform float uDotSize;
 
         varying vec3 vDir;
 
+        float spot(vec3 dir, vec3 lightDir, float size, float softness) {
+          float d = 1.0 - dot(dir, lightDir);
+          return pow(smoothstep(size, 0.0, d), softness);
+        }
+
         void main() {
           float y = vDir.y;
-          vec3 color = mix(uFloor, uHorizon, smoothstep(-0.95, -0.05, y));
-          color = mix(color, uSky, smoothstep(-0.05, 0.85, y));
 
-          // One small hot spot for the tight, near-white highlight.
-          float keyD = 1.0 - dot(vDir, uKeyDir);
-          color += uKeyColor * pow(smoothstep(uKeySize, 0.0, keyD), 2.6);
+          // One continuous gradient. Two joined smoothsteps leave a slope
+          // discontinuity at the seam, and a mirror renders that as a hard
+          // line straight across the metal.
+          vec3 color = mix(uFloor, uSky, smoothstep(-0.9, 0.9, y));
+          color += uHorizon * exp(-pow(y * 3.2, 2.0));
 
-          // The filaments.
-          for (int i = 0; i < ${RING_COUNT}; i++) {
-            float band = smoothstep(uWidths[i], 0.0, abs(dot(vDir, uAxes[i])));
-            color += uColors[i] * pow(band, 3.2);
-          }
+          color += uKeyColor * spot(vDir, uKeyDir, uKeySize, 1.35);
+          color += uFillColor * spot(vDir, uFillDir, uFillSize, 1.5);
+          color += uDotColor * spot(vDir, uDotDir, uDotSize, 3.0);
 
           gl_FragColor = vec4(color, 1.0);
         }

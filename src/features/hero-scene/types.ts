@@ -15,5 +15,3 @@ export type HeroSceneOptions = {
   onFirstFrame?: () => void;
   onContextLost?: () => void;
 };
-
-export type HeroLook = "surface" | "blob" | "metaballs";

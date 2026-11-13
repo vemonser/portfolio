@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { heroScrollProgress } from "@/features/hero-scene/math";
-import type { HeroLook, HeroScene } from "@/features/hero-scene/scene";
+import type { HeroScene } from "@/features/hero-scene/scene";
 
 const DESKTOP = "(min-width: 769px)";
 const REDUCED = "(prefers-reduced-motion: reduce)";
@@ -50,11 +50,6 @@ export default function HeroStage() {
     const params = new URLSearchParams(window.location.search);
     const forced = params.has("scene");
     const initialTime = Number(params.get("t") ?? 0) || 0;
-    const requested = params.get("look");
-    const look: HeroLook =
-      requested === "blob" || requested === "metaballs" || requested === "surface"
-        ? requested
-        : "surface";
 
     const canRun = () => (desktop.matches || forced) && !reduced.matches;
 
@@ -135,7 +130,6 @@ export default function HeroStage() {
 
         scene = createHeroScene({
           canvas,
-          look,
           initialTime,
           onFirstFrame: () => setReady(true),
           onContextLost: () => {
