@@ -1,9 +1,9 @@
 import gsap from "gsap";
 import * as THREE from "three";
+import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
 
 import { clamp } from "./math";
 import { SIMPLEX_3D } from "./noise";
-import { createStudioEnvironment } from "./studio";
 import type { HeroScene, HeroSceneOptions } from "./types";
 
 /**
@@ -26,10 +26,10 @@ import type { HeroScene, HeroSceneOptions } from "./types";
 
 const PLANE_WIDTH = 7.2;
 const PLANE_HEIGHT = 4.6;
-const SEGMENTS = 340;
-const RINGS = 220;
+const SEGMENTS = 520;
+const RINGS = 340;
 
-const AMPLITUDE = 0.28;
+const AMPLITUDE = 0.3;
 const FLOW = 0.1;
 const FOV = 42;
 const CAMERA_Z = 3.4;
@@ -48,26 +48,30 @@ export function createSurfaceScene({
   });
   renderer.setClearAlpha(0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.72;
+  renderer.toneMappingExposure = 0.85;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 50);
   camera.position.set(0, 0, CAMERA_Z);
 
-  // PMREM, not a raw cube: a raw cube map leaves a visible seam where two
-  // faces meet, which reads as a stray line across the metal. PMREM's
-  // prefiltered levels are seamless, and with broad lights (no thin rings)
-  // the blur costs nothing.
+  // A real studio HDRI. The procedural environment could only ever light the
+  // normals that happened to point at three small sources; a captured studio
+  // has dozens of them at every angle, which is what puts a highlight on
+  // every fold.
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const studio = createStudioEnvironment();
-  scene.environment = pmrem.fromScene(studio, 0.02).texture;
+  pmrem.compileEquirectangularShader();
+  let envReady = false;
+  new HDRLoader()
+    .setPath("/env/")
+    .load("studio.hdr", (hdr) => {
+      hdr.mapping = THREE.EquirectangularReflectionMapping;
+      const target = pmrem.fromEquirectangular(hdr);
+      scene.environment = target.texture;
+      hdr.dispose();
+      envReady = true;
+      draw(uniforms.uTime.value / FLOW);
+    });
   pmrem.dispose();
-  studio.traverse((object) => {
-    if (object instanceof THREE.Mesh) {
-      object.geometry.dispose();
-      (object.material as THREE.Material).dispose();
-    }
-  });
 
   const uniforms = {
     uTime: { value: initialTime * FLOW },
@@ -77,9 +81,14 @@ export function createSurfaceScene({
   };
 
   const material = new THREE.MeshPhysicalMaterial({
+    // Double-sided on purpose. Where the surface folds over itself, a
+    // front-side-only material culls the back face and leaves a black sliver
+    // that reads as a stray line across the metal. Rendering both sides turns
+    // that fold into what it actually is: more metal.
+    side: THREE.DoubleSide,
     color: "#e4e1da",
     metalness: 1,
-    roughness: 0.06,
+    roughness: 0.09,
     clearcoat: 1,
     clearcoatRoughness: 0.12,
     envMapIntensity: 1.5,
@@ -145,7 +154,7 @@ export function createSurfaceScene({
         #include <beginnormal_vertex>
 
         vec2 heroP = position.xy;
-        float heroEps = 0.05;
+        float heroEps = 0.026;
 
         float heroH = heroField(heroP);
         float heroHx = heroField(heroP + vec2(heroEps, 0.0));
@@ -218,7 +227,7 @@ export function createSurfaceScene({
 
     renderer.render(scene, camera);
 
-    if (firstFrame) {
+    if (firstFrame && envReady) {
       firstFrame = false;
       onFirstFrame?.();
     }

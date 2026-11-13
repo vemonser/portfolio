@@ -55,20 +55,23 @@ shaded by a mirror.
 
 - **No lights.** `metalness: 1` with roughness near zero means the environment
   map is the entire lighting rig.
-- **The environment is code.** `studio.ts` builds a near-black dome with two
-  broad soft sources and one small hot spot, baked into a PMREM. No HDR file,
-  no CDN, no network request. Broad sources give the gradients that read as
-  liquid; the small one gives the single crisp glint that reads as polished.
+- **The environment is a captured studio HDRI** (`public/env/studio.hdr`,
+  Poly Haven, CC0), baked into a PMREM. A procedural environment was tried
+  first and rejected: with only a handful of synthetic sources, only a handful
+  of normals ever catch a highlight, so the metal reads as grey fog. A real
+  studio has dozens of sources at every angle, which is what puts a highlight
+  on every fold.
+- **It is desaturated on the canvas.** A captured studio carries its own
+  colour (green walls, warm bulbs) and tinted chrome reads as plastic, so the
+  canvas has a CSS `grayscale` filter.
 - **The field is anisotropic.** Squashed on one axis and stretched on the
   other, so forms elongate and flow instead of sitting there as round hills.
   This is most of "liquid" for free.
 - **The normal is analytic.** Two extra samples per vertex give the gradient,
   so shading stays smooth instead of showing the tessellation.
-- **Amplitude is deliberately under the fold threshold.** Push it further and
-  the surface folds over itself, which shows up as a stray dark line — the
-  exact artefact that made earlier versions look wrong.
-- **No ring lights.** A ring reflects off a near-flat surface as a closed loop
-  that appears from nowhere and reads as an artefact, not as metal.
+- **The material is double-sided.** Where the surface folds over itself, a
+  single-sided material culls the back face and leaves a black sliver that
+  reads as a stray line; rendering both sides turns the fold into more metal.
 
 ### Whether the engine runs at all
 

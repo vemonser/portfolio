@@ -189,7 +189,7 @@ export default function HeroStage() {
 
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-700 group-data-[ready=true]:opacity-100"
+        className="absolute inset-0 h-full w-full opacity-0 grayscale transition-opacity duration-700 group-data-[ready=true]:opacity-100"
       />
     </div>
   );
