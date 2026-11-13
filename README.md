@@ -1,34 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio — hero
 
-## Getting Started
+A bilingual (Arabic / English) hero with a full-bleed liquid-chrome WebGL surface.
+This repository contains **only the hero**. Navigation, copy, and the sections
+below the fold are deliberately absent.
 
-First, run the development server:
+## Stack
+
+| | |
+|---|---|
+| Framework | Next.js 16.4 (App Router, Turbopack, fully static) |
+| Language | TypeScript, strict |
+| Styling | Tailwind CSS 4 (`@theme` tokens, no JS config) |
+| i18n | next-intl 4 — `/[locale]`, Arabic default, no middleware |
+| 3D | three.js 0.187, imperative, no react-three-fiber |
+| Motion | GSAP 3.15 (core only — no ScrollTrigger) |
+
+## Running
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev          # http://localhost:3000
+pnpm build        # static build
+pnpm typecheck
+pnpm test
+pnpm lint
+pnpm poster       # regenerate the fallback images (needs dev or start running)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`/` redirects to `/ar`. The redirect is declared in `next.config.ts`, so it is
+served without a proxy/middleware hop.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How the hero is put together
 
-## Learn More
+```
+src/app/[locale]/page.tsx          server: builds the real HTML
+src/features/hero/Hero.tsx         server: layers + the <h1> wordmark
+src/features/hero/HeroStage.tsx    client: decides whether WebGL may exist
+src/features/hero-scene/scene.ts   three.js, no React
+src/features/hero-scene/studio.ts  the procedural environment
+src/features/hero-scene/noise.ts   GLSL simplex noise
+src/features/hero-scene/math.ts    pure helpers (tested)
+```
 
-To learn more about Next.js, take a look at the following resources:
+`scene.ts` never imports React. React mounts it, feeds it pointer and scroll
+values, and disposes it. That boundary is why the renderer can be replaced — or
+driven from ScrollTrigger later — without touching the page.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### The scene
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The reference is a macro photograph of molten metal, not an object in a scene:
+a surface with no silhouette and no horizon. So the scene is a densely
+tessellated plane sitting just in front of the camera, displaced along its
+normal by animated 3D noise, shaded by a chrome material.
 
-## Deploy on Vercel
+- **No lights.** `metalness: 1` plus low roughness means the environment map is
+  the entire lighting rig. Adding a light would flatten exactly what makes it
+  read as metal.
+- **The environment is code.** `studio.ts` builds a gradient dome, a few hard
+  emissive strips, and large near-black panels, then bakes it into a PMREM.
+  No HDR file, no CDN, no network request. The black panels are not decoration:
+  chrome only reads as chrome when half of it is reflecting nothing.
+- **The normal is analytic.** The height field's gradient is computed from two
+  extra samples per vertex, so shading stays smooth instead of showing the
+  tessellation.
+- **Roughness is not zero on purpose.** A near-mirror aliases the hard edges of
+  the environment into visible blocks; `0.22` both removes that and matches the
+  soft-focus look of the reference.
+- **The field is low frequency.** Two octaves with a weak second one, plus a
+  gentle domain warp. More detail reads as crumpled foil; the reference is one
+  dark mass with a soft sheen.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Whether the engine runs at all
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`HeroStage` owns that decision. The scene module is imported lazily, inside an
+effect, after the checks below — so a phone never downloads three.js.
+
+| Condition | Rendered | three.js fetched |
+|---|---|---|
+| Desktop, WebGL, motion allowed | live canvas over the poster | yes |
+| `prefers-reduced-motion: reduce` | poster | no |
+| No WebGL | poster | no |
+| ≤ 768px | poster | no |
+| Hero scrolled out of view | paused | already loaded |
+
+`?scene=1` forces the engine on regardless of viewport, and `?t=<seconds>`
+freezes the flow at a fixed moment. Both exist for QA and for the poster
+pipeline.
+
+### Poster
+
+`public/poster/*` is captured from the live scene, never mocked up, so the
+still always matches the material. `scripts/poster.mjs` screenshots the canvas
+element only — the headline stays real HTML. Fixing `t` makes the output
+reproducible across runs.
+
+Regenerate after any change to the material, the camera, or the environment.
+
+## Measured
+
+Measured on this machine, production build (`gzip -9`), 1440×900.
+
+| | |
+|---|---|
+| Initial route JS (`/en`) | 176 KB gz |
+| Scene chunk (three + GSAP + scene) | 161 KB gz / 135 KB br |
+| Poster, desktop AVIF | 4.8 KB |
+| Poster, mobile AVIF | 3.7 KB |
+| Frame time, p95 | 7 ms |
+| Mobile (390px) requests for the scene chunk | 0 |
+
+The brief's 260 KB budget is **not met** — the route totals 337 KB gz. Next's
+own framework baseline is 176 KB before any 3D, and a three.js renderer is
+~137 KB of that remainder. Levers if the number matters: drop GSAP from the
+hero (≈24 KB), or accept it and raise the budget.
+
+## Changing things
+
+- **The name** lives in `src/messages/ar.json` and `src/messages/en.json` under
+  `hero.name`.
+- **The Arabic display face** is `--font-display` for `html[lang="ar"]` in
+  `src/app/globals.css`. Arabic must keep `letter-spacing: 0` — any tracking
+  tears a joined script apart.
+- **The wordmark crop** is `--wordmark-drop`, per locale. The comment in
+  `globals.css` explains the identity: `clip ≈ descender-overflow − drop`.

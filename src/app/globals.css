@@ -1,1 +1,133 @@
 @import "tailwindcss";
+
+@theme {
+  /* Palette — the brief's tokens, verbatim. */
+  --color-bone: #f5f1e8;
+  --color-ink: #171614;
+  --color-black: #0b0b0a;
+  --color-white: #ffffff;
+  --color-forest: #2f4a3c;
+  --color-clay: #b4583a;
+  --color-warm: #8a7f72;
+
+  /* Type scale — exposed as text-t-96, text-t-28, … */
+  --text-t-14: 0.875rem;
+  --text-t-16: 1rem;
+  --text-t-20: 1.25rem;
+  --text-t-28: 1.75rem;
+  --text-t-40: 2.5rem;
+  --text-t-64: 4rem;
+  --text-t-96: 6rem;
+
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+}
+
+/*
+ * Arabic swaps the whole type stack in two declarations, and every utility
+ * that reads these variables follows. Reem Kufi is a geometric kufic: it is
+ * the display style Arabic has always used for architecture and signage, so
+ * it holds up against the chrome object instead of competing with it.
+ */
+html[lang="ar"] {
+  --font-display: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
+  --font-body: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
+  --font-label: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
+  --track: 0;
+}
+
+:root {
+  --track: 0.18em;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-black);
+    color: var(--color-bone);
+    font-family: var(--font-body);
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-clay);
+    color: var(--color-bone);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-clay);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+/*
+ * The wordmark. Real text, never an image: it is the LCP element, it carries
+ * the h1, and it is translated.
+ *
+ * Arabic is a joined script — any letter tracking tears the joins apart, so
+ * --track drops to 0 and the size/crop are tuned per locale.
+ */
+.hero-wordmark {
+  /*
+   * The crop. A line-height below 1 means the glyph box overflows its layout
+   * box, so the word already bleeds past the section's bottom edge. `drop`
+   * is the extra distance the layout box is lifted back up, which decides
+   * how much survives: clip ≈ descender-overflow − drop.
+   *
+   * Measured for Fraunces at line-height .76: overflow ≈ .233em, so a .113em
+   * drop leaves ≈ .12em clipped — the brief's `bottom: -0.12em`.
+   */
+  --wordmark-drop: 0.113em;
+
+  display: block;
+  width: 100%;
+  padding: 0;
+  text-align: center;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 13.2vw, 13rem);
+  font-weight: 600;
+  line-height: 0.76;
+  letter-spacing: -0.045em;
+  color: var(--color-bone);
+  margin: 0;
+  margin-block-end: var(--wordmark-drop);
+  user-select: none;
+}
+
+html[lang="en"] .hero-wordmark {
+  text-transform: uppercase;
+}
+
+/*
+ * Arabic: 0 tracking (a joined script falls apart with any), one full line of
+ * leading so the kufic forms are not compressed, and almost no crop. Cutting
+ * a Latin stem reads as deliberate; cutting the bowl of ن reads as broken.
+ */
+html[lang="ar"] .hero-wordmark {
+  --wordmark-drop: 0.11em;
+
+  font-size: clamp(2.6rem, 13vw, 11rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
