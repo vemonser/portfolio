@@ -38,3 +38,9 @@ Final: Evidence Gate PASS — .quality/runs/2026-11-14T07-15-00-000Z/evidence-ma
 Final: WebGL context-creation failure during repeated headless navigation surfaced an unhandled THREE error; HeroStage now catches it and falls back to the poster while still announcing hero readiness.
 Final review: self-checked diff after reviewer round; no unresolved blockers.
 
+
+Follow-up: work grid now 3-up and flat (no stagger), title/index on one line, description below, hairline per card (matches the provided CRZ reference); Selected work heading is a large display title with no rule; global whitespace increased (nav inset, section paddings, grid gaps); Lenis 1.3.27 installed and driven by the GSAP ticker with ScrollTrigger.update, stopped while the menu is open, disabled under reduced motion, route changes snap to top; native scrollbar hidden.
+Ruling: Lenis stylesheet inlined instead of @import from node_modules — the Turbopack CSS pipeline hung compiling the package import; cost if wrong: six rules to keep in sync on upgrade.
+Verification: tests 24/24, lint/typecheck/build clean; Playwright checks pass with Lenis active (lenis class present, scrollbar-width none, wheel scrolls, reduced-motion has no Lenis, no console errors, no overflow).
+Evidence Gate PASS on run 2026-11-14T15-25-00-000Z (AC-01..AC-08, real exit codes).
+
