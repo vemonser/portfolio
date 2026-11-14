@@ -1,0 +1,59 @@
+{
+  "enUnderline": {
+    "before": "322px 0.5px",
+    "after": "0px 0.5px"
+  },
+  "arUnderline": {
+    "before": "0px 0.5px",
+    "after": "316px 0.5px"
+  },
+  "overflows": {
+    "/ar": 0,
+    "/en": 0,
+    "/en/work": 0,
+    "/ar/blog/two-directions": 0
+  },
+  "reducedMotion": {
+    "overlayIn": "true",
+    "lineTransform": "none",
+    "statementOpacity": "1"
+  },
+  "heroMeta": "AVAILABLE FOR WORK SCROLL CAIRO, EGYPT",
+  "footerClock": "LOCAL TIME 16:35 EET",
+  "cards": 6,
+  "seeAll": {
+    "text": "See all projects",
+    "href": "/en/work"
+  },
+  "workCards": {
+    "en": 6,
+    "ar": 6
+  },
+  "blogPosts": {
+    "en": 2,
+    "ar": 2
+  },
+  "menu": {
+    "open": true,
+    "state": "open",
+    "links": [
+      "Home",
+      "Work",
+      "Blog",
+      "About",
+      "Contact"
+    ]
+  },
+  "menuClosed": true,
+  "consoleErrors": [],
+  "assertions": {
+    "enMirrored": true,
+    "arMirrored": true,
+    "noOverflow": true,
+    "reducedMotion": true,
+    "menu": true,
+    "homeContent": true,
+    "workIndex": true,
+    "blogIndex": true
+  }
+}

@@ -43,7 +43,12 @@ export default function HeroOverlay({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div ref={ref} className="hero-overlay" data-in="false">
+    <div
+      ref={ref}
+      className="group relative z-10 flex flex-col gap-[clamp(1.1rem,2.6vh,2rem)]"
+      data-hero-overlay
+      data-in="false"
+    >
       {children}
     </div>
   );

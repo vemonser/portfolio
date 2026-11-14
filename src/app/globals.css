@@ -53,6 +53,33 @@ html.lenis body {
   --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-label: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+
+  --animate-hero-pulse: hero-pulse 2.4s ease-out infinite;
+  --animate-hero-scroll: hero-scroll 2.4s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+
+  @keyframes hero-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgb(198 240 53 / 0.45);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgb(198 240 53 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(198 240 53 / 0);
+    }
+  }
+
+  @keyframes hero-scroll {
+    0%,
+    100% {
+      transform: scaleY(0.25);
+      opacity: 0.25;
+    }
+    50% {
+      transform: scaleY(1);
+      opacity: 0.85;
+    }
+  }
 }
 
 /*
@@ -867,127 +894,10 @@ html[lang="ar"] .prose-blog h2 {
   background: none;
 }
 
-/* Hero overlay — state-driven entrance and the two looping hints. */
-.hero-overlay {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1.1rem, 2.6vh, 2rem);
-}
-
-.hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.25rem;
-  padding-inline: var(--nav-inset);
-  opacity: 0;
-  transform: translateY(0.75rem) rotate(0.001deg);
-  transition:
-    opacity 0.9s cubic-bezier(0.7, 0, 0.2, 1),
-    transform 0.9s cubic-bezier(0.7, 0, 0.2, 1);
-  transition-delay: 0.55s;
-}
-
-.hero-overlay[data-in="true"] .hero-meta {
-  opacity: 1;
-  transform: translateY(0) rotate(0.001deg);
-}
-
-.hero-meta__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.hero-meta__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-lime);
-  animation: hero-pulse 2.4s ease-out infinite;
-}
-
-@keyframes hero-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgb(198 240 53 / 0.45);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgb(198 240 53 / 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgb(198 240 53 / 0);
-  }
-}
-
-.hero-meta__location {
-  margin: 0;
-  margin-inline-start: auto;
-  text-align: end;
-}
-
-.hero-meta__scroll {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.hero-meta__scroll-line {
-  display: block;
-  width: 1px;
-  height: clamp(1.5rem, 4vh, 2.5rem);
-  background: linear-gradient(
-    to bottom,
-    var(--color-warm),
-    color-mix(in srgb, var(--color-warm) 0%, transparent)
-  );
-  transform-origin: top;
-  animation: hero-scroll 2.4s cubic-bezier(0.7, 0, 0.2, 1) infinite;
-}
-
-@keyframes hero-scroll {
-  0%,
-  100% {
-    transform: scaleY(0.25);
-    opacity: 0.25;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 0.85;
-  }
-}
-
-@media (min-width: 640px) {
-  .hero-meta__scroll {
-    display: flex;
-  }
-}
-
-/* The wordmark entrance: one line inside a mask, lifted from below. */
+/* Hero overlay — only the wordmark's type/cropping lives here; the entrance
+   and meta choreography are utilities driven by `data-in` on the overlay. */
 .hero-wordmark {
   transform: translate3d(0, calc(var(--hero-scroll, 0) * 4vh), 0);
-}
-
-.hero-wordmark__mask {
-  display: block;
-  overflow: hidden;
-  padding-block: 0.12em;
-  margin-block: -0.12em;
-}
-
-.hero-wordmark__line {
-  display: block;
-  transform: translateY(115%);
-  transition: transform 1.05s cubic-bezier(0.7, 0, 0.2, 1);
-  transition-delay: 0.15s;
-  will-change: transform;
-}
-
-.hero-overlay[data-in="true"] .hero-wordmark__line {
-  transform: translateY(0);
 }
 
 /* Grain — one fixed noise plate above the page, below the header. */
@@ -1002,4 +912,26 @@ html[lang="ar"] .prose-blog h2 {
   background-size: 160px 160px;
 }
 
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* The scroll lag and the looping hints are motion, not information. */
+  .hero-wordmark {
+    transform: none !important;
+  }
+
+  .animate-hero-pulse,
+  .animate-hero-scroll {
+    animation: none !important;
+  }
 }

@@ -1,0 +1,10 @@
+
+ RUN  v5.1.0 /home/abdelrhman/Developments/2026/portfolio/portfolio
+
+
+ Test Files  4 passed (4)
+      Tests  24 passed (24)
+   Start at  16:37:17
+   Duration  180ms (import 39%, tests 33%, transform 16%, worker 11%)
+
+$ vitest run

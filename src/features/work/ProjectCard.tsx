@@ -21,7 +21,7 @@ function formatIndex(index: number): string {
  */
 export default function ProjectCard({ project, index, href }: Props) {
   return (
-    <Link href={href} className="group block" data-project={project.slug}>
+    <Link href={href} className="group flex h-full flex-col" data-project={project.slug}>
       <span className="relative isolate block aspect-[4/3] overflow-hidden rounded-[2px] bg-ink">
         <span
           className="absolute inset-0 transition-transform duration-[950ms] ease-[cubic-bezier(0.7,0,0.2,1)] will-change-transform group-hover:scale-105 group-focus-visible:scale-105"
@@ -36,7 +36,7 @@ export default function ProjectCard({ project, index, href }: Props) {
         </span>
       </span>
 
-      <span className="grid gap-[0.55rem] border-b border-bone/15 pb-[1.2rem] pt-4">
+      <span className="flex flex-1 flex-col gap-[0.55rem] border-b border-bone/15 pb-[1.2rem] pt-4">
         <span className="flex items-baseline justify-between gap-4">
           <span className="font-display text-[clamp(1.05rem,1.5vw,1.35rem)] font-bold leading-[1.2] tracking-[-0.01em] en:uppercase en:tracking-[0.005em] ar:leading-[1.45] ar:tracking-normal">
             {project.title}

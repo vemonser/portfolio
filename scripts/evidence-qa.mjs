@@ -112,8 +112,8 @@ async function checks() {
     await page.goto(`${BASE}/en`, { waitUntil: "networkidle" });
     await page.waitForTimeout(700);
     return page.evaluate(() => {
-      const overlay = document.querySelector(".hero-overlay");
-      const line = document.querySelector(".hero-wordmark__line");
+      const overlay = document.querySelector("[data-hero-overlay]");
+      const line = document.querySelector("#hero-title span span");
       const statement = document.querySelector("#intro-title");
       return {
         overlayIn: overlay?.getAttribute("data-in"),
@@ -138,7 +138,7 @@ async function checks() {
   await home.goto(`${BASE}/en`, { waitUntil: "networkidle" });
   await settle(home);
   results.heroMeta = await home.evaluate(() => {
-    const meta = document.querySelector(".hero-meta");
+    const meta = document.querySelector("[data-hero-meta]");
     return meta ? meta.innerText.replace(/\s+/g, " ").trim() : null;
   });
   results.footerClock = await home.evaluate(() => {

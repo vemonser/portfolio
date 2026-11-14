@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "run": {
+    "id": "2026-11-14T16-35-00-000Z",
+    "task": "Portfolio redesign: hero utilities, equal-height work cards, Tailwind-first styling",
+    "source": "docs/acceptance-criteria.md"
+  },
+  "criteria": [
+    {
+      "id": "AC-01",
+      "statement": "Given the home page, when it renders, then the order is hero, intro without an About button, six hover-swapping project cards, a See all projects link, a contact CTA with real email and phone, and a footer with Instagram/Twitter/LinkedIn and a live Cairo clock.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 7
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/app/[locale]/page.tsx",
+        "src/features/intro/IntroSection.tsx",
+        "src/features/work/SelectedWork.tsx",
+        "src/features/work/ProjectCard.tsx",
+        "src/features/contact-cta/ContactCta.tsx",
+        "src/features/footer/SiteFooter.tsx"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/browser-checks.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/browser-checks.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:35:55.381Z"
+        },
+        {
+          "type": "screenshot",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/home-en.png",
+          "command": "node scripts/evidence-qa.mjs screenshot --route /en --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/home-en.png --full",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:35:59.710Z"
+        },
+        {
+          "type": "e2e",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:37:48.874Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-02",
+      "statement": "Given /work and /work/[slug], when the site is built, then all six projects render on the index and each project has a static bilingual case-study page with meta, cover, sections and a wrapping next-project link.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 15
+      },
+      "kind": "behavior",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/app/[locale]/work/page.tsx",
+        "src/app/[locale]/work/[slug]/page.tsx",
+        "src/content/projects/index.ts",
+        "src/content/projects/projects.en.ts",
+        "src/content/projects/projects.ar.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "screenshot",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/work-en.png",
+          "command": "node scripts/evidence-qa.mjs screenshot --route /en/work --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/work-en.png --full",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:36:02.955Z"
+        },
+        {
+          "type": "screenshot",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/project-ar.png",
+          "command": "node scripts/evidence-qa.mjs screenshot --route /ar/work/atlas --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/project-ar.png --full",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:36:06.777Z"
+        },
+        {
+          "type": "e2e",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-02.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-02.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:38:09.449Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-03",
+      "statement": "Given /blog and /blog/[slug], when the site is built, then two MDX posts exist per locale, the index lists them newest first, each post renders as prose, and Blog appears in the header, menu and footer.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 22
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/app/[locale]/blog/page.tsx",
+        "src/app/[locale]/blog/[slug]/page.tsx",
+        "src/content/blog/posts.ts",
+        "src/content/blog/two-directions.en.mdx",
+        "src/content/blog/two-directions.ar.mdx",
+        "next.config.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "screenshot",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/blog-en.png",
+          "command": "node scripts/evidence-qa.mjs screenshot --route /en/blog --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/blog-en.png --full",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:36:09.650Z"
+        },
+        {
+          "type": "screenshot",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/post-ar.png",
+          "command": "node scripts/evidence-qa.mjs screenshot --route /ar/blog/two-directions --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/post-ar.png --full",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:36:12.815Z"
+        },
+        {
+          "type": "e2e",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-03.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-03.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:38:30.088Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-04",
+      "statement": "Given /about and /contact, when they render, then About shows intro copy, portrait placeholder and services, and Contact shows a labelled required form that composes a mailto to abdelrhmansamymoh@gmail.com plus the direct email and phone.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 28
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/app/[locale]/about/page.tsx",
+        "src/app/[locale]/contact/page.tsx",
+        "src/features/contact/ContactForm.tsx"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "screenshot",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/contact-en.png",
+          "command": "node scripts/evidence-qa.mjs screenshot --route /en/contact --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/contact-en.png --full",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:36:15.785Z"
+        },
+        {
+          "type": "screenshot",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/about-ar.png",
+          "command": "node scripts/evidence-qa.mjs screenshot --route /ar/about --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/about-ar.png --full",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:36:19.440Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-05",
+      "statement": "Given every route under /en and /ar, when rendered, then both locales serve the same structure with Arabic typography overrides and mirrored LinkLine underlines (EN enters inline-start, AR enters from the right), with no horizontal overflow at 390px.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 34
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/app/[locale]/layout.tsx",
+        "src/app/globals.css",
+        "src/messages/en.json",
+        "src/messages/ar.json"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/browser-checks-rtl.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/browser-checks-rtl.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:36:56.557Z"
+        },
+        {
+          "type": "e2e",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-05.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-05.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:38:50.755Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-06",
+      "statement": "Given the token sheet, when the site renders, then #C6F035 is the only accent color and no clay token or usage remains in src/.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 41
+      },
+      "kind": "behavior",
+      "requiresBrowser": false,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/app/globals.css"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "static-analysis",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/no-clay.log",
+          "command": "node -e const fs=require(\"fs\"),path=require(\"path\");const bad=[];const walk=(d)=>{for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else if(/\\.(tsx?|css|json)$/.test(e.name)&&/clay/i.test(fs.readFileSync(p,\"utf8\")))bad.push(p);}};walk(\"src\");if(bad.length){console.error(bad.join(\"\\n\"));process.exit(1);}console.log(\"no clay references in src/\");",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:37:17.451Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-07",
+      "statement": "Given prefers-reduced-motion: reduce, when the page loads, then the hero wordmark and intro content are visible immediately, the pulse and parallax are disabled, and the hero shows a frozen frame.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 46
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/features/hero/HeroOverlay.tsx",
+        "src/app/globals.css"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/browser-checks-motion.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/browser-checks-motion.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:37:17.377Z"
+        },
+        {
+          "type": "e2e",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-07.json",
+          "command": "node scripts/evidence-qa.mjs checks --out .quality/runs/2026-11-14T16-35-00-000Z/artifacts/e2e-checks-07.json",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:39:11.054Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-08",
+      "statement": "Given the branch, when verification runs, then Vitest, ESLint, TypeScript and next build all exit 0, and the build emits static routes for both locales across home, work, case studies, blog, about and contact.",
+      "sourceRef": {
+        "path": "docs/acceptance-criteria.md",
+        "line": 52
+      },
+      "kind": "behavior",
+      "requiresBrowser": false,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "package.json",
+        "src/content/projects/index.ts",
+        "src/features/blog/format.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "unit-test",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/vitest.log",
+          "command": "pnpm test",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:37:18.001Z"
+        },
+        {
+          "type": "lint",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/eslint.log",
+          "command": "pnpm lint",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:37:20.566Z"
+        },
+        {
+          "type": "typecheck",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/typecheck.log",
+          "command": "pnpm typecheck",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:37:22.500Z"
+        },
+        {
+          "type": "build",
+          "path": ".quality/runs/2026-11-14T16-35-00-000Z/artifacts/build.log",
+          "command": "pnpm build",
+          "exitCode": 0,
+          "recordedAt": "2026-11-14T14:37:27.672Z"
+        }
+      ]
+    }
+  ],
+  "unresolvedReviewBlockers": []
+}
