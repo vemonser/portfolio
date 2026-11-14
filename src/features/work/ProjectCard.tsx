@@ -18,8 +18,8 @@ type Props = {
  */
 const HOME_ASPECT = [
   "aspect-[16/10]",
-  "aspect-[4/5]",
-  "aspect-[5/4]",
+  "aspect-square",
+  "aspect-[4/3]",
   "aspect-[3/2]",
 ];
 

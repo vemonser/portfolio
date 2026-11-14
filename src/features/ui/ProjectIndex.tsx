@@ -14,10 +14,10 @@ type Props = {
  * the archive is calmer and denser because it is a catalogue, not a spread.
  */
 const HOME_LAYOUT = [
-  "lg:col-span-12",
-  "lg:col-start-6 lg:col-span-7",
-  "lg:col-start-1 lg:col-span-5",
-  "lg:col-start-4 lg:col-span-9",
+  "lg:col-span-10",
+  "lg:col-start-7 lg:col-span-6",
+  "lg:col-start-2 lg:col-span-4",
+  "lg:col-start-5 lg:col-span-8",
 ];
 
 export default function ProjectIndex({ projects, variant }: Props) {
