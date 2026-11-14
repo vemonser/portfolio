@@ -38,7 +38,7 @@ export default async function WorkPage({ params }: Props) {
             as="article"
             key={project.slug}
             className="work-grid__cell"
-            delay={(index % 2) * 70}
+            delay={(index % 3) * 60}
           >
             <ProjectCard
               project={project}

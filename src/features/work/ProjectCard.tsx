@@ -37,8 +37,10 @@ export default function ProjectCard({ project, index, href }: Props) {
       </span>
 
       <span className="project-card__meta">
-        <span className="project-card__index">P / {formatIndex(index)}</span>
-        <span className="project-card__title">{project.title}</span>
+        <span className="project-card__head">
+          <span className="project-card__title">{project.title}</span>
+          <span className="project-card__index">P / {formatIndex(index)}</span>
+        </span>
         <span className="project-card__tagline">{project.tagline}</span>
       </span>
     </Link>

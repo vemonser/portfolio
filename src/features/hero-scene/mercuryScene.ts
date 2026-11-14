@@ -281,7 +281,12 @@ export function createMercuryScene({
       compositeMaterial.dispose();
       quad.dispose();
       renderer.dispose();
-      renderer.forceContextLoss();
+      // Deliberately no forceContextLoss: in development, Fast Refresh (and
+      // StrictMode) tears the effect down and mounts again on the same canvas.
+      // A forced loss poisons that canvas — the next WebGLRenderer gets a null
+      // context and the hero falls back to the poster until a full reload.
+      // dispose() releases the programs and targets; the context is reclaimed
+      // with the element.
     },
   };
 }

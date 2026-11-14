@@ -1,5 +1,36 @@
 @import "tailwindcss";
 
+/*
+ * Lenis' own stylesheet, inlined: importing it from node_modules made the
+ * Turbopack CSS pipeline hang on this setup.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
+}
+
 @theme {
   /* Palette — the brief's tokens, verbatim. */
   --color-bone: #f5f1e8;
@@ -38,7 +69,7 @@ html[lang="ar"] {
 
 :root {
   --track: 0.18em;
-  --nav-inset: clamp(1.25rem, 2.6vw, 2rem);
+  --nav-inset: clamp(1.5rem, 3.2vw, 2.75rem);
   --scrollbar-comp: 0px;
 }
 
@@ -46,6 +77,13 @@ html[lang="ar"] {
   html {
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
+    /* Lenis drives the page; the native bar is gone, like the reference. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
   }
 
   body {
@@ -789,7 +827,7 @@ html[lang="ar"] .round-button {
 
 /* Contact CTA ------------------------------------------------------------- */
 .contact-cta {
-  padding: clamp(6rem, 14vh, 11rem) var(--nav-inset);
+  padding: clamp(8rem, 18vh, 14rem) var(--nav-inset);
   border-top: 1px solid color-mix(in srgb, var(--color-bone) 12%, transparent);
 }
 
@@ -858,7 +896,7 @@ html[lang="ar"] .contact-cta__title {
 
 /* Footer ------------------------------------------------------------------ */
 .site-footer {
-  padding: 3.5rem var(--nav-inset) max(2.5rem, var(--nav-inset));
+  padding: 5rem var(--nav-inset) max(3rem, var(--nav-inset));
   border-top: 1px solid color-mix(in srgb, var(--color-bone) 12%, transparent);
 }
 
@@ -915,17 +953,17 @@ html[lang="ar"] .site-footer__list .link-line {
 
 /* Intro -------------------------------------------------------------------- */
 .intro {
-  padding: clamp(5.5rem, 14vh, 10rem) var(--nav-inset)
-    clamp(4.5rem, 10vh, 7.5rem);
+  padding: clamp(7rem, 18vh, 13rem) var(--nav-inset)
+    clamp(6rem, 13vh, 10rem);
 }
 
 .intro__label {
-  margin-block-end: clamp(1.75rem, 4vw, 3rem);
+  margin-block-end: clamp(2rem, 5vw, 3.75rem);
 }
 
 .intro__grid {
   display: grid;
-  gap: clamp(1.75rem, 4vw, 3rem);
+  gap: clamp(2.5rem, 5vw, 4rem);
   align-items: start;
 }
 
@@ -968,31 +1006,55 @@ html[lang="ar"] .intro__body {
 }
 
 /* Selected work ------------------------------------------------------------ */
+.section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6.4vw, 5.5rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+html[lang="en"] .section-title {
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+html[lang="ar"] .section-title {
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
 .selected-work {
-  padding: clamp(3.5rem, 9vh, 7rem) var(--nav-inset) clamp(4rem, 10vh, 8rem);
+  padding: clamp(5rem, 12vh, 9rem) var(--nav-inset)
+    clamp(6rem, 13vh, 10rem);
 }
 
 .work-grid {
   display: grid;
-  gap: clamp(2rem, 4vw, 3.5rem);
-  margin-block-start: clamp(2.5rem, 6vw, 4rem);
+  gap: clamp(3rem, 5.5vw, 4.75rem);
+  margin-block-start: clamp(3.5rem, 8vw, 6rem);
 }
 
 @media (min-width: 768px) {
   .work-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: clamp(2rem, 4vw, 4rem);
+    column-gap: clamp(2.5rem, 5vw, 4.5rem);
   }
+}
 
-  .work-grid__cell:nth-child(even) {
-    margin-block-start: clamp(3rem, 8vw, 7rem);
+/* Three per row like the reference; every card sits on the same baseline. */
+@media (min-width: 1024px) {
+  .work-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: clamp(2rem, 3vw, 3.5rem);
   }
 }
 
 .selected-work__more {
   display: flex;
   justify-content: center;
-  margin-block-start: clamp(3rem, 7vw, 5rem);
+  margin-block-start: clamp(4rem, 9vw, 6.5rem);
 }
 
 .selected-work__more .link-line {
@@ -1027,16 +1089,19 @@ html[lang="ar"] .intro__body {
 
 .project-card__layer--b {
   opacity: 0;
+  transform: scale(1.07) rotate(0.001deg);
+}
+
+/* The second image rises over the first, like a plate being placed on top. */
+.project-card:hover .project-card__layer--a,
+.project-card:focus-visible .project-card__layer--a {
+  transform: scale(1.05) rotate(0.001deg);
 }
 
 .project-card:hover .project-card__layer--b,
 .project-card:focus-visible .project-card__layer--b {
   opacity: 1;
-}
-
-.project-card:hover .project-card__layer,
-.project-card:focus-visible .project-card__layer {
-  transform: scale(1.05) rotate(0.001deg);
+  transform: scale(1) rotate(0.001deg);
 }
 
 .project-card__mark {
@@ -1056,11 +1121,21 @@ html[lang="ar"] .intro__body {
 
 .project-card__meta {
   display: grid;
-  gap: 0.4rem;
-  padding-block-start: 1.15rem;
+  gap: 0.55rem;
+  padding-block: 1rem 1.2rem;
+  border-block-end: 1px solid
+    color-mix(in srgb, var(--color-bone) 14%, transparent);
+}
+
+.project-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .project-card__index {
+  flex: none;
   font-family: var(--font-label);
   font-size: var(--text-t-14);
   letter-spacing: var(--track);
@@ -1073,21 +1148,27 @@ html[lang="ar"] .project-card__index {
 
 .project-card__title {
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.2vw, 1.9rem);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* The reference sets English titles as a tight uppercase line. */
+html[lang="en"] .project-card__title {
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
 }
 
 html[lang="ar"] .project-card__title {
-  line-height: 1.4;
+  line-height: 1.45;
   letter-spacing: 0;
 }
 
 .project-card__tagline {
-  max-width: 40ch;
+  max-width: 44ch;
   color: color-mix(in srgb, var(--color-bone) 58%, transparent);
-  font-size: var(--text-t-16);
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
   line-height: 1.6;
 }
 
@@ -1098,7 +1179,7 @@ html[lang="ar"] .project-card__tagline {
 /* Inner pages -------------------------------------------------------------- */
 .work-index,
 .project-page {
-  padding: clamp(8rem, 22vh, 13rem) var(--nav-inset) 0;
+  padding: clamp(9rem, 24vh, 15rem) var(--nav-inset) 0;
 }
 
 .page-intro {
@@ -1134,8 +1215,8 @@ html[lang="ar"] .page-lede {
 }
 
 .work-index .work-grid {
-  margin-block-start: clamp(3rem, 8vw, 6rem);
-  padding-block-end: clamp(4rem, 10vh, 8rem);
+  margin-block-start: clamp(4rem, 9vw, 7rem);
+  padding-block-end: clamp(5rem, 12vh, 9rem);
 }
 
 .project-hero {
@@ -1176,7 +1257,7 @@ html[lang="ar"] .project-hero__tagline {
 }
 
 .project-cover {
-  margin-block-start: clamp(2.5rem, 7vw, 5rem);
+  margin-block-start: clamp(3rem, 8vw, 6rem);
   aspect-ratio: 4 / 3;
   border-radius: 2px;
   background-color: var(--color-ink);
@@ -1190,10 +1271,10 @@ html[lang="ar"] .project-hero__tagline {
 
 .project-body {
   display: grid;
-  gap: clamp(2.5rem, 6vw, 4rem);
+  gap: clamp(3rem, 7vw, 5rem);
   max-width: 46rem;
   margin-inline: auto;
-  padding-block: clamp(3.5rem, 9vw, 6.5rem);
+  padding-block: clamp(4.5rem, 11vw, 8rem);
 }
 
 .project-section h2 {
@@ -1240,7 +1321,7 @@ html[lang="ar"] .project-section p {
 .about-grid {
   display: grid;
   gap: 2.5rem;
-  margin-block-start: clamp(2.5rem, 7vw, 5rem);
+  margin-block-start: clamp(3.5rem, 8vw, 6rem);
   align-items: start;
 }
 
@@ -1298,13 +1379,13 @@ html[lang="ar"] .about-bio p {
 }
 
 .about-services {
-  margin-block-start: clamp(4rem, 10vw, 7rem);
+  margin-block-start: clamp(5rem, 12vw, 9rem);
 }
 
 .services-grid {
   display: grid;
-  gap: 2rem;
-  margin: 2.5rem 0 0;
+  gap: 2.5rem;
+  margin: 3.5rem 0 0;
   padding: 0;
   list-style: none;
 }
@@ -1312,7 +1393,7 @@ html[lang="ar"] .about-bio p {
 @media (min-width: 768px) {
   .services-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2.5rem 3rem;
+    gap: 3.5rem 4rem;
   }
 }
 
@@ -1359,7 +1440,7 @@ html[lang="ar"] .service__body {
 .contact-grid {
   display: grid;
   gap: 3rem;
-  margin-block-start: clamp(2.5rem, 7vw, 5rem);
+  margin-block-start: clamp(3.5rem, 8vw, 6rem);
   align-items: start;
 }
 
@@ -1454,9 +1535,9 @@ html[lang="ar"] .contact-form__hint {
 .blog-list {
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 5vw, 3.25rem);
+  gap: clamp(2.5rem, 6vw, 4rem);
   max-width: 52rem;
-  margin: clamp(2.5rem, 7vw, 5rem) 0 0;
+  margin: clamp(3.5rem, 8vw, 6rem) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -1499,7 +1580,7 @@ html[lang="ar"] .blog-row__excerpt {
 }
 
 .blog-post {
-  padding: clamp(7rem, 20vh, 12rem) var(--nav-inset) clamp(3rem, 8vh, 6rem);
+  padding: clamp(8rem, 22vh, 14rem) var(--nav-inset) clamp(3rem, 8vh, 6rem);
 }
 
 .blog-post-hero {

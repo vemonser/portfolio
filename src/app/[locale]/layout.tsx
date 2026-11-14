@@ -12,6 +12,7 @@ import SiteHeader from "@/features/navigation/SiteHeader";
 import { buildNavLinks, localizedHref } from "@/features/navigation/nav";
 import ContactCta from "@/features/contact-cta/ContactCta";
 import SiteFooter from "@/features/footer/SiteFooter";
+import SmoothScroll from "@/features/scroll/SmoothScroll";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -121,6 +122,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             __html: 'document.documentElement.dataset.js = "true"',
           }}
         />
+        <SmoothScroll />
         <SiteHeader
           brand={tMeta("title")}
           homeHref={localizedHref(locale, "/")}

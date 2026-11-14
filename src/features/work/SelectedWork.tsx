@@ -4,7 +4,6 @@ import { getProjects } from "@/content/projects";
 import { localizedHref } from "@/features/navigation/nav";
 import LinkLine from "@/features/ui/LinkLine";
 import Reveal from "@/features/ui/Reveal";
-import SectionHeading from "@/features/ui/SectionHeading";
 
 import ProjectCard from "./ProjectCard";
 
@@ -22,11 +21,10 @@ export default async function SelectedWork({ locale }: Props) {
   return (
     <section aria-labelledby="selected-work-title" className="selected-work">
       <Reveal>
-        <SectionHeading label={t("label")} />
+        <h2 id="selected-work-title" className="section-title">
+          {t("label")}
+        </h2>
       </Reveal>
-      <h2 id="selected-work-title" className="sr-only">
-        {t("label")}
-      </h2>
 
       <div className="work-grid">
         {projects.map((project, index) => (
@@ -34,7 +32,7 @@ export default async function SelectedWork({ locale }: Props) {
             as="article"
             key={project.slug}
             className="work-grid__cell"
-            delay={(index % 2) * 70}
+            delay={(index % 3) * 60}
           >
             <ProjectCard
               project={project}

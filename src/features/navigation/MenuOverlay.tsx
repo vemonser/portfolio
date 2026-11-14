@@ -249,7 +249,7 @@ export default function MenuOverlay({
       <div className="nav-panel">
         <div className="nav-lip" aria-hidden="true" />
 
-        <div className="nav-panel__inner">
+        <div className="nav-panel__inner" data-lenis-prevent>
           <div>
             <p className="ui-label">{labels.navigation}</p>
             <hr className="nav-rule" />
