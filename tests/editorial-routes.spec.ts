@@ -107,6 +107,19 @@ test.describe("footer and targets", () => {
     }
 
     await expect(page.locator('a[href="#"]')).toHaveCount(0);
+
+    const socials = page.getByRole("navigation", { name: "Socials" });
+    for (const label of ["Instagram", "Twitter", "LinkedIn"]) {
+      await expect(socials).toContainText(label);
+    }
+
+    const socialLinks = socials.locator("a");
+    for (let index = 0; index < (await socialLinks.count()); index += 1) {
+      await expect(socialLinks.nth(index)).toHaveAttribute(
+        "href",
+        /^https?:\/\//,
+      );
+    }
   });
 
   test("the fixed trigger clears contact links", async ({ page }) => {

@@ -42,6 +42,7 @@ export const copy = {
 
   footer: {
     navigation: "Navigation",
+    socials: "Socials",
     edition: "2026 © Edition",
     localTime: "Local time",
   },

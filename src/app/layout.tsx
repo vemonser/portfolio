@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 
 import { copy } from "@/content/copy";
+import { socials } from "@/content/socials";
 import ContactChapter from "@/features/contact-cta/ContactChapter";
 import ContactCta from "@/features/contact-cta/ContactCta";
 import SiteFooter from "@/features/footer/SiteFooter";
@@ -78,10 +79,12 @@ export default function RootLayout({
         <SiteFooter
           labels={{
             navigation: copy.footer.navigation,
+            socials: copy.footer.socials,
             edition: copy.footer.edition,
             localTime: copy.footer.localTime,
           }}
           links={links}
+          socials={socials}
         />
       </body>
     </html>
