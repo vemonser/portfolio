@@ -50,7 +50,7 @@ export default async function SelectedWork({ locale }: Props) {
       >
         <LinkLine
           href={localizedHref(locale, "/work")}
-          className="text-[clamp(1.05rem,1.6vw,1.3rem)]"
+          className="inline-flex min-h-11 items-center text-[clamp(1.05rem,1.6vw,1.3rem)]"
         >
           {t("more")}
         </LinkLine>

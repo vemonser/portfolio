@@ -56,7 +56,7 @@ export default async function ContactPage({ params }: Props) {
               <dd className="m-0 break-words text-[clamp(1.05rem,1.5vw,1.25rem)] [overflow-wrap:anywhere]">
                 <LinkLine
                   href={`mailto:${email}`}
-                  className="scroll-mt-[8rem]"
+                  className="inline-flex min-h-11 scroll-mt-[8rem] items-center"
                 >
                   {email}
                 </LinkLine>
@@ -69,7 +69,7 @@ export default async function ContactPage({ params }: Props) {
                 className="m-0 text-[clamp(1.05rem,1.5vw,1.25rem)]"
                 dir="ltr"
               >
-                <LinkLine href={t("phoneHref")} className="scroll-mt-[8rem]">
+                <LinkLine href={t("phoneHref")} className="inline-flex min-h-11 scroll-mt-[8rem] items-center">
                   {t("phone")}
                 </LinkLine>
               </dd>

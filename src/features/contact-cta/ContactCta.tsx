@@ -45,7 +45,12 @@ export default async function ContactCta({ locale }: Props) {
             <div className="flex flex-col gap-[0.35rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
               <dt className="ui-label">{t("emailLabel")}</dt>
               <dd className="m-0 break-words text-[clamp(1.15rem,2vw,1.6rem)] [overflow-wrap:anywhere]">
-                <LinkLine href={`mailto:${t("email")}`}>{t("email")}</LinkLine>
+                <LinkLine
+                  href={`mailto:${t("email")}`}
+                  className="inline-flex min-h-11 items-center"
+                >
+                  {t("email")}
+                </LinkLine>
               </dd>
             </div>
 
@@ -55,7 +60,12 @@ export default async function ContactCta({ locale }: Props) {
                 className="m-0 text-[clamp(1.15rem,2vw,1.6rem)]"
                 dir="ltr"
               >
-                <LinkLine href={t("phoneHref")}>{t("phone")}</LinkLine>
+                <LinkLine
+                  href={t("phoneHref")}
+                  className="inline-flex min-h-11 items-center"
+                >
+                  {t("phone")}
+                </LinkLine>
               </dd>
             </div>
           </dl>

@@ -80,7 +80,12 @@ export default async function BlogPostPage({ params }: Props) {
       </Prose>
 
       <div className="chapter-open mt-[var(--space-4)] border-t border-[var(--line-hairline)] pt-[var(--space-3)]">
-        <LinkLine href={localizedHref(locale, "/blog")}>{t("back")}</LinkLine>
+        <LinkLine
+          href={localizedHref(locale, "/blog")}
+          className="inline-flex min-h-11 items-center"
+        >
+          {t("back")}
+        </LinkLine>
       </div>
     </PageFrame>
   );
