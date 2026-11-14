@@ -57,3 +57,7 @@ Restored the global prefers-reduced-motion block that the earlier CSS slice had 
 QA scripts now target data-hero-meta/data-hero-overlay/#hero-title span span.
 Verification: tests 24/24, lint/typecheck/build clean, browser checks pass, Evidence Gate PASS on run 2026-11-14T16-35-00-000Z.
 
+
+Reveal gate: tried next/script beforeInteractive (ran after first paint → flash) and @media (scripting: enabled) (dropped by Lightning CSS). Kept the inline flag, which executes during HTML parse; verified intro stays hidden (opacity 0) until in view and work title reveals to 1 on scroll, with no console errors.
+Hero utilities + equal-height cards verified; Evidence Gate PASS on run 2026-11-14T17-00-00-000Z.
+
