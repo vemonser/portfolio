@@ -50,3 +50,10 @@ Ruling: semantic class hooks removed by utility migration → added stable data-
 Ruling: dev server restart required after adding @custom-variant — Turbopack served a stale tailwind bundle once; cost if wrong: re-verify CSS after variant changes.
 Verification: tests 24/24, lint/typecheck/build clean; browser checks pass (EN uppercase / AR normal-case via custom variants, 3-up flat grid, hover swap, Lenis active, no console errors, no overflow). Evidence Gate PASS on run 2026-11-14T15-50-00-000Z.
 
+
+Hero: overlay/meta/mask/entrance converted to utilities with group-data variants; pulse/scroll keyframes moved into @theme animate tokens; only .hero-wordmark typography, .grain and base tokens remain in CSS. Removed ~120 lines.
+Selected work: cards stretch to the tallest card in the row (h-full + flex-1 meta), bottom hairlines pixel-aligned (measured 2105/2105/2105 and 2619/2619/2619).
+Restored the global prefers-reduced-motion block that the earlier CSS slice had dropped, and added .animate-hero-pulse/.animate-hero-scroll to it.
+QA scripts now target data-hero-meta/data-hero-overlay/#hero-title span span.
+Verification: tests 24/24, lint/typecheck/build clean, browser checks pass, Evidence Gate PASS on run 2026-11-14T16-35-00-000Z.
+
