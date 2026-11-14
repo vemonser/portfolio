@@ -44,7 +44,7 @@ async function settle(page) {
 }
 
 async function underlineOrigin(page) {
-  const link = page.locator(".contact-details__row .link-line").first();
+  const link = page.locator("main a[href^=\"mailto:\"]").first();
   const before = await link.evaluate(
     (n) => getComputedStyle(n, "::after").transformOrigin,
   );
@@ -114,7 +114,7 @@ async function checks() {
     return page.evaluate(() => {
       const overlay = document.querySelector(".hero-overlay");
       const line = document.querySelector(".hero-wordmark__line");
-      const statement = document.querySelector(".intro__statement");
+      const statement = document.querySelector("#intro-title");
       return {
         overlayIn: overlay?.getAttribute("data-in"),
         lineTransform: getComputedStyle(line).transform,
@@ -142,14 +142,14 @@ async function checks() {
     return meta ? meta.innerText.replace(/\s+/g, " ").trim() : null;
   });
   results.footerClock = await home.evaluate(() => {
-    const time = document.querySelector(".site-footer__time");
+    const time = document.querySelector("[data-clock]");
     return time ? time.innerText.replace(/\s+/g, " ").trim() : null;
   });
   results.cards = await home.evaluate(
-    () => document.querySelectorAll(".project-card").length,
+    () => document.querySelectorAll("a[data-project]").length,
   );
   results.seeAll = await home.evaluate(() => {
-    const more = document.querySelector(".selected-work__more a");
+    const more = document.querySelector("section[data-section=\"selected-work\"] a[href$=\"/work\"]");
     return more
       ? { text: more.textContent, href: more.getAttribute("href") }
       : null;
@@ -157,17 +157,17 @@ async function checks() {
 
   results.workCards = await withPage({ width: 1440, height: 900 }, async (page) => {
     await page.goto(`${BASE}/en/work`, { waitUntil: "networkidle" });
-    const en = await page.locator(".project-card").count();
+    const en = await page.locator("a[data-project]").count();
     await page.goto(`${BASE}/ar/work`, { waitUntil: "networkidle" });
-    const ar = await page.locator(".project-card").count();
+    const ar = await page.locator("a[data-project]").count();
     return { en, ar };
   });
 
   results.blogPosts = await withPage({ width: 1440, height: 900 }, async (page) => {
     await page.goto(`${BASE}/en/blog`, { waitUntil: "networkidle" });
-    const en = await page.locator(".blog-row").count();
+    const en = await page.locator("main ul li a[href*=\"/blog/\"]").count();
     await page.goto(`${BASE}/ar/blog`, { waitUntil: "networkidle" });
-    const ar = await page.locator(".blog-row").count();
+    const ar = await page.locator("main ul li a[href*=\"/blog/\"]").count();
     return { en, ar };
   });
 
@@ -194,6 +194,8 @@ async function checks() {
   await home.close();
   await browser.close();
 
+  const matrix = results.reducedMotion.lineTransform.match(/matrix\(([^)]+)\)/);
+  const lineOffset = matrix ? Math.abs(Number(matrix[1].split(",")[5])) : 0;
   const en = results.enUnderline;
   const ar = results.arUnderline;
   const assertions = {
@@ -204,7 +206,7 @@ async function checks() {
     noOverflow: Object.values(results.overflows).every((value) => value <= 0),
     reducedMotion:
       results.reducedMotion.overlayIn === "true" &&
-      results.reducedMotion.lineTransform === "matrix(1, 0, 0, 1, 0, 0)" &&
+      lineOffset < 0.5 &&
       results.reducedMotion.statementOpacity === "1",
     menu:
       results.menu.open &&

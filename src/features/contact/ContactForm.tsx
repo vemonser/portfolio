@@ -2,6 +2,8 @@
 
 import type { FormEvent } from "react";
 
+import { roundButton } from "@/features/ui/styles";
+
 type Props = {
   to: string;
   labels: {
@@ -13,6 +15,9 @@ type Props = {
     subjectPrefix: string;
   };
 };
+
+const controlClasses =
+  "w-full rounded-none border-0 border-b border-bone/30 bg-transparent px-2 py-[0.95rem] font-body text-t-20 text-bone transition-colors duration-300 focus:border-lime";
 
 /**
  * v1 has no backend: submit composes a real message in the visitor's mail app.
@@ -36,11 +41,11 @@ export default function ContactForm({ to, labels }: Props) {
   };
 
   return (
-    <form className="contact-form" onSubmit={handleSubmit}>
-      <label className="field">
+    <form className="grid max-w-[40rem] gap-[1.6rem]" onSubmit={handleSubmit}>
+      <label className="flex flex-col gap-[0.6rem]">
         <span className="ui-label">{labels.name}</span>
         <input
-          className="field__control"
+          className={controlClasses}
           type="text"
           name="name"
           autoComplete="name"
@@ -48,10 +53,10 @@ export default function ContactForm({ to, labels }: Props) {
         />
       </label>
 
-      <label className="field">
+      <label className="flex flex-col gap-[0.6rem]">
         <span className="ui-label">{labels.email}</span>
         <input
-          className="field__control"
+          className={controlClasses}
           type="email"
           name="email"
           autoComplete="email"
@@ -60,10 +65,10 @@ export default function ContactForm({ to, labels }: Props) {
         />
       </label>
 
-      <label className="field">
+      <label className="flex flex-col gap-[0.6rem]">
         <span className="ui-label">{labels.message}</span>
         <textarea
-          className="field__control field__control--area"
+          className={`${controlClasses} min-h-36 resize-y`}
           name="message"
           rows={5}
           maxLength={2000}
@@ -71,11 +76,16 @@ export default function ContactForm({ to, labels }: Props) {
         />
       </label>
 
-      <div className="contact-form__footer">
-        <button type="submit" className="round-button contact-form__submit">
+      <div className="mt-2 flex flex-wrap items-center gap-6">
+        <button
+          type="submit"
+          className={`${roundButton} cursor-pointer border-0`}
+        >
           {labels.send}
         </button>
-        <p className="contact-form__hint">{labels.hint}</p>
+        <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm ar:text-t-16">
+          {labels.hint}
+        </p>
       </div>
     </form>
   );

@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getProjects } from "@/content/projects";
 import { localizedHref } from "@/features/navigation/nav";
 import Reveal from "@/features/ui/Reveal";
+import { pageLede, pageShell, pageTitle, workGrid } from "@/features/ui/styles";
 
 import ProjectCard from "@/features/work/ProjectCard";
 
@@ -25,19 +26,20 @@ export default async function WorkPage({ params }: Props) {
   const projects = getProjects(locale);
 
   return (
-    <main className="work-index">
-      <Reveal className="page-intro">
+    <main className={pageShell}>
+      <Reveal className="max-w-[60rem]">
         <p className="ui-label">{t("label")}</p>
-        <h1 className="page-title">{t("title")}</h1>
-        <p className="page-lede">{t("lede")}</p>
+        <h1 className={pageTitle}>{t("title")}</h1>
+        <p className={pageLede}>{t("lede")}</p>
       </Reveal>
 
-      <div className="work-grid">
+      <div
+        className={`mt-[clamp(4rem,9vw,7rem)] pb-[clamp(5rem,12vh,9rem)] ${workGrid}`}
+      >
         {projects.map((project, index) => (
           <Reveal
             as="article"
             key={project.slug}
-            className="work-grid__cell"
             delay={(index % 3) * 60}
           >
             <ProjectCard

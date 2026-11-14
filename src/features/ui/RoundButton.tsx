@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { roundButton } from "./styles";
+
 type Props = {
   href: string;
   label: string;
@@ -20,6 +22,7 @@ function Arrow() {
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
+      className="rtl:-scale-x-100"
     >
       <path d="M7 17 17 7M9 7h8v8" />
     </svg>
@@ -33,7 +36,7 @@ export default function RoundButton({
   external = false,
   className,
 }: Props) {
-  const classes = className ? `round-button ${className}` : "round-button";
+  const classes = className ? `${roundButton} ${className}` : roundButton;
   const content = (
     <>
       <span>{label}</span>
