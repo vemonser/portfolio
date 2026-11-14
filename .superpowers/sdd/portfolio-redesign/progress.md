@@ -26,3 +26,9 @@ Browser QA (Playwright on :3000): zero console errors; card hover layerB 0→1; 
 Ruling: pre-hydration `data-js` flag on <html> needs suppressHydrationWarning (React 19 compares extra attributes); cost if wrong: one suppression attribute.
 Ruling: blog metadata kept in a typed TS registry (posts.ts), MDX files hold content only — avoids custom .mdx export typings; cost if wrong: duplicate title/date in one file per post.
 
+
+Review: adversarial-reviewer — 0 Critical; HIGH scroll-write throttling fixed (rAF + 0.001 epsilon); portrait initial localized (about.initial); RoundButton arrow mirrors in RTL; socials render without target=_blank while href is "#".
+Ruling: footer social hrefs stay "#" — user has not provided account URLs; no new tab so a click is harmless. Cost if wrong: dead links until URLs are filled.
+Ruling: footer clock uses en-GB formatting on both locales — it is a mono system label and Arabic tz names wrap the line. Cost if wrong: Latin digits in the AR footer.
+Deferred minor: Reveal uses `as never` casts for polymorphic ref/style — runtime safe, typing could be cleaner.
+

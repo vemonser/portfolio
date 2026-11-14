@@ -185,6 +185,11 @@ export default function HeroStage() {
         });
 
         attach(scene);
+      } catch {
+        // A refused context (GPU process gone, too many live contexts) must
+        // degrade to the poster, not surface an unhandled error. The entrance
+        // still runs so the title is never held hostage.
+        setHeroReady(true);
       } finally {
         loading = false;
       }
