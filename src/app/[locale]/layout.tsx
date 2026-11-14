@@ -10,6 +10,7 @@ import {
 
 import SiteHeader from "@/features/navigation/SiteHeader";
 import { buildNavLinks, localizedHref } from "@/features/navigation/nav";
+import ContactChapter from "@/features/contact-cta/ContactChapter";
 import ContactCta from "@/features/contact-cta/ContactCta";
 import SiteFooter from "@/features/footer/SiteFooter";
 import SmoothScroll from "@/features/scroll/SmoothScroll";
@@ -139,7 +140,9 @@ export default async function LocaleLayout({ children, params }: Props) {
           }}
         />
         {children}
-        <ContactCta locale={locale} />
+        <ContactChapter>
+          <ContactCta locale={locale} />
+        </ContactChapter>
         <div className="grain" aria-hidden="true" />
         <SiteFooter
           labels={{

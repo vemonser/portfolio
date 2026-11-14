@@ -1,55 +1,67 @@
 import { getTranslations } from "next-intl/server";
 
 import { localizedHref } from "@/features/navigation/nav";
+import ChapterLabel from "@/features/ui/ChapterLabel";
 import LinkLine from "@/features/ui/LinkLine";
 import Reveal from "@/features/ui/Reveal";
 import RoundButton from "@/features/ui/RoundButton";
+import { toLocale } from "@/features/ui/editorial";
 
 type Props = {
   locale: string;
 };
 
 /**
- * dennissnellenberg's closing section, sized for this site: the statement and
- * the two ways to reach out, in one block above the footer. It lives in the
- * layout, so every page ends the same way.
+ * The closing chapter, present on every route. It is composed like the rest of
+ * the site — a label, a display sentence, then the two real ways to reach the
+ * owner — rather than a floating pill above the footer.
  */
 export default async function ContactCta({ locale }: Props) {
   const t = await getTranslations({ locale, namespace: "cta" });
+  const typed = toLocale(locale);
 
   return (
     <section
       aria-labelledby="cta-title"
       data-section="contact-cta"
-      className="border-t border-bone/10 px-[var(--nav-inset)] py-[clamp(8rem,18vh,14rem)]"
+      className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] pb-[calc(var(--inset-chapter)+2rem)] pt-[var(--inset-chapter)]"
     >
-      <div className="grid items-end gap-[clamp(2.5rem,6vw,5rem)] md:grid-cols-[minmax(0,1fr)_auto]">
-        <Reveal className="flex max-w-[60rem] flex-col gap-6">
-          <p className="ui-label">{t("label")}</p>
-          <h2
-            id="cta-title"
-            className="m-0 font-display text-[clamp(2.4rem,6.6vw,6.5rem)] font-semibold leading-[0.98] tracking-[-0.035em] ar:leading-[1.25] ar:tracking-normal"
-          >
-            {t("title")}
-          </h2>
+      <Reveal>
+        <ChapterLabel locale={typed} index={5}>
+          {t("label")}
+        </ChapterLabel>
 
-          <dl className="mt-3 flex flex-col gap-[0.85rem]">
-            <div className="m-0 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+        <h2
+          id="cta-title"
+          className="m-0 mt-[var(--space-3)] max-w-[18ch] font-display text-[clamp(2.4rem,6.4vw,6rem)] font-semibold leading-[0.98] tracking-[-0.035em] ar:max-w-[16ch] ar:leading-[1.25] ar:tracking-normal"
+        >
+          {t("title")}
+        </h2>
+      </Reveal>
+
+      <div className="mt-[var(--space-6)] grid items-end gap-[var(--space-6)] md:grid-cols-[minmax(0,1fr)_auto]">
+        <Reveal delay={80}>
+          <dl className="m-0 flex flex-col gap-[var(--space-3)]">
+            <div className="flex flex-col gap-[0.35rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
               <dt className="ui-label">{t("emailLabel")}</dt>
-              <dd className="m-0 text-[clamp(1.05rem,1.5vw,1.3rem)]">
+              <dd className="m-0 break-words text-[clamp(1.15rem,2vw,1.6rem)] [overflow-wrap:anywhere]">
                 <LinkLine href={`mailto:${t("email")}`}>{t("email")}</LinkLine>
               </dd>
             </div>
-            <div className="m-0 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+
+            <div className="flex flex-col gap-[0.35rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
               <dt className="ui-label">{t("phoneLabel")}</dt>
-              <dd className="m-0 text-[clamp(1.05rem,1.5vw,1.3rem)]" dir="ltr">
+              <dd
+                className="m-0 text-[clamp(1.15rem,2vw,1.6rem)]"
+                dir="ltr"
+              >
                 <LinkLine href={t("phoneHref")}>{t("phone")}</LinkLine>
               </dd>
             </div>
           </dl>
         </Reveal>
 
-        <Reveal delay={120} className="justify-self-start md:justify-self-end">
+        <Reveal delay={140} className="justify-self-start md:justify-self-end">
           <RoundButton
             href={localizedHref(locale, "/contact")}
             label={t("button")}

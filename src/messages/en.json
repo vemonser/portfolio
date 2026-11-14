@@ -109,7 +109,16 @@
       "message": "Message",
       "send": "Send message",
       "hint": "This opens your mail app with the message ready to send.",
-      "subjectPrefix": "Project enquiry from"
+      "subjectPrefix": "Project enquiry from",
+      "requiredName": "Please add your name.",
+      "requiredEmail": "Please add an email address.",
+      "invalidEmail": "That email address does not look right.",
+      "requiredMessage": "Please write a message.",
+      "sending": "Sending…",
+      "sent": "Your message is on its way.",
+      "ready": "Your message is ready. Open your mail app to send it.",
+      "openMail": "Open mail app",
+      "failed": "Something went wrong. Your message is still here — try again."
     }
   },
   "blogPage": {
