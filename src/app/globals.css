@@ -1143,6 +1143,18 @@ html[lang="ar"] .prose-editorial {
   line-height: var(--leading-arabic);
 }
 
+/* Reading refinements: no orphaned last words in running copy, and headings
+   that balance rather than leaving one word on the last line. */
+.prose-editorial p,
+.prose-editorial li {
+  text-wrap: pretty;
+}
+
+.prose-editorial h2,
+.prose-editorial h3 {
+  text-wrap: balance;
+}
+
 /* Hero overlay — only the wordmark's type/cropping lives here; the entrance
    and meta choreography are utilities driven by `data-in` on the overlay. */
 .hero-wordmark {
