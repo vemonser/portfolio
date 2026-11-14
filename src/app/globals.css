@@ -1099,6 +1099,40 @@ html[lang="ar"] .editorial-media__meta {
   text-transform: none;
 }
 
+/* The next-project chapter: one full-width link, its underline sweeping from
+   the reading edge. The whole block is the target, so the line is the only
+   hover affordance besides the disc. */
+.next-project {
+  position: relative;
+}
+
+.next-project::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  block-size: 1px;
+  background: var(--color-lime);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--dur-slow) var(--ease-editorial);
+}
+
+html[dir="rtl"] .next-project::after {
+  transform-origin: left;
+}
+
+.next-project:hover::after,
+.next-project:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+html[dir="rtl"] .next-project:hover::after,
+html[dir="rtl"] .next-project:focus-visible::after {
+  transform-origin: right;
+}
+
 /* Prose inherits .prose-blog's rhythm and only restates the measure, which is
    a locale token rather than a fixed rem. */
 .prose-editorial {

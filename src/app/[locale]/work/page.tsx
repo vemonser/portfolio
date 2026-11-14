@@ -1,12 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { getProjects } from "@/content/projects";
-import { localizedHref } from "@/features/navigation/nav";
-import { toLocale } from "@/features/ui/editorial";
+import ChapterLabel from "@/features/ui/ChapterLabel";
+import PageFrame from "@/features/ui/PageFrame";
+import ProjectIndex from "@/features/ui/ProjectIndex";
 import Reveal from "@/features/ui/Reveal";
-import { pageLede, pageShell, pageTitle, workGrid } from "@/features/ui/styles";
-
-import ProjectCard from "@/features/work/ProjectCard";
+import { toLocale } from "@/features/ui/editorial";
+import { bodyMeasure, chapterFrame, displayTitle } from "@/features/ui/styles";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -25,35 +25,30 @@ export default async function WorkPage({ params }: Props) {
 
   const t = await getTranslations({ locale, namespace: "workPage" });
   const projects = getProjects(locale);
+  const typed = toLocale(locale);
 
   return (
-    <main className={pageShell}>
-      <Reveal className="max-w-[60rem]">
-        <p className="ui-label">{t("label")}</p>
-        <h1 className={pageTitle}>{t("title")}</h1>
-        <p className={pageLede}>{t("lede")}</p>
+    <PageFrame
+      locale={typed}
+      className={`${chapterFrame} pb-[var(--inset-chapter)] pt-[clamp(8rem,22vh,14rem)]`}
+    >
+      <Reveal className="chapter-open">
+        <ChapterLabel locale={typed} index={1}>
+          {t("label")}
+        </ChapterLabel>
+
+        <h1 className={`${displayTitle} mt-[var(--space-3)]`}>{t("title")}</h1>
+
+        <p
+          className={`${bodyMeasure} mt-[var(--space-3)] text-[clamp(1.05rem,1.5vw,1.3rem)]`}
+        >
+          {t("lede")}
+        </p>
       </Reveal>
 
-      <div
-        className={`mt-[clamp(4rem,9vw,7rem)] pb-[clamp(5rem,12vh,9rem)] ${workGrid}`}
-      >
-        {projects.map((project, index) => (
-          <Reveal
-            as="article"
-            key={project.slug}
-            delay={(index % 3) * 60}
-          >
-            <ProjectCard
-              project={project}
-              index={index}
-              href={localizedHref(locale, `/work/${project.slug}`)}
-              locale={toLocale(locale)}
-              direction={locale === "ar" ? "rtl" : "ltr"}
-              variant="archive"
-            />
-          </Reveal>
-        ))}
+      <div className="mt-[var(--space-8)]">
+        <ProjectIndex locale={typed} projects={projects} variant="archive" />
       </div>
-    </main>
+    </PageFrame>
   );
 }

@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { getNextProject, getProject, getProjects } from "@/content/projects";
-import { localizedHref } from "@/features/navigation/nav";
-import LinkLine from "@/features/ui/LinkLine";
+import EditorialMedia from "@/features/ui/EditorialMedia";
+import NextProject from "@/features/ui/NextProject";
+import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
-import { pageShell, pageTitle } from "@/features/ui/styles";
-import { coverStyle } from "@/features/work/cover";
+import { formatNumber, toLocale } from "@/features/ui/editorial";
+import { chapterFrame, displayTitle } from "@/features/ui/styles";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -39,50 +40,84 @@ export default async function ProjectPage({ params }: Props) {
 
   const t = await getTranslations({ locale, namespace: "project" });
   const next = getNextProject(locale, slug);
+  const typed = toLocale(locale);
+  const arabic = typed === "ar";
+  const yearLabel = /^\d+$/.test(project.year)
+    ? formatNumber(Number(project.year), typed)
+    : project.year;
 
   return (
-    <main className={pageShell}>
+    <PageFrame
+      locale={typed}
+      className={`${chapterFrame} pb-[var(--inset-chapter)] pt-[clamp(8rem,20vh,13rem)]`}
+    >
       <article>
-        <Reveal className="flex max-w-[70rem] flex-col gap-4">
-          <p className="ui-label">{t("caseStudy")}</p>
-          <h1 className={`${pageTitle} mt-0`}>{project.title}</h1>
-          <p className="m-0 max-w-[44ch] text-t-20 leading-[1.6] text-warm ar:leading-[1.9]">
+        <header className="chapter-open">
+          <p className="ui-label m-0">{t("caseStudy")}</p>
+
+          <h1 className={`${displayTitle} mt-[var(--space-2)]`}>
+            {project.title}
+          </h1>
+
+          <p className="m-0 mt-[var(--space-3)] max-w-[44ch] text-[clamp(1.1rem,1.8vw,1.45rem)] leading-[1.6] text-warm ar:max-w-[38ch] ar:leading-[1.85]">
             {project.tagline}
           </p>
 
-          <dl className="mt-5 flex flex-wrap gap-x-12 gap-y-6">
+          <dl className="m-0 mt-[var(--space-5)] grid gap-[var(--space-3)] border-y border-[var(--line-hairline)] py-[var(--space-3)] sm:grid-cols-3">
             <div className="flex flex-col gap-[0.35rem]">
               <dt className="ui-label">{t("role")}</dt>
               <dd className="m-0 text-t-16">{project.role}</dd>
             </div>
             <div className="flex flex-col gap-[0.35rem]">
               <dt className="ui-label">{t("year")}</dt>
-              <dd className="m-0 text-t-16">{project.year}</dd>
+              <dd className="m-0 text-t-16">
+                {yearLabel}
+              </dd>
             </div>
             <div className="flex flex-col gap-[0.35rem]">
               <dt className="ui-label">{t("stack")}</dt>
-              <dd className="m-0 text-t-16" dir="ltr">
+              <dd className="m-0 text-start text-t-16" dir="ltr">
                 {project.stack.join(" · ")}
               </dd>
             </div>
           </dl>
-        </Reveal>
+        </header>
 
+        {/* Full-bleed field: the media is the project's atmosphere, not a
+            fabricated screenshot. */}
         <Reveal delay={80}>
-          <div
-            aria-hidden="true"
-            className="mt-[clamp(3rem,8vw,6rem)] aspect-[4/3] rounded-[2px] bg-ink md:aspect-[21/9]"
-            style={{ background: coverStyle(project.cover) }}
-          />
+          <div className="-mx-[var(--inset-edge)] mt-[var(--space-6)]">
+            <EditorialMedia
+              project={project}
+              index={0}
+              locale={typed}
+              className="aspect-[4/3] md:aspect-[21/9]"
+            />
+          </div>
         </Reveal>
 
-        <div className="mx-auto grid max-w-[46rem] gap-[clamp(3rem,7vw,5rem)] py-[clamp(4.5rem,11vw,8rem)]">
-          {project.sections.map((section) => (
-            <Reveal as="section" key={section.heading}>
-              <h2 className="mb-[0.9rem] mt-0 font-display text-[clamp(1.35rem,2vw,1.75rem)] font-semibold tracking-[-0.02em] ar:tracking-normal">
+        <div className="mt-[var(--space-8)] grid gap-[var(--space-7)]">
+          {project.sections.map((section, index) => (
+            <Reveal
+              as="section"
+              key={section.heading}
+              className={
+                index % 2 === 1
+                  ? arabic
+                    ? "me-[12%] max-w-[54ch]"
+                    : "ms-auto max-w-[42ch]"
+                  : "max-w-[58ch]"
+              }
+            >
+              <span className="font-label text-t-14 tracking-[var(--track)] text-lime ar:text-t-16 ar:tracking-normal">
+                {formatNumber(index + 1, typed, { pad: 2 })}
+              </span>
+
+              <h2 className="mb-[0.9rem] mt-[var(--space-2)] font-display text-[clamp(1.7rem,3vw,2.6rem)] font-semibold leading-[1.1] tracking-[-0.025em] ar:leading-[1.35] ar:tracking-normal">
                 {section.heading}
               </h2>
-              <p className="m-0 text-t-20 leading-[1.8] text-bone/70 ar:leading-[2]">
+
+              <p className="m-0 text-[clamp(1.02rem,1.4vw,1.2rem)] leading-[1.8] text-bone/70 ar:leading-[2]">
                 {section.body}
               </p>
             </Reveal>
@@ -90,17 +125,9 @@ export default async function ProjectPage({ params }: Props) {
         </div>
       </article>
 
-      <nav
-        aria-label={t("next")}
-        className="flex justify-end border-t border-bone/10 pb-[clamp(3rem,8vw,5rem)] pt-[clamp(2rem,5vw,3.5rem)]"
-      >
-        <LinkLine
-          href={localizedHref(locale, `/work/${next.slug}`)}
-          className="text-[clamp(1.05rem,1.6vw,1.3rem)]"
-        >
-          {t("next")} — {next.title}
-        </LinkLine>
-      </nav>
-    </main>
+      <div className="mt-[var(--space-8)]">
+        <NextProject locale={typed} project={next} label={t("next")} />
+      </div>
+    </PageFrame>
   );
 }
