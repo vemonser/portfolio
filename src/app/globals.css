@@ -947,6 +947,77 @@ html[lang="ar"] .prose-blog h2 {
   background: none;
 }
 
+/* ---------------------------------------------------------------------------
+ * Editorial composition variants.
+ *
+ * English opens from the reading edge with a wide display measure; Arabic
+ * opens from its own reading edge with a narrower one, because the script is
+ * taller and wants fewer characters per line. Values are logical properties
+ * so nothing here needs an RTL branch.
+ * --------------------------------------------------------------------------- */
+
+.page-frame {
+  display: block;
+}
+
+[data-locale="en"] {
+  --chapter-open-measure: 64rem;
+  --chapter-gap: var(--space-7);
+  --display-lead: 0.94;
+}
+
+[data-locale="ar"] {
+  --chapter-open-measure: 46rem;
+  --chapter-gap: var(--space-6);
+  --display-lead: 1.28;
+}
+
+.chapter-open {
+  inline-size: 100%;
+  max-inline-size: var(--chapter-open-measure, 64rem);
+  text-align: start;
+}
+
+.chapter-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-warm);
+}
+
+.chapter-label__index {
+  color: var(--color-lime);
+  font-variant-numeric: tabular-nums;
+}
+
+.chapter-label__rule {
+  display: block;
+  inline-size: clamp(1.25rem, 4vw, 3rem);
+  block-size: 1px;
+  background: var(--line-hairline);
+}
+
+html[lang="ar"] .chapter-label {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Prose inherits .prose-blog's rhythm and only restates the measure, which is
+   a locale token rather than a fixed rem. */
+.prose-editorial {
+  max-width: var(--measure-body);
+}
+
+html[lang="ar"] .prose-editorial {
+  line-height: var(--leading-arabic);
+}
+
 /* Hero overlay — only the wordmark's type/cropping lives here; the entrance
    and meta choreography are utilities driven by `data-in` on the overlay. */
 .hero-wordmark {
