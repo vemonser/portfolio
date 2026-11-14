@@ -1,8 +1,11 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import ChapterLabel from "@/features/ui/ChapterLabel";
+import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
-import SectionHeading from "@/features/ui/SectionHeading";
-import { pageLede, pageShell, pageTitle } from "@/features/ui/styles";
+import SkillMatrix from "@/features/ui/SkillMatrix";
+import { toLocale } from "@/features/ui/editorial";
+import { chapterFrame, displayTitle } from "@/features/ui/styles";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -24,78 +27,80 @@ export default async function AboutPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: "about" });
   const paragraphs = t.raw("paragraphs") as string[];
   const services = t.raw("services") as ServiceCopy[];
+  const typed = toLocale(locale);
+  const arabic = typed === "ar";
 
   return (
-    <main className={`${pageShell} pb-[clamp(4rem,9vh,7rem)]`}>
-      <Reveal className="max-w-[60rem]">
-        <p className="ui-label">{t("label")}</p>
-        <h1 className={pageTitle}>{t("title")}</h1>
-        <p className={pageLede}>{t("lede")}</p>
+    <PageFrame
+      locale={typed}
+      className={`${chapterFrame} pb-[var(--inset-chapter)] pt-[clamp(8rem,22vh,14rem)]`}
+    >
+      <Reveal className="chapter-open">
+        <ChapterLabel locale={typed} index={3}>
+          {t("label")}
+        </ChapterLabel>
+
+        <h1 className={`${displayTitle} mt-[var(--space-3)]`}>{t("title")}</h1>
+
+        <p className="m-0 mt-[var(--space-3)] max-w-[26ch] font-display text-[clamp(1.6rem,3.6vw,3.2rem)] font-medium leading-[1.12] tracking-[-0.03em] text-bone/85 ar:max-w-[24ch] ar:leading-[1.5] ar:tracking-normal">
+          {t("lede")}
+        </p>
       </Reveal>
 
-      <div className="mt-[clamp(3.5rem,8vw,6rem)] grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,26rem)] lg:gap-x-[clamp(2rem,6vw,6rem)]">
-        <Reveal className="flex max-w-[42rem] flex-col gap-5">
-          {paragraphs.map((paragraph) => (
-            <p
-              key={paragraph}
-              className="m-0 text-t-20 leading-[1.8] text-bone/70 ar:leading-[2]"
-            >
-              {paragraph}
-            </p>
-          ))}
+      <div className="mt-[var(--space-8)] grid items-start gap-[var(--space-6)] lg:grid-cols-12">
+        <Reveal
+          className={
+            arabic
+              ? "lg:col-span-8 lg:col-start-5"
+              : "lg:col-span-7 lg:col-start-1"
+          }
+        >
+          <div className="flex flex-col gap-[var(--space-3)]">
+            {paragraphs.map((paragraph, index) => (
+              <p
+                key={paragraph}
+                className={
+                  index === 0
+                    ? "m-0 max-w-[46ch] text-[clamp(1.15rem,1.8vw,1.45rem)] leading-[1.65] text-bone/80 ar:max-w-[40ch] ar:leading-[1.95]"
+                    : "m-0 max-w-[48ch] text-[clamp(1rem,1.3vw,1.15rem)] leading-[1.8] text-bone/60 ar:max-w-[42ch] ar:leading-[2]"
+                }
+              >
+                {paragraph}
+              </p>
+            ))}
+          </div>
         </Reveal>
 
+        {/*
+          Not a portrait placeholder: a typographic mark built from the initial
+          the owner already supplies, set in the forest surface. It gives the
+          manifesto a second column without pretending to be a photograph.
+        */}
         <Reveal
-          delay={100}
-          className="relative aspect-[4/5] overflow-hidden rounded-[2px] bg-ink"
+          delay={120}
+          className={
+            arabic
+              ? "lg:col-span-4 lg:col-start-1 lg:row-start-1"
+              : "lg:col-span-4 lg:col-start-9"
+          }
         >
-          <div
-            role="img"
-            aria-label={t("portraitAlt")}
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(110% 80% at 30% 20%, rgb(198 240 53 / 0.18), transparent 60%), linear-gradient(160deg, #2f4a3c, #171614 55%, #0b0b0a)",
-            }}
-          />
-          <span className="absolute inset-0 grid place-items-center font-display text-[clamp(8rem,20vw,16rem)] font-semibold leading-none text-bone/10">
-            {t("initial")}
-          </span>
+          <div className="relative aspect-[3/4] overflow-hidden bg-forest">
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 grid place-items-center font-display text-[clamp(9rem,20vw,16rem)] font-semibold leading-none text-bone/10"
+            >
+              {t("initial")}
+            </span>
+            <span className="absolute font-label text-t-14 uppercase tracking-[var(--track)] text-bone/60 ar:text-t-16 ar:normal-case ar:tracking-normal [inset-block-end:var(--space-3)] [inset-inline-start:var(--space-3)]">
+              {t("title")}
+            </span>
+          </div>
         </Reveal>
       </div>
 
-      <section
-        aria-labelledby="services-title"
-        className="mt-[clamp(5rem,12vw,9rem)]"
-      >
-        <Reveal>
-          <SectionHeading label={t("servicesLabel")} />
-        </Reveal>
-        <h2 id="services-title" className="sr-only">
-          {t("servicesLabel")}
-        </h2>
-
-        <ul className="m-0 mt-14 grid list-none gap-10 p-0 md:grid-cols-2 md:gap-x-16 md:gap-y-14">
-          {services.map((service, index) => (
-            <Reveal
-              as="li"
-              key={service.title}
-              className="border-t border-bone/15 pt-[1.1rem]"
-              delay={index * 60}
-            >
-              <span className="font-label text-t-14 tracking-[var(--track)] text-lime ar:tracking-normal">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mb-2 mt-[0.4rem] font-display text-t-28 font-semibold tracking-[-0.02em] ar:tracking-normal">
-                {service.title}
-              </h3>
-              <p className="m-0 max-w-[38ch] leading-[1.7] text-bone/60 ar:leading-[1.9]">
-                {service.body}
-              </p>
-            </Reveal>
-          ))}
-        </ul>
-      </section>
-    </main>
+      <div className="mt-[var(--space-8)]">
+        <SkillMatrix locale={typed} groups={services} label={t("servicesLabel")} />
+      </div>
+    </PageFrame>
   );
 }
