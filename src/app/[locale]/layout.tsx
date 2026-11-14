@@ -147,19 +147,10 @@ export default async function LocaleLayout({ children, params }: Props) {
         <SiteFooter
           labels={{
             navigation: tFooter("navigation"),
-            socials: tFooter("socials"),
             edition: tFooter("edition"),
             localTime: tFooter("localTime"),
-            instagram: tFooter("instagram"),
-            twitter: tFooter("twitter"),
-            linkedin: tFooter("linkedin"),
           }}
           links={links}
-          socials={[
-            { key: "instagram", href: "#" },
-            { key: "twitter", href: "#" },
-            { key: "linkedin", href: "#" },
-          ]}
         />
       </body>
     </html>
