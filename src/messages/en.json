@@ -5,5 +5,21 @@
   },
   "hero": {
     "name": "software developer"
+  },
+  "nav": {
+    "open": "Open navigation",
+    "close": "Close navigation",
+    "navigation": "Navigation",
+    "language": "Language",
+    "home": "Home",
+    "work": "Work",
+    "about": "About",
+    "contact": "Contact",
+    "en": "English",
+    "ar": "العربية"
+  },
+  "stub": {
+    "body": "This section is being built.",
+    "back": "Back to home"
   }
 }

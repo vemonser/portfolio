@@ -8,6 +8,8 @@ import {
   JetBrains_Mono,
 } from "next/font/google";
 
+import SiteHeader from "@/features/navigation/SiteHeader";
+import { buildNavLinks, localizedHref } from "@/features/navigation/nav";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -75,6 +77,22 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   setRequestLocale(locale);
 
+  /*
+   * Every nav string is resolved here, on the server. The client header gets
+   * values, not a message catalog, so the page still ships no i18n runtime.
+   */
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const tMeta = await getTranslations({ locale, namespace: "meta" });
+  const links = buildNavLinks(locale, {
+    home: tNav("home"),
+    work: tNav("work"),
+    about: tNav("about"),
+    contact: tNav("contact"),
+  });
+  const otherLocaleCode =
+    routing.locales.find((candidate) => candidate !== locale) ??
+    routing.defaultLocale;
+
   return (
     <html
       lang={locale}
@@ -87,7 +105,22 @@ export default async function LocaleLayout({ children, params }: Props) {
         use-intl client runtime would be dead weight in the hero budget.
         Add the provider when the first *client* component needs t().
       */}
-      <body className="min-h-dvh bg-black font-body text-bone antialiased">
+      <body className="min-h-[300vh] bg-black font-body text-bone antialiased">
+        <SiteHeader
+          brand={tMeta("title")}
+          homeHref={localizedHref(locale, "/")}
+          links={links}
+          labels={{
+            open: tNav("open"),
+            close: tNav("close"),
+            navigation: tNav("navigation"),
+            language: tNav("language"),
+          }}
+          otherLocale={{
+            code: otherLocaleCode,
+            label: tNav(otherLocaleCode),
+          }}
+        />
         {children}
       </body>
     </html>

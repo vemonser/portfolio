@@ -34,11 +34,12 @@ html[lang="ar"] {
   --font-display: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
   --font-body: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
   --font-label: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
-  --track: 0;
 }
 
 :root {
   --track: 0.18em;
+  --nav-inset: clamp(1.25rem, 2.6vw, 2rem);
+  --scrollbar-comp: 0px;
 }
 
 @layer base {
@@ -67,23 +68,18 @@ html[lang="ar"] {
 
 @layer components {
 /*
- * The wordmark. Real text, never an image: it is the LCP element, it carries
- * the h1, and it is translated.
+ * The wordmark: real HTML text, the LCP element, and the h1.
+ *
+ * It sits at the bottom edge and is deliberately cropped: a line-height below
+ * 1 means the glyph box overflows its layout box, so the word already bleeds
+ * past the section's bottom edge. `drop` is the extra distance the box is
+ * pushed down (a negative margin), which decides how much survives.
  *
  * Arabic is a joined script — any letter tracking tears the joins apart, so
- * --track drops to 0 and the size/crop are tuned per locale.
+ * the Arabic variant drops tracking to zero and the kufic stack takes over.
  */
 .hero-wordmark {
-  /*
-   * The crop. A line-height below 1 means the glyph box overflows its layout
-   * box, so the word already bleeds past the section's bottom edge. `drop`
-   * is the extra distance the layout box is lifted back up, which decides
-   * how much survives: clip ≈ descender-overflow − drop.
-   *
-   * Measured for Fraunces at line-height .76: overflow ≈ .233em, so a .113em
-   * drop leaves ≈ .12em clipped — the brief's `bottom: -0.12em`.
-   */
-  --wordmark-drop: 0.072em;
+  --wordmark-drop: -0.06em;
 
   display: block;
   width: 100%;
@@ -119,6 +115,562 @@ html[lang="ar"] .hero-wordmark {
   letter-spacing: 0;
 }
 
+/*
+ * The wordmark is plain text: no filter, no transform, nothing applied. Hover
+ * belongs to the liquid behind it, like the reference.
+ */
+
+/*
+ * ---------------------------------------------------------------------------
+ * Navigation
+ *
+ * The header is absolute (it scrolls away with the page); the trigger is fixed
+ * and appears past 30% of the viewport. The panel is a native <dialog> in the
+ * top layer, so focus, Escape and inertness come from the platform. The only
+ * choreography is CSS: a panel that slides in from the inline-end edge, and a
+ * lip of 6vw whose huge ellipse collapses to zero, which is what turns the
+ * leading edge from a curve into a straight line.
+ * ---------------------------------------------------------------------------
+ */
+
+.ui-label {
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-warm);
+}
+
+html[lang="ar"] .ui-label {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.site-header {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: var(--nav-inset);
+  pointer-events: none;
+}
+
+.site-header__brand,
+.site-header__link,
+.menu-trigger,
+.nav-close {
+  pointer-events: auto;
+}
+
+.site-header__brand {
+  padding-block: 0.9rem;
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-bone);
+  text-decoration: none;
+}
+
+html[lang="ar"] .site-header__brand {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2.4vw, 1.75rem);
+}
+
+.site-header__link {
+  position: relative;
+  padding-block: 0.9rem;
+  padding-inline: 0.5rem;
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 55%, transparent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-header__link:hover,
+.site-header__link[data-active="true"] {
+  color: var(--color-bone);
+}
+
+.site-header__link[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: -1em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-clay);
+  transform: translateY(-50%);
+}
+
+html[lang="ar"] .site-header__link {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.site-header__locale {
+  padding-block: 0.9rem;
+  padding-inline-start: clamp(0.75rem, 2.4vw, 1.75rem);
+  border-inline-start: 1px solid
+    color-mix(in srgb, var(--color-bone) 18%, transparent);
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 55%, transparent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-header__locale:hover {
+  color: var(--color-bone);
+}
+
+html[lang="ar"] .site-header__locale {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/*
+ * On an English page the locale link carries `lang="ar"` itself, so the
+ * document-level override above does not reach it. Arabic is a joined script:
+ * any tracking tears it, and JetBrains Mono has no Arabic glyphs.
+ */
+.site-header__locale:lang(ar) {
+  font-family: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.menu-trigger {
+  position: fixed;
+  inset-block-start: var(--nav-inset);
+  inset-inline-end: calc(var(--nav-inset) + var(--scrollbar-comp));
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  width: clamp(4rem, 5vw, 5rem);
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-ink);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-bone) 18%, transparent);
+  color: var(--color-bone);
+  cursor: pointer;
+  visibility: hidden;
+  transform: scale(0) rotate(0.001deg);
+  transition:
+    transform 0.4s cubic-bezier(0.36, 0, 0.66, 0),
+    visibility 0s 0.4s,
+    background-color 0.2s ease;
+}
+
+.menu-trigger[data-visible="true"] {
+  visibility: visible;
+  transform: scale(1) rotate(0.001deg);
+  transition:
+    transform 0.4s cubic-bezier(0.34, 1.5, 0.64, 1),
+    visibility 0s,
+    background-color 0.2s ease;
+}
+
+.menu-trigger:hover {
+  background: var(--color-forest);
+}
+
+.menu-trigger__bars {
+  position: relative;
+  display: block;
+  width: 28%;
+  height: 8%;
+}
+
+.menu-trigger__bars::before,
+.menu-trigger__bars::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 1px;
+  background: currentColor;
+  transform: translateY(-50%);
+}
+
+.menu-trigger__bars::before {
+  top: 0;
+}
+
+.menu-trigger__bars::after {
+  top: 100%;
+}
+
+/* No inline links on small screens, so the trigger is always available. */
+@media (max-width: 767px) {
+  .site-header__nav {
+    display: none;
+  }
+
+  .menu-trigger {
+    visibility: visible;
+    transform: scale(1) rotate(0.001deg);
+  }
+}
+
+.nav-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+
+.nav-dialog::backdrop {
+  background: linear-gradient(
+    to right,
+    rgb(11 11 10 / 0.3) 40%,
+    rgb(11 11 10) 80%
+  );
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+html[dir="rtl"] .nav-dialog::backdrop {
+  background: linear-gradient(
+    to left,
+    rgb(11 11 10 / 0.3) 40%,
+    rgb(11 11 10) 80%
+  );
+}
+
+.nav-dialog[data-state="open"]::backdrop {
+  opacity: 0.35;
+}
+
+.nav-panel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 1;
+  width: auto;
+  min-width: clamp(20rem, 37.5vw, 40.25rem);
+  background: var(--color-ink);
+  transform: translateX(calc(100% + 9vw)) rotate(0.001deg);
+  transition: transform 0.8s cubic-bezier(0.7, 0, 0.2, 1);
+  will-change: transform;
+}
+
+html[dir="rtl"] .nav-panel {
+  transform: translateX(calc(-100% - 9vw)) rotate(0.001deg);
+}
+
+.nav-dialog[data-state="open"] .nav-panel {
+  transform: translateX(0) rotate(0.001deg);
+}
+
+/*
+ * The lip is the whole trick. It sits just outside the panel's leading edge,
+ * is 6vw wide, and is closed with the panel. Inside it, an ellipse 775% wide
+ * and 150% tall reads as one huge arc; collapsing the lip's width to zero
+ * collapses the arc, and the panel's edge straightens out.
+ */
+.nav-lip {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 1px;
+  width: 6vw;
+  pointer-events: none;
+  transform: translateX(-100%);
+  transition: width 0.85s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.nav-lip::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  width: 775%;
+  height: 150%;
+  background: var(--color-ink);
+  border-radius: 50%;
+  transform: translate(-6.5%, -50%);
+}
+
+/*
+ * Mirrored: the lip stays on the panel's inline-start edge, which in RTL is
+ * its right edge — the page-facing side. Only the direction it is pushed out
+ * changes. (Anchoring it with inset-inline-end would put it inside the panel,
+ * where the ellipse is invisible.)
+ */
+html[dir="rtl"] .nav-lip {
+  transform: translateX(100%);
+}
+
+html[dir="rtl"] .nav-lip::before {
+  transform: translate(6.5%, -50%);
+}
+
+.nav-dialog[data-state="open"] .nav-lip {
+  width: 0;
+}
+
+.nav-close {
+  position: absolute;
+  inset-block-start: var(--nav-inset);
+  inset-inline-end: calc(var(--nav-inset) + var(--scrollbar-comp));
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: clamp(4rem, 5vw, 5rem);
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-clay);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.nav-close:hover {
+  background: color-mix(in srgb, var(--color-clay) 78%, var(--color-bone));
+}
+
+/*
+ * On the way out the close button turns back into the trigger it replaced, so
+ * the swap at the end of the animation is invisible: same dark disc, same two
+ * bars, same corner.
+ */
+.nav-dialog[data-state="closing"] .nav-close {
+  background: var(--color-ink);
+  color: var(--color-bone);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-bone) 18%, transparent);
+}
+
+.nav-close__bars {
+  position: relative;
+  display: block;
+  width: 28%;
+  height: 8%;
+}
+
+.nav-close__bars::before,
+.nav-close__bars::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 1px;
+  background: currentColor;
+  transition:
+    top 0.3s cubic-bezier(0.7, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.nav-close__bars::before {
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.nav-close__bars::after {
+  transform: translateY(-50%) rotate(-45deg);
+}
+
+.nav-dialog[data-state="closing"] .nav-close__bars::before {
+  top: 0;
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.nav-dialog[data-state="closing"] .nav-close__bars::after {
+  top: 100%;
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.nav-panel__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3rem;
+  height: 100%;
+  padding: 15vh max(1.5rem, 7.5vw) 10vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.nav-panel .ui-label {
+  margin: 0 0 2rem;
+  font-size: 0.72rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+
+html[lang="ar"] .nav-panel .ui-label {
+  font-size: 0.85rem;
+  letter-spacing: 0;
+}
+
+.nav-rule {
+  height: 1px;
+  margin: 0 0 2.8rem;
+  border: 0;
+  background: color-mix(in srgb, var(--color-bone) 16%, transparent);
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-item {
+  transform: translateX(15vw) rotate(0.001deg);
+  transition: transform 0.8s cubic-bezier(0.7, 0, 0.2, 1);
+  will-change: transform;
+}
+
+html[dir="rtl"] .nav-item {
+  transform: translateX(-15vw) rotate(0.001deg);
+}
+
+.nav-dialog[data-state="open"] .nav-item {
+  transform: translateX(0) rotate(0.001deg);
+}
+
+.nav-item:nth-child(2) {
+  transition-delay: 0.03s;
+}
+
+.nav-item:nth-child(3) {
+  transition-delay: 0.06s;
+}
+
+.nav-item:nth-child(4) {
+  transition-delay: 0.09s;
+}
+
+.nav-item a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4.6vw, 3.75rem);
+  line-height: 1.4;
+  letter-spacing: -0.03em;
+  color: var(--color-bone);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.nav-item a:hover {
+  color: var(--color-clay);
+}
+
+html[lang="ar"] .nav-item a {
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+/*
+ * The reference puts the active dot in the left margin, so every label stays
+ * on the same x. An inline dot would indent only the active row.
+ */
+.nav-item a[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -0.6em;
+  inset-block-start: 50%;
+  width: 0.18em;
+  height: 0.18em;
+  border-radius: 50%;
+  background: var(--color-bone);
+  transform: translateY(-50%);
+}
+
+.nav-panel__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nav-locale {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  font-family: var(--font-label);
+  font-size: var(--text-t-16);
+  color: var(--color-bone);
+  text-decoration: underline;
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--color-bone) 35%,
+    transparent
+  );
+  text-underline-offset: 6px;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+}
+
+.nav-locale:hover {
+  color: var(--color-clay);
+  text-decoration-color: var(--color-clay);
+}
+
+.stub-title {
+  letter-spacing: -0.03em;
+}
+
+html[lang="ar"] .stub-title {
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+@media (max-width: 639px) {
+  .nav-panel {
+    width: 100%;
+  }
+
+  .nav-item a {
+    font-size: clamp(2.5rem, 11vw, 3.5rem);
+  }
+}
+
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -128,6 +680,7 @@ html[lang="ar"] .hero-wordmark {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
 }

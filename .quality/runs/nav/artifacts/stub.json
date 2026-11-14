@@ -1,0 +1,50 @@
+[
+  {
+    "route": "/en",
+    "status": 200,
+    "header": 1,
+    "heading": "software developer"
+  },
+  {
+    "route": "/en/work",
+    "status": 200,
+    "header": 1,
+    "heading": "Work"
+  },
+  {
+    "route": "/en/about",
+    "status": 200,
+    "header": 1,
+    "heading": "About"
+  },
+  {
+    "route": "/en/contact",
+    "status": 200,
+    "header": 1,
+    "heading": "Contact"
+  },
+  {
+    "route": "/ar",
+    "status": 200,
+    "header": 1,
+    "heading": "مطور برمجيات"
+  },
+  {
+    "route": "/ar/work",
+    "status": 200,
+    "header": 1,
+    "heading": "الأعمال"
+  },
+  {
+    "route": "/ar/about",
+    "status": 200,
+    "header": 1,
+    "heading": "نبذة"
+  },
+  {
+    "route": "/ar/contact",
+    "status": 200,
+    "header": 1,
+    "heading": "تواصل"
+  }
+]

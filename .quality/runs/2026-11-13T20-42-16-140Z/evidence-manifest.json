@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "run": {
+    "id": "2026-11-13T20-42-16-140Z",
+    "task": "Rewrite the hero scene as a screen-space mercury surface with ripple simulation and a refracted canvas wordmark",
+    "source": ".planning/hero-mercury/SPEC.md"
+  },
+  "criteria": [
+    {
+      "id": "AC-01",
+      "statement": "Given no pointer input, when the hero is idle, then the mercury field visibly animates and the frame is a plausible scene rather than blank or white.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 14
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero-scene/mercuryScene.ts",
+        "src/features/hero-scene/glsl/mercury.ts",
+        "src/features/hero-scene/glsl/composite.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/idle-b.png",
+          "command": "node scripts/hero-qa.mjs --case idle --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:42:56.061Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-02",
+      "statement": "Given the hero is live, when the pointer is dragged across it, then the surface is disturbed and the frame after the drag differs substantially from the frame before.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 17
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero-scene/glsl/ripple.ts",
+        "src/features/hero-scene/mercuryScene.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/ripple-after.png",
+          "command": "node scripts/hero-qa.mjs --case ripple --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:01.031Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-03",
+      "statement": "Given the scene is frozen at a chosen second, when the frame is analysed, then the wordmark is painted by the canvas as a near-white band spanning most of the frame width.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 20
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero-scene/text-texture.ts",
+        "src/features/hero-scene/glsl/composite.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/wordmark.png",
+          "command": "node scripts/hero-qa.mjs --case wordmark --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:03.642Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-04",
+      "statement": "Given a mobile viewport with touch, when /ar loads, then the live scene runs on WebGL 2, touch disturbs the surface, and the Arabic wordmark is shaped and painted by the canvas.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 23
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/HeroStage.tsx",
+        "src/features/hero-scene/mercuryScene.ts",
+        "src/features/hero-scene/text-texture.ts"
+      ],
+      "status": "PASS",
+      "notes": "Touch interaction is verified with synthesized pointer events; touch-action pan-y leaves vertical scrolling to the browser.",
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/mobile-before.png",
+          "command": "node scripts/hero-qa.mjs --case mobile --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:07.450Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-05",
+      "statement": "Given prefers-reduced-motion: reduce, when the hero loads, then the real scene renders as a single frozen frame and the canvas is the visible layer.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 26
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/HeroStage.tsx",
+        "src/features/hero-scene/mercuryScene.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/reduced-b.png",
+          "command": "node scripts/hero-qa.mjs --case reduced --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:11.974Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-06",
+      "statement": "Given a browser without WebGL 2, when the hero loads, then the scene never claims readiness and the poster image is the visible layer.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 29
+      },
+      "kind": "behavior",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/HeroStage.tsx"
+      ],
+      "status": "PASS",
+      "notes": "Simulated by stubbing HTMLCanvasElement.getContext('webgl2') to null before load.",
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/nowebgl.png",
+          "command": "node scripts/hero-qa.mjs --case nowebgl --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:16.170Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-07",
+      "statement": "Given ?t=<seconds>, when the frame is captured twice, then the two captures are identical, so the poster pipeline is reproducible.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 32
+      },
+      "kind": "behavior",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero-scene/mercuryScene.ts",
+        "scripts/poster.mjs"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/frozen-b.png",
+          "command": "node scripts/hero-qa.mjs --case frozen --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:20.343Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-08",
+      "statement": "Given the implementation, when static validation runs, then typecheck, unit tests, lint, and the production build all pass.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 35
+      },
+      "kind": "static-analysis",
+      "requiresBrowser": false,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/features/hero-scene/math.ts",
+        "src/features/hero-scene/mercuryScene.ts",
+        "scripts/hero-qa.mjs"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "typecheck",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/typecheck.log",
+          "command": "pnpm typecheck",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:22.409Z"
+        },
+        {
+          "type": "unit-test",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/unit-test.log",
+          "command": "pnpm test",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:23.002Z"
+        },
+        {
+          "type": "lint",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/lint.log",
+          "command": "pnpm lint",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:25.377Z"
+        },
+        {
+          "type": "build",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/build.log",
+          "command": "pnpm build",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:30.602Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-09",
+      "statement": "Given the English locale, when the poster is regenerated, then the poster still contains the wordmark band.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 38
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "scripts/poster.mjs",
+        "public/poster/hero-1440.webp"
+      ],
+      "status": "PASS",
+      "notes": "Numerically confirmed: the regenerated desktop poster is 3.05% near-white pixels, the mobile Arabic poster 1.77%.",
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": "public/poster/hero-1440.webp",
+          "command": "pnpm poster",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:43:59.382Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-10",
+      "statement": "Given any locale, when the page renders, then the hero h1 still exists with translated text and is clipped to screen-reader-only size.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 41
+      },
+      "kind": "behavior",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/Hero.tsx"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T20-42-16-140Z/artifacts/seo.json",
+          "command": "node scripts/hero-qa.mjs --case seo --out .quality/runs/2026-11-13T20-42-16-140Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T20:44:01.025Z"
+        }
+      ]
+    }
+  ],
+  "unresolvedReviewBlockers": []
+}

@@ -1,0 +1,12 @@
+{
+  "case": "pause",
+  "base": "http://localhost:3000",
+  "checks": [
+    "scene is live",
+    "scene is paused while the menu is open",
+    "visibilitychange does not resume behind the menu",
+    "scene resumes after closing"
+  ],
+  "pausedWhileOpen": true,
+  "resumedAfterClose": true
+}

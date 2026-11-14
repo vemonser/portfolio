@@ -1,10 +1,9 @@
 /**
  * Regenerates the hero posters from the live scene.
  *
- * The poster is what a phone, a reduced-motion visitor, or a browser without
- * WebGL actually sees, so it has to be a real frame of the real material —
- * not a mockup. It captures the canvas element only, never the page, so the
- * headline stays real HTML.
+ * The poster is the first paint (and the whole page for a browser without
+ * WebGL 2), so it has to be a real frame of the real material — not a mockup.
+ * It captures the canvas element, which now paints the wordmark itself.
  *
  *   pnpm dev            # in one terminal
  *   pnpm poster         # in another
@@ -23,8 +22,8 @@ const OUT = path.join(process.cwd(), "public", "poster");
 // `t` freezes the flow at a fixed second, so the same poster comes out every
 // run. Each value is a frame chosen for a strong light/dark split.
 const shots = [
-  { name: "hero-1440", width: 1440, height: 900, dpr: 1, route: "/en?scene=1&t=3" },
-  { name: "hero-780", width: 390, height: 844, dpr: 2, route: "/ar?scene=1&t=3" },
+  { name: "hero-1440", width: 1440, height: 900, dpr: 1, route: "/en?t=3" },
+  { name: "hero-780", width: 390, height: 844, dpr: 2, route: "/ar?t=3" },
 ];
 
 const SETTLE_MS = 900;
@@ -44,13 +43,11 @@ try {
     await page.waitForSelector('[data-ready="true"]', { timeout: 20_000 });
     await page.waitForTimeout(SETTLE_MS);
 
-    // Element screenshots capture whatever is painted over the box, so the
-    // headline, the scrim and the dev badge have to go — the poster is the
-    // canvas alone.
+    // Element screenshots capture whatever is painted over the box. The
+    // wordmark is real HTML layered above the canvas, so it is hidden for the
+    // capture — the poster is the liquid alone and the live text stays on top.
     await page.addStyleTag({
-      content: `
-        #hero-title, [data-scrim], nextjs-portal { visibility: hidden !important; }
-      `,
+      content: `#hero-title, nextjs-portal { visibility: hidden !important; }`,
     });
 
     const buffer = await page.locator("canvas").screenshot({ omitBackground: true });

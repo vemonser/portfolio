@@ -1,0 +1,11 @@
+{
+  "case": "en-reveal",
+  "base": "http://localhost:3000",
+  "checks": [
+    "trigger appears past 30%",
+    "trigger is scaled to 1",
+    "revealed flag",
+    "trigger hides back above the threshold"
+  ],
+  "artifact": "nav/artifacts/en-revealed.png"
+}

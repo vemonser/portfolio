@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "run": {
+    "id": "2026-11-13T21-20-12-838Z",
+    "task": "Hero wordmark back in HTML with a reference-style letter-roll hover; calm the surface; keep the mercury scene",
+    "source": ".planning/hero-mercury/SPEC.md"
+  },
+  "criteria": [
+    {
+      "id": "AC-01",
+      "statement": "Given no pointer input, when the hero is idle, then the mercury field visibly animates at a calm pace and the frame is a plausible scene.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 13
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero-scene/mercuryScene.ts",
+        "src/features/hero-scene/glsl/mercury.ts",
+        "src/features/hero-scene/glsl/composite.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/idle-b.png",
+          "command": "node scripts/hero-qa.mjs --case idle --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:20:45.890Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-02",
+      "statement": "Given the hero is live, when the pointer is dragged across it, then the surface is disturbed.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 17
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero-scene/glsl/ripple.ts",
+        "src/features/hero-scene/mercuryScene.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/ripple-after.png",
+          "command": "node scripts/hero-qa.mjs --case ripple --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:20:50.636Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-03",
+      "statement": "Given the hero is rendered, when the frame is analysed, then the wordmark is real HTML text visible as a light band at the bottom spanning most of the frame width.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 20
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/Hero.tsx",
+        "src/features/hero/HeroWordmark.tsx",
+        "src/app/globals.css"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/wordmark.png",
+          "command": "node scripts/hero-qa.mjs --case wordmark --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:20:53.129Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-04",
+      "statement": "Given a mobile viewport with touch, when /ar loads, then the live scene runs on WebGL 2, touch disturbs the surface, and the unsplit Arabic wordmark is visible over the canvas.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 24
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/HeroStage.tsx",
+        "src/features/hero/HeroWordmark.tsx",
+        "src/features/hero-scene/mercuryScene.ts"
+      ],
+      "status": "PASS",
+      "notes": "Touch interaction is verified with synthesized pointer events; touch-action pan-y leaves vertical scrolling to the browser.",
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/mobile-before.png",
+          "command": "node scripts/hero-qa.mjs --case mobile --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:20:56.857Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-05",
+      "statement": "Given prefers-reduced-motion: reduce, when the hero loads, then the real scene renders as a single frozen frame and the canvas is the visible layer.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 27
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/HeroStage.tsx",
+        "src/features/hero-scene/mercuryScene.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/reduced-b.png",
+          "command": "node scripts/hero-qa.mjs --case reduced --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:01.142Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-06",
+      "statement": "Given a browser without WebGL 2, when the hero loads, then the scene never claims readiness and the poster image is the visible layer.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 30
+      },
+      "kind": "behavior",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/HeroStage.tsx"
+      ],
+      "status": "PASS",
+      "notes": "Simulated by stubbing HTMLCanvasElement.getContext('webgl2') to null before load.",
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/nowebgl.png",
+          "command": "node scripts/hero-qa.mjs --case nowebgl --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:05.144Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-07",
+      "statement": "Given ?t=<seconds>, when the frame is captured twice, then the two captures are identical.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 33
+      },
+      "kind": "behavior",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero-scene/mercuryScene.ts",
+        "scripts/poster.mjs"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/frozen-b.png",
+          "command": "node scripts/hero-qa.mjs --case frozen --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:09.085Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-08",
+      "statement": "Given the implementation, when static validation runs, then typecheck, unit tests, lint, and the production build all pass.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 36
+      },
+      "kind": "static-analysis",
+      "requiresBrowser": false,
+      "requiresAutomatedTest": true,
+      "implementation": [
+        "src/features/hero-scene/math.ts",
+        "src/features/hero/HeroWordmark.tsx",
+        "scripts/hero-qa.mjs"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "typecheck",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/typecheck.log",
+          "command": "pnpm typecheck",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:10.931Z"
+        },
+        {
+          "type": "unit-test",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/unit-test.log",
+          "command": "pnpm test",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:11.454Z"
+        },
+        {
+          "type": "lint",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/lint.log",
+          "command": "pnpm lint",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:13.476Z"
+        },
+        {
+          "type": "build",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/build.log",
+          "command": "pnpm build",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:17.964Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-09",
+      "statement": "Given the English locale, when the poster is regenerated, then the poster is a real capture of the live scene with the HTML wordmark layered above it.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 39
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "scripts/poster.mjs",
+        "public/poster/hero-1440.webp"
+      ],
+      "status": "PASS",
+      "notes": "The capture hides #hero-title, so the still is the liquid alone and the live text sits on top.",
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": "public/poster/hero-1440.webp",
+          "command": "pnpm poster",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:40.101Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-10",
+      "statement": "Given any locale, when the page renders, then the hero h1 exists with translated text and is visible to sighted users.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 43
+      },
+      "kind": "behavior",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/Hero.tsx",
+        "src/features/hero/HeroWordmark.tsx"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/seo.json",
+          "command": "node scripts/hero-qa.mjs --case seo --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:41.672Z"
+        }
+      ]
+    },
+    {
+      "id": "AC-11",
+      "statement": "Given a mouse over the wordmark, when it enters, then the letters roll and pointer moves do not reach the canvas, so no separate ripple is triggered.",
+      "sourceRef": {
+        "path": ".planning/hero-mercury/SPEC.md",
+        "line": 45
+      },
+      "kind": "ui-visual",
+      "requiresBrowser": true,
+      "requiresAutomatedTest": false,
+      "implementation": [
+        "src/features/hero/HeroWordmark.tsx",
+        "src/features/hero-scene/mercuryScene.ts"
+      ],
+      "status": "PASS",
+      "notes": null,
+      "naReason": null,
+      "evidence": [
+        {
+          "type": "browser",
+          "path": ".quality/runs/2026-11-13T21-20-12-838Z/artifacts/hover-text.png",
+          "command": "node scripts/hero-qa.mjs --case hover-text --out .quality/runs/2026-11-13T21-20-12-838Z/artifacts",
+          "exitCode": 0,
+          "recordedAt": "2026-11-13T21:21:45.149Z"
+        }
+      ]
+    }
+  ],
+  "unresolvedReviewBlockers": []
+}

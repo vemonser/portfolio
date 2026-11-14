@@ -1,0 +1,56 @@
+{
+  "case": "scrollpage",
+  "base": "http://localhost:3000",
+  "checks": [
+    "scroll locks on a long page",
+    "trigger holds its position when opening",
+    "scroll stays locked while the panel leaves",
+    "trigger does not move while closing",
+    "page does not scroll while closing",
+    "no horizontal overflow while closing",
+    "close button becomes the trigger",
+    "panel content never shows a horizontal scrollbar",
+    "scroll unlocks after the panel is gone",
+    "trigger still has not moved",
+    "page keeps its scroll position"
+  ],
+  "artifact": "nav/artifacts/close-300vh.png",
+  "before": {
+    "x": 1335,
+    "scrollY": 1200
+  },
+  "open": {
+    "x": 1336,
+    "scrollY": 1200,
+    "overflow": "hidden"
+  },
+  "closing": {
+    "overflow": "hidden",
+    "x": 1336,
+    "scrollY": 1200,
+    "scrollW": 1440,
+    "clientW": 1440,
+    "closeBg": "rgb(23, 22, 20)",
+    "triggerBg": "rgb(23, 22, 20)",
+    "closeRgb": [
+      23,
+      22,
+      20,
+      255
+    ],
+    "triggerRgb": [
+      23,
+      22,
+      20,
+      255
+    ],
+    "innerScrollW": 540,
+    "innerW": 540,
+    "innerOverflowX": "hidden"
+  },
+  "after": {
+    "overflow": "visible",
+    "x": 1336,
+    "scrollY": 1200
+  }
+}

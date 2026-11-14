@@ -13,13 +13,16 @@ export default async function Hero() {
     >
       <HeroStage />
 
-      <div
-        aria-hidden="true"
-        data-scrim
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[52%] bg-gradient-to-t from-black via-black/80 to-transparent"
-      />
-
-      <h1 id="hero-title" className="hero-wordmark relative z-10">
+      {/*
+        Plain HTML text, exactly like the reference hero: the h1 carries the
+        word, nothing is applied to it, and hover belongs entirely to the
+        surface behind it — pointer moves travel through the text to the
+        scene, which is what makes the shape answer the cursor.
+      */}
+      <h1
+        id="hero-title"
+        className="hero-wordmark pointer-events-none relative z-10"
+      >
         {t("name")}
       </h1>
     </section>

@@ -1,0 +1,15 @@
+{
+  "case": "en-close",
+  "base": "http://localhost:3000",
+  "checks": [
+    "Escape closes the dialog",
+    "focus returns to the trigger",
+    "scroll unlocks",
+    "aria-expanded resets",
+    "backdrop click closes the dialog",
+    "backdrop click returns focus",
+    "backdrop click unlocks scroll",
+    "backdrop click resets aria"
+  ],
+  "artifact": "nav/artifacts/en-closed.png"
+}

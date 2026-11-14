@@ -1,0 +1,11 @@
+{
+  "case": "locale",
+  "base": "http://localhost:3000",
+  "checks": [
+    "locale switch keeps the path",
+    "lands on the other locale",
+    "same destination",
+    "menu closes on navigation"
+  ],
+  "artifact": "nav/artifacts/locale-switch.png"
+}

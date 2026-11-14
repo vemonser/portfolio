@@ -1,0 +1,13 @@
+{
+  "case": "ar-open",
+  "base": "http://localhost:3000",
+  "checks": [
+    "document is rtl",
+    "dialog is open",
+    "panel enters from the left",
+    "no horizontal overflow",
+    "arabic labels",
+    "locale switch keeps the path"
+  ],
+  "artifact": "nav/artifacts/ar-open.png"
+}

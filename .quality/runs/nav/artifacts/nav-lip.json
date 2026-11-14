@@ -1,0 +1,21 @@
+{
+  "case": "lip",
+  "base": "http://localhost:3000",
+  "checks": [
+    "english lip leads the panel",
+    "english lip is visible mid-transition",
+    "arabic lip leads the panel",
+    "arabic lip is visible mid-transition"
+  ],
+  "artifact": "nav/artifacts/ar-lip-mid.png",
+  "ltr": {
+    "panelLeft": 1475.5113525390625,
+    "lipRight": 1476.5269775390625,
+    "lipWidth": 80.4375
+  },
+  "rtl": {
+    "panelRight": -45.18939208984375,
+    "lipLeft": -46.20512008666992,
+    "lipWidth": 81.54695892333984
+  }
+}

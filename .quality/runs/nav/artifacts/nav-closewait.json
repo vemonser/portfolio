@@ -1,0 +1,13 @@
+{
+  "case": "closewait",
+  "base": "http://localhost:3000",
+  "checks": [
+    "normal close lasts the transition",
+    "reopening during the exit keeps the menu open",
+    "reopening keeps the scroll locked",
+    "it still closes after the interruption",
+    "scroll unlocks after the interruption"
+  ],
+  "artifact": "nav/artifacts/closewait.png",
+  "elapsedMs": 937
+}

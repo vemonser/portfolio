@@ -1,0 +1,10 @@
+{
+  "case": "mobile",
+  "base": "http://localhost:3000",
+  "checks": [
+    "trigger visible without scrolling",
+    "inline links hidden",
+    "panel covers the screen"
+  ],
+  "artifact": "nav/artifacts/ar-mobile-open.png"
+}

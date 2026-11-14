@@ -1,0 +1,81 @@
+{
+  "case": "stub",
+  "base": "http://localhost:3000",
+  "checks": [
+    "/en status",
+    "/en has the header",
+    "/en has a heading",
+    "/en/work status",
+    "/en/work has the header",
+    "/en/work has a heading",
+    "/en/about status",
+    "/en/about has the header",
+    "/en/about has a heading",
+    "/en/contact status",
+    "/en/contact has the header",
+    "/en/contact has a heading",
+    "/ar status",
+    "/ar has the header",
+    "/ar has a heading",
+    "/ar/work status",
+    "/ar/work has the header",
+    "/ar/work has a heading",
+    "/ar/about status",
+    "/ar/about has the header",
+    "/ar/about has a heading",
+    "/ar/contact status",
+    "/ar/contact has the header",
+    "/ar/contact has a heading"
+  ],
+  "routes": [
+    {
+      "route": "/en",
+      "status": 200,
+      "header": 1,
+      "heading": "software developer"
+    },
+    {
+      "route": "/en/work",
+      "status": 200,
+      "header": 1,
+      "heading": "Work"
+    },
+    {
+      "route": "/en/about",
+      "status": 200,
+      "header": 1,
+      "heading": "About"
+    },
+    {
+      "route": "/en/contact",
+      "status": 200,
+      "header": 1,
+      "heading": "Contact"
+    },
+    {
+      "route": "/ar",
+      "status": 200,
+      "header": 1,
+      "heading": "مطور برمجيات"
+    },
+    {
+      "route": "/ar/work",
+      "status": 200,
+      "header": 1,
+      "heading": "الأعمال"
+    },
+    {
+      "route": "/ar/about",
+      "status": 200,
+      "header": 1,
+      "heading": "نبذة"
+    },
+    {
+      "route": "/ar/contact",
+      "status": 200,
+      "header": 1,
+      "heading": "تواصل"
+    }
+  ],
+  "artifact": "nav/artifacts/ar-work.png"
+}

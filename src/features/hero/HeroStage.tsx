@@ -2,29 +2,37 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { isMenuOpen, subscribeMenu } from "@/features/navigation/menu-store";
 import { heroScrollProgress } from "@/features/hero-scene/math";
+import { FROZEN_TIME } from "@/features/hero-scene/mercuryScene";
 import type { HeroScene } from "@/features/hero-scene/scene";
 
-const DESKTOP = "(min-width: 769px)";
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
-function hasWebGL(): boolean {
+/**
+ * The wave simulator keeps its state in half-float render targets, which is a
+ * core WebGL 2 feature. WebGL 1 visitors get the poster instead of a slower,
+ * shifted copy of the scene.
+ */
+function hasWebGL2(): boolean {
   try {
     const probe = document.createElement("canvas");
-    return Boolean(
-      window.WebGLRenderingContext &&
-        (probe.getContext("webgl2") ?? probe.getContext("webgl")),
-    );
+    return Boolean(window.WebGL2RenderingContext && probe.getContext("webgl2"));
   } catch {
     return false;
   }
 }
 
 /**
- * The scene layer. Everything about *whether* three.js should exist lives
- * here, and the module is imported lazily — so a phone, a reduced-motion
- * visitor, or a browser without WebGL never downloads the engine at all.
- * The poster underneath carries the page for all three.
+ * The scene layer. Everything about *whether* the scene should exist lives
+ * here, and the module is imported lazily — the poster carries the page until
+ * the first frame lands, and it is the whole page for a browser without
+ * WebGL 2.
+ *
+ * There is no viewport gate: the surface is pure shading, so a phone runs the
+ * same shader as a desktop. Reduced motion still gets the real thing — one
+ * frozen frame at the same drift the posters use — because the alternative is
+ * a static image that can never match it.
  */
 export default function HeroStage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,7 +43,6 @@ export default function HeroStage() {
     const section = canvas?.closest("section");
     if (!canvas || !section) return;
 
-    const desktop = window.matchMedia(DESKTOP);
     const reduced = window.matchMedia(REDUCED);
 
     let scene: HeroScene | null = null;
@@ -44,16 +51,22 @@ export default function HeroStage() {
     let visible = true;
     const cleanups: Array<() => void> = [];
 
-    // `?scene=1` forces the engine on regardless of viewport. It exists so the
-    // poster can be regenerated from the real thing (scripts/poster.mjs) and so
-    // the scene can be inspected at phone widths during QA.
-    const params = new URLSearchParams(window.location.search);
-    const forced = params.has("scene");
-    const initialTime = Number(params.get("t") ?? 0) || 0;
+    // The menu covers the hero but does not remove it from the viewport, so
+    // IntersectionObserver would happily keep the shader running underneath.
+    const unsubscribeMenu = subscribeMenu((menuOpen) => {
+      if (menuOpen) scene?.stop();
+      else if (visible) scene?.start();
+    });
 
-    const canRun = () => (desktop.matches || forced) && !reduced.matches;
+    // `?t=` freezes the drift at a chosen second so the poster can be captured
+    // from the real material (scripts/poster.mjs) and the scene can be
+    // inspected as a still.
+    const params = new URLSearchParams(window.location.search);
+    const initialTime = Number(params.get("t") ?? 0) || 0;
+    const frozenTime = () => (reduced.matches ? FROZEN_TIME : 0);
 
     const detach = () => {
+      loading = false;
       while (cleanups.length) cleanups.pop()?.();
       scene?.dispose();
       scene = null;
@@ -80,7 +93,7 @@ export default function HeroStage() {
       const observer = new IntersectionObserver(
         ([entry]) => {
           visible = entry.isIntersecting && !document.hidden;
-          if (visible) scene?.start();
+          if (visible && !isMenuOpen()) scene?.start();
           else scene?.stop();
         },
         { threshold: 0 },
@@ -90,7 +103,7 @@ export default function HeroStage() {
 
       const onVisibilityChange = () => {
         visible = !document.hidden;
-        if (visible) scene?.start();
+        if (visible && !isMenuOpen()) scene?.start();
         else scene?.stop();
       };
       document.addEventListener("visibilitychange", onVisibilityChange);
@@ -116,23 +129,26 @@ export default function HeroStage() {
 
       observeVisibility();
       onScroll();
-      if (!visible) instance.stop();
+      if (!visible || isMenuOpen()) instance.stop();
     };
 
     const mount = async () => {
-      if (scene || loading || disposed || !canRun()) return;
-      if (!hasWebGL()) return;
+      if (scene || loading || disposed) return;
+      if (!hasWebGL2()) return;
 
       loading = true;
       try {
         const { createHeroScene } = await import("@/features/hero-scene/scene");
-        if (disposed || !canRun()) return;
+        if (disposed) return;
 
         scene = createHeroScene({
           canvas,
-          initialTime,
-          onFirstFrame: () => setReady(true),
+          initialTime: initialTime || frozenTime(),
+          onFirstFrame: () => {
+            if (!disposed) setReady(true);
+          },
           onContextLost: () => {
+            if (disposed) return;
             setReady(false);
             scene?.dispose();
             scene = null;
@@ -147,18 +163,19 @@ export default function HeroStage() {
 
     void mount();
 
-    const onMediaChange = () => {
-      if (canRun()) void mount();
-      else detach();
+    // Toggling reduced motion swaps between the live loop and the frozen
+    // frame, so the scene is rebuilt rather than reconfigured.
+    const onReducedChange = () => {
+      detach();
+      void mount();
     };
 
-    desktop.addEventListener("change", onMediaChange);
-    reduced.addEventListener("change", onMediaChange);
+    reduced.addEventListener("change", onReducedChange);
 
     return () => {
       disposed = true;
-      desktop.removeEventListener("change", onMediaChange);
-      reduced.removeEventListener("change", onMediaChange);
+      unsubscribeMenu();
+      reduced.removeEventListener("change", onReducedChange);
       detach();
     };
   }, []);
@@ -189,7 +206,7 @@ export default function HeroStage() {
 
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 h-full w-full opacity-0 grayscale transition-opacity duration-700 group-data-[ready=true]:opacity-100"
+        className="absolute inset-0 h-full w-full touch-pan-y opacity-0 transition-opacity duration-700 group-data-[ready=true]:opacity-100"
       />
     </div>
   );

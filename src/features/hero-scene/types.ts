@@ -10,7 +10,7 @@ export type HeroScene = {
 
 export type HeroSceneOptions = {
   canvas: HTMLCanvasElement;
-  /** Seconds of flow to fast-forward to, and freeze there. Reproducible stills. */
+  /** Seconds of drift to fast-forward to, and freeze there. Reproducible stills. */
   initialTime?: number;
   onFirstFrame?: () => void;
   onContextLost?: () => void;

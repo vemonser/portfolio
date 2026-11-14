@@ -1,0 +1,10 @@
+{
+  "case": "reduced",
+  "base": "http://localhost:3000",
+  "checks": [
+    "panel settles immediately",
+    "closing is instant"
+  ],
+  "elapsedMs": 30,
+  "artifact": "nav/artifacts/reduced.png"
+}

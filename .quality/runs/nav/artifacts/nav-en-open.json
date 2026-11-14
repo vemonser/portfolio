@@ -1,0 +1,19 @@
+{
+  "case": "en-open",
+  "base": "http://localhost:3000",
+  "checks": [
+    "dialog is open",
+    "open phase",
+    "aria-expanded",
+    "aria-controls",
+    "focus inside the dialog",
+    "panel is on the inline-end edge",
+    "panel width",
+    "scroll locked",
+    "backdrop faded in",
+    "close target is at least 44px",
+    "trigger target is at least 44px",
+    "focus stays inside the dialog"
+  ],
+  "artifact": "nav/artifacts/en-open.png"
+}

@@ -1,0 +1,10 @@
+{
+  "case": "en-top",
+  "base": "http://localhost:3000",
+  "checks": [
+    "header links",
+    "trigger hidden at the top",
+    "locale switch in the header"
+  ],
+  "artifact": "nav/artifacts/en-top.png"
+}
