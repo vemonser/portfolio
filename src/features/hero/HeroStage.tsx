@@ -51,6 +51,8 @@ export default function HeroStage() {
     let loading = false;
     let disposed = false;
     let visible = true;
+    let scrollFrame = 0;
+    let lastProgress = -1;
     const cleanups: Array<() => void> = [];
 
     // The menu covers the hero but does not remove it from the viewport, so
@@ -87,16 +89,25 @@ export default function HeroStage() {
     const onPointerDown = () => scene?.pulse();
 
     const onScroll = () => {
-      const rect = section.getBoundingClientRect();
-      const progress = heroScrollProgress(
-        rect.top,
-        rect.height,
-        window.innerHeight,
-      );
-      scene?.setScroll(progress);
-      // The wordmark lags a little behind the section as it leaves, which is
-      // what makes the hand-off to the intro feel deliberate.
-      section.style.setProperty("--hero-scroll", progress.toFixed(4));
+      if (scrollFrame !== 0) return;
+      scrollFrame = requestAnimationFrame(() => {
+        scrollFrame = 0;
+        const rect = section.getBoundingClientRect();
+        const progress = heroScrollProgress(
+          rect.top,
+          rect.height,
+          window.innerHeight,
+        );
+        scene?.setScroll(progress);
+
+        // The wordmark lags a little behind the section as it leaves, which is
+        // what makes the hand-off to the intro feel deliberate. Only write when
+        // the value actually moved: this runs on every scroll event.
+        if (Math.abs(progress - lastProgress) > 0.001) {
+          lastProgress = progress;
+          section.style.setProperty("--hero-scroll", progress.toFixed(3));
+        }
+      });
     };
 
     const observeVisibility = () => {
@@ -135,6 +146,7 @@ export default function HeroStage() {
         section.removeEventListener("pointerleave", onPointerLeave);
         section.removeEventListener("pointerdown", onPointerDown);
         window.removeEventListener("scroll", onScroll);
+        if (scrollFrame !== 0) cancelAnimationFrame(scrollFrame);
       });
 
       observeVisibility();

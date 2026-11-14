@@ -775,6 +775,11 @@ html[data-js="true"] .reveal[data-revealed="true"] {
   transform: scale(0.97) rotate(0.001deg);
 }
 
+/* Forward is up-left in Arabic. */
+html[dir="rtl"] .round-button svg {
+  transform: scaleX(-1);
+}
+
 html[lang="ar"] .round-button {
   font-size: var(--text-t-16);
   letter-spacing: 0;

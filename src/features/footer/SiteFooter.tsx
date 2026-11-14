@@ -38,7 +38,10 @@ export default function SiteFooter({ labels, links, socials }: Props) {
           <ul className="site-footer__list">
             {socials.map((social) => (
               <li key={social.key}>
-                <LinkLine href={social.href} external>
+                <LinkLine
+                  href={social.href}
+                  external={social.href !== "#"}
+                >
                   {labels[social.key]}
                 </LinkLine>
               </li>

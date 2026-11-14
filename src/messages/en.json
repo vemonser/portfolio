@@ -67,6 +67,7 @@
     "title": "Abdelrhman",
     "lede": "Software developer focused on the places where design, code and language meet.",
     "portraitAlt": "Portrait placeholder — replace with a real photograph",
+    "initial": "A",
     "paragraphs": [
       "I build interfaces for the web, mostly in Next.js and TypeScript, with a soft spot for the parts most people never notice: how a page behaves on a slow connection, how a sentence reads when it is mirrored into Arabic, how a hover state settles.",
       "My work sits between design and engineering. I like starting from structure — the hierarchy, the reading order, the empty states — and only then deciding what moves.",

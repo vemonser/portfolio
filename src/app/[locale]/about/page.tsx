@@ -46,7 +46,7 @@ export default async function AboutPage({ params }: Props) {
             aria-label={t("portraitAlt")}
           />
           <span className="about-portrait__mark" aria-hidden="true">
-            A
+            {t("initial")}
           </span>
         </Reveal>
       </div>

@@ -17,3 +17,12 @@ Ruling: catalogue tests written after implementation (characterization) — logi
 
 Phase 6: complete (about + contact pages, mailto compose form without backend, typecheck/lint green)
 
+
+Phase 3: complete (HeroOverlay gate + hero-ready store, masked wordmark entrance, meta layer with live availability dot/scroll hint, fixed grain plate, accent sheen uniform in composite shader, warp boost + wordmark parallax on scroll; posters regenerated)
+Phase 7: complete (MDX wired per Next 16 docs, 2 posts ×2 locales, blog index/post pages, Blog in nav+menu+footer)
+Phase 8: complete (metadata/description for all routes, footer clock nowrap, dead stub removed)
+Verification: vitest 24/24, eslint clean, tsc clean, next build clean with EN/AR static routes for work(6), blog(2), about, contact.
+Browser QA (Playwright on :3000): zero console errors; card hover layerB 0→1; clock live (EET); LinkLine origins — EN enter-left/exit-right, AR enter-right/exit-left; no horizontal overflow at 390px (AR home, work, AR post); reduced-motion shows content immediately; menu opens with Blog and closes on Escape.
+Ruling: pre-hydration `data-js` flag on <html> needs suppressHydrationWarning (React 19 compares extra attributes); cost if wrong: one suppression attribute.
+Ruling: blog metadata kept in a typed TS registry (posts.ts), MDX files hold content only — avoids custom .mdx export typings; cost if wrong: duplicate title/date in one file per post.
+
