@@ -32,3 +32,9 @@ Ruling: footer social hrefs stay "#" — user has not provided account URLs; no 
 Ruling: footer clock uses en-GB formatting on both locales — it is a mono system label and Arabic tz names wrap the line. Cost if wrong: Latin digits in the AR footer.
 Deferred minor: Reveal uses `as never` casts for polymorphic ref/style — runtime safe, typing could be cleaner.
 
+
+Final: adversarial-reviewer done; fixes committed (scroll rAF, localized initial, RTL arrow, socials placeholder).
+Final: Evidence Gate PASS — .quality/runs/2026-11-14T07-15-00-000Z/evidence-manifest.json validates with no gaps (AC-01..AC-08 all PASS, real recorded exit codes).
+Final: WebGL context-creation failure during repeated headless navigation surfaced an unhandled THREE error; HeroStage now catches it and falls back to the poster while still announcing hero readiness.
+Final review: self-checked diff after reviewer round; no unresolved blockers.
+
