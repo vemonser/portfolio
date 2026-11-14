@@ -98,6 +98,59 @@ html[lang="ar"] {
   --track: 0.18em;
   --nav-inset: clamp(1.5rem, 3.2vw, 2.75rem);
   --scrollbar-comp: 0px;
+
+  /*
+   * The editorial system. Every spacing value on the site is one of these
+   * steps; every transition is one of the five durations. A number that is
+   * not in this block does not belong in a component.
+   */
+  --space-0: 0.5rem;
+  --space-1: 0.75rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4.5rem;
+  --space-7: 7rem;
+  --space-8: 10rem;
+
+  /* One ratio for the whole composition, mirrored by editorial.ts. */
+  --type-ratio: 1.25;
+  --type-display-max: 8.5rem;
+  --measure-body: 68ch;
+  --leading-arabic: 1.55;
+
+  --dur-fast: 200ms;
+  --dur-base: 300ms;
+  --dur-slow: 450ms;
+  --dur-exit: 850ms;
+  --dur-entrance: 1050ms;
+  --ease-editorial: cubic-bezier(0.7, 0, 0.2, 1);
+
+  --inset-edge: var(--nav-inset);
+  --inset-chapter: clamp(6rem, 13vh, 10rem);
+  --inset-chapter-lg: clamp(7rem, 18vh, 13rem);
+
+  --surface-base: var(--color-black);
+  --surface-raised: var(--color-ink);
+  --line-hairline: color-mix(in srgb, var(--color-bone) 15%, transparent);
+  --line-strong: color-mix(in srgb, var(--color-bone) 30%, transparent);
+  --ink-muted: color-mix(in srgb, var(--color-bone) 62%, transparent);
+
+  --focus-ring: 2px solid var(--color-lime);
+  --focus-offset: 3px;
+  --focus-radius: 2px;
+}
+
+/*
+ * The Arabic composition is not the English one stretched: it gets a taller
+ * display ceiling (the script needs the room), a narrower measure and its own
+ * leading. Only the values that genuinely differ are overridden.
+ */
+html[lang="ar"] {
+  --type-display-max: 9rem;
+  --measure-body: 58ch;
+  --leading-arabic: 1.8;
 }
 
 /*
@@ -133,8 +186,8 @@ html[lang="ar"] {
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-lime);
-    outline-offset: 3px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
   }
 }
 
