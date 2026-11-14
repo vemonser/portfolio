@@ -7,7 +7,7 @@
   --color-black: #0b0b0a;
   --color-white: #ffffff;
   --color-forest: #2f4a3c;
-  --color-clay: #b4583a;
+  --color-lime: #c6f035;
   --color-warm: #8a7f72;
 
   /* Type scale — exposed as text-t-96, text-t-28, … */
@@ -56,12 +56,12 @@ html[lang="ar"] {
   }
 
   ::selection {
-    background-color: var(--color-clay);
-    color: var(--color-bone);
+    background-color: var(--color-lime);
+    color: var(--color-ink);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-clay);
+    outline: 2px solid var(--color-lime);
     outline-offset: 3px;
   }
 }
@@ -215,7 +215,7 @@ html[lang="ar"] .site-header__brand {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--color-clay);
+  background: var(--color-lime);
   transform: translateY(-50%);
 }
 
@@ -282,7 +282,8 @@ html[lang="ar"] .site-header__locale {
   transition:
     transform 0.4s cubic-bezier(0.36, 0, 0.66, 0),
     visibility 0s 0.4s,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .menu-trigger[data-visible="true"] {
@@ -291,11 +292,13 @@ html[lang="ar"] .site-header__locale {
   transition:
     transform 0.4s cubic-bezier(0.34, 1.5, 0.64, 1),
     visibility 0s,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .menu-trigger:hover {
-  background: var(--color-forest);
+  background: var(--color-lime);
+  color: var(--color-ink);
 }
 
 .menu-trigger__bars {
@@ -450,7 +453,7 @@ html[dir="rtl"] .nav-lip::before {
   aspect-ratio: 1;
   border: 0;
   border-radius: 50%;
-  background: var(--color-clay);
+  background: var(--color-lime);
   color: var(--color-ink);
   cursor: pointer;
   transition:
@@ -461,7 +464,7 @@ html[dir="rtl"] .nav-lip::before {
 }
 
 .nav-close:hover {
-  background: color-mix(in srgb, var(--color-clay) 78%, var(--color-bone));
+  background: color-mix(in srgb, var(--color-lime) 78%, var(--color-bone));
 }
 
 /*
@@ -596,7 +599,7 @@ html[dir="rtl"] .nav-item {
 }
 
 .nav-item a:hover {
-  color: var(--color-clay);
+  color: var(--color-lime);
 }
 
 html[lang="ar"] .nav-item a {
@@ -648,8 +651,8 @@ html[lang="ar"] .nav-item a {
 }
 
 .nav-locale:hover {
-  color: var(--color-clay);
-  text-decoration-color: var(--color-clay);
+  color: var(--color-lime);
+  text-decoration-color: var(--color-lime);
 }
 
 .stub-title {
@@ -669,6 +672,239 @@ html[lang="ar"] .stub-title {
   .nav-item a {
     font-size: clamp(2.5rem, 11vw, 3.5rem);
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Shared primitives — used by every page, not just the hero.
+ * --------------------------------------------------------------------------- */
+
+/*
+ * The link line. The underline enters from the inline start and leaves toward
+ * the inline end; flipping `transform-origin` is what makes the exit travel
+ * the other way. Base = exit origin, hover = enter origin.
+ */
+.link-line {
+  position: relative;
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.link-line::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: var(--link-line-offset, -0.08em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.55s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.link-line:hover::after,
+.link-line:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+html[dir="rtl"] .link-line::after {
+  transform-origin: left;
+}
+
+html[dir="rtl"] .link-line:hover::after,
+html[dir="rtl"] .link-line:focus-visible::after {
+  transform-origin: right;
+}
+
+/* Header links carry generous padding, so their line sits inside the box. */
+.site-header__link.link-line {
+  --link-line-offset: 0.5rem;
+}
+
+/* Reveal — IntersectionObserver flips data-revealed once; CSS does the rest. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(1.25rem) rotate(0.001deg);
+  transition:
+    opacity 0.8s cubic-bezier(0.7, 0, 0.2, 1),
+    transform 0.8s cubic-bezier(0.7, 0, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js .reveal[data-revealed="true"] {
+  opacity: 1;
+  transform: translateY(0) rotate(0.001deg);
+}
+
+.section-heading__rule {
+  height: 1px;
+  margin: 1rem 0 0;
+  border: 0;
+  background: color-mix(in srgb, var(--color-bone) 16%, transparent);
+}
+
+.round-button {
+  display: inline-grid;
+  place-items: center;
+  gap: 0.45rem;
+  padding: 1.25rem;
+  width: clamp(9rem, 13vw, 11.5rem);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--color-lime);
+  color: var(--color-ink);
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    transform 0.45s cubic-bezier(0.7, 0, 0.2, 1),
+    background-color 0.3s ease;
+}
+
+.round-button:hover {
+  transform: scale(1.045) rotate(0.001deg);
+  background: color-mix(in srgb, var(--color-lime) 82%, var(--color-bone));
+}
+
+.round-button:active {
+  transform: scale(0.97) rotate(0.001deg);
+}
+
+html[lang="ar"] .round-button {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.45;
+}
+
+/* Contact CTA ------------------------------------------------------------- */
+.contact-cta {
+  padding: clamp(6rem, 14vh, 11rem) var(--nav-inset);
+  border-top: 1px solid color-mix(in srgb, var(--color-bone) 12%, transparent);
+}
+
+.contact-cta__grid {
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  align-items: end;
+}
+
+@media (min-width: 768px) {
+  .contact-cta__grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.contact-cta__lead {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 60rem;
+}
+
+.contact-cta__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6.6vw, 6.5rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+html[lang="ar"] .contact-cta__title {
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.contact-cta__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
+.contact-cta__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.contact-cta__row dd {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+}
+
+.contact-cta__action {
+  justify-self: start;
+}
+
+@media (min-width: 768px) {
+  .contact-cta__action {
+    justify-self: end;
+  }
+}
+
+/* Footer ------------------------------------------------------------------ */
+.site-footer {
+  padding: 3.5rem var(--nav-inset) max(2.5rem, var(--nav-inset));
+  border-top: 1px solid color-mix(in srgb, var(--color-bone) 12%, transparent);
+}
+
+.site-footer__inner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.5rem 2rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr 1fr auto;
+  }
+}
+
+.site-footer__list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer__list .link-line {
+  font-size: var(--text-t-16);
+}
+
+html[lang="ar"] .site-footer__list .link-line {
+  font-size: var(--text-t-20);
+}
+
+.site-footer__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+@media (min-width: 900px) {
+  .site-footer__meta {
+    align-items: flex-end;
+    text-align: end;
+  }
+}
+
+.site-footer__time {
+  display: inline-flex;
+  gap: 0.4em;
 }
 
 }

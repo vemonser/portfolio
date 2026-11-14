@@ -82,7 +82,7 @@ export default function SiteHeader({
               <Link
                 key={link.key}
                 href={link.href}
-                className="site-header__link"
+                className="site-header__link link-line"
                 aria-current={active ? "page" : undefined}
                 data-active={active ? "true" : "false"}
               >

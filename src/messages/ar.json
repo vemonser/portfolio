@@ -21,5 +21,24 @@
   "stub": {
     "body": "هذا القسم قيد الإنشاء.",
     "back": "العودة إلى الرئيسية"
+  },
+  "cta": {
+    "label": "تواصل",
+    "title": "خلينا نشتغل مع بعض",
+    "button": "كلمني",
+    "emailLabel": "الإيميل",
+    "phoneLabel": "التليفون",
+    "email": "abdelrhmansamymoh@gmail.com",
+    "phone": "01016669171",
+    "phoneHref": "tel:+201016669171"
+  },
+  "footer": {
+    "navigation": "التنقل",
+    "socials": "السوشيال",
+    "edition": "إصدار ٢٠٢٦ ©",
+    "localTime": "الوقت المحلي",
+    "instagram": "انستجرام",
+    "twitter": "تويتر",
+    "linkedin": "لينكدإن"
   }
 }
