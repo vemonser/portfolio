@@ -1,10 +1,10 @@
 # Portfolio
 
-A bilingual (Arabic / English) portfolio. The hero is a full-bleed liquid-chrome
-WebGL surface; the navigation is a header that hands over to a circular trigger
-past 30% of the viewport and opens a modal panel from the inline-end edge —
-right in English, left in Arabic. The sections below the hero are still absent:
-`/work`, `/about` and `/contact` are honest stubs so the menu never dead-ends.
+An editorial English portfolio. The hero is a full-bleed liquid-chrome WebGL
+surface; the navigation is a header that hands over to a circular trigger past
+30% of the viewport and opens a modal panel from the inline-end edge. Every
+route — `/`, `/work`, `/blog`, `/about`, `/contact` and their detail pages — is
+built.
 
 ## Stack
 
@@ -13,9 +13,8 @@ right in English, left in Arabic. The sections below the hero are still absent:
 | Framework | Next.js 16.4 (App Router, Turbopack, fully static) |
 | Language | TypeScript, strict |
 | Styling | Tailwind CSS 4 (`@theme` tokens, no JS config) |
-| i18n | next-intl 4 — `/[locale]`, Arabic default, no middleware |
 | 3D | three.js 0.187, imperative, no react-three-fiber |
-| Motion | GSAP 3.15 (core only — no ScrollTrigger) |
+| Motion | GSAP 3.15 (core + ScrollTrigger, driving Lenis) |
 
 ## Running
 
@@ -29,13 +28,14 @@ pnpm lint
 pnpm poster       # regenerate the fallback images (needs dev or start running)
 ```
 
-`/` redirects to `/ar`. The redirect is declared in `next.config.ts`, so it is
-served without a proxy/middleware hop.
+The site used to be bilingual. Old `/en/*` and `/ar/*` URLs permanently redirect
+to the un-prefixed paths, declared in `next.config.ts` — no proxy or middleware
+hop.
 
 ## How the hero is put together
 
 ```
-src/app/[locale]/page.tsx               server: builds the real HTML
+src/app/page.tsx                        server: builds the real HTML
 src/features/hero/Hero.tsx              server: the section + the h1 wordmark
 src/features/hero/HeroStage.tsx         client: decides whether WebGL may exist
 src/features/hero-scene/scene.ts        three.js, no React
@@ -106,13 +106,13 @@ Regenerate after any change to the material or the type tokens in
 ## How the navigation is put together
 
 ```
-src/features/navigation/nav.ts              destinations + locale-prefixed hrefs
-src/features/navigation/locale-href.ts      locale switch and path normalising (tested)
+src/features/navigation/nav.ts              destinations and labels
 src/features/navigation/menu-store.ts       pause signal shared with the hero scene
 src/features/navigation/SiteHeader.tsx      client: header, 30% threshold, trigger
-src/features/navigation/MenuOverlay.tsx     client: native <dialog>, focus, locale
-src/app/[locale]/layout.tsx                 server: resolves strings, passes props
-src/app/globals.css                         panel, lip, stagger, RTL
+src/features/navigation/MenuOverlay.tsx     client: native <dialog>, focus, Escape
+src/app/layout.tsx                          server: shell, copy, header/footer
+src/content/copy.ts                         the site's copy, typed
+src/app/globals.css                         panel, lip, stagger
 ```
 
 - The panel is a native `<dialog>` opened with `showModal()`: focus trap, Esc and
@@ -122,20 +122,23 @@ src/app/globals.css                         panel, lip, stagger, RTL
 - The panel is **bone with ink text**, not ink. The reference's dark panel reads
   because its page is light; against the near-black hero a dark panel and its
   curve disappear. Inverting the surface is what makes the shape legible.
-- `html[dir]` alone decides the side — the panel enters from the right on `/en`
-  and from the left on `/ar`, with no JS branch.
+- The panel enters from the right, the reading edge of the page.
 - The hero scene stops while the menu is open (`menu-store`), including when a
   tab switch or an IntersectionObserver callback would otherwise resume it.
-- Strings stay server-rendered; the client header receives values, not the
-  message catalog, so no `NextIntlClientProvider` is shipped.
-- `/work`, `/about` and `/contact` exist in both locales as stubs. The header is
-  absolute and scrolls away; the trigger is fixed and appears past 30% of the
-  viewport.
+- Strings stay server-rendered; the client header receives values, not the copy
+  module, so the page ships no translation runtime.
+- The header is absolute and scrolls away; the trigger is fixed and appears past
+  30% of the viewport (and is always visible below 768px).
 
-Browser QA: `node scripts/nav-qa.mjs --case <case> --out artifacts` (cases:
-`en-top`, `en-reveal`, `en-open`, `en-close`, `locale`, `ar-open`, `mobile`,
-`reduced`, `stub`, `pause`). Evidence for each criterion lives in
-`.quality/runs/nav/`.
+Browser QA lives in `tests/` and runs against the dev server:
+
+```bash
+pnpm playwright test --project=chromium
+```
+
+`tests/editorial-routes.spec.ts` covers routing, navigation, the drawer, footer
+targets, overflow and the legacy redirects; `tests/contact-form.spec.ts` covers
+the form states; `tests/hero-liquid-compression.spec.ts` covers the scene.
 
 ## Measured
 
@@ -144,7 +147,7 @@ predate the navigation layer.
 
 | | |
 |---|---|
-| Initial route JS (`/en`) | ~176 KB gz |
+| Initial route JS (`/`) | ~176 KB gz |
 | Scene chunk (three + GSAP + scene) | 158 KB gz |
 | Poster, desktop AVIF / WebP | 9 KB / 18 KB |
 | Poster, mobile AVIF / WebP | 6 KB / 13 KB |
@@ -155,14 +158,11 @@ applies.
 
 ## Changing things
 
-- **The name** lives in `src/messages/ar.json` and `src/messages/en.json` under
-  `hero.name`.
-- **Navigation labels** live under `nav` in the same files. The panel side and
-  direction are driven by `html[dir]`, not by JS.
-- **The wordmark typography** is `.hero-wordmark` in `src/app/globals.css`.
-  Arabic must keep `letter-spacing: 0` — any tracking tears a joined script
-  apart. The bottom crop is `--wordmark-drop` (a negative margin). Nothing
-  else is applied to the text — no filter, no transform, no hover state.
+- **All copy** lives in `src/content/copy.ts` — the name under `hero.name`,
+  navigation labels under `nav`, and so on. No translation runtime is involved.
+- **The wordmark typography** is `.hero-wordmark` in `src/app/globals.css`. The
+  bottom crop is `--wordmark-drop` (a negative margin). Nothing else is applied
+  to the text — no filter, no transform, no hover state.
 - **The surface** dials — wave force, amplitude, dispersion, sheen, warp — are
   the constants at the top of `mercuryScene.ts`; the drift speeds are inside
   `glsl/mercury.ts`.

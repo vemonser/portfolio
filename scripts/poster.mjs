@@ -22,8 +22,8 @@ const OUT = path.join(process.cwd(), "public", "poster");
 // `t` freezes the flow at a fixed second, so the same poster comes out every
 // run. Each value is a frame chosen for a strong light/dark split.
 const shots = [
-  { name: "hero-1440", width: 1440, height: 900, dpr: 1, route: "/en?t=3" },
-  { name: "hero-780", width: 390, height: 844, dpr: 2, route: "/ar?t=3" },
+  { name: "hero-1440", width: 1440, height: 900, dpr: 1, route: "/?t=3" },
+  { name: "hero-780", width: 390, height: 844, dpr: 2, route: "/?t=3" },
 ];
 
 const SETTLE_MS = 900;
