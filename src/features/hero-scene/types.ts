@@ -17,8 +17,6 @@ export type HeroScene = {
 
 export type HeroSceneOptions = {
   canvas: HTMLCanvasElement;
-  /** Reading direction of the page; the fold axis mirrors with it. */
-  direction?: "ltr" | "rtl";
   /** Seconds of drift to fast-forward to, and freeze there. Reproducible stills. */
   initialTime?: number;
   onFirstFrame?: () => void;

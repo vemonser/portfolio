@@ -1,11 +1,11 @@
 /**
- * Blog dates are displayed in the reader's language; the stored value stays
- * ISO so sorting never depends on presentation.
+ * Blog dates are displayed for an English reader; the stored value stays ISO
+ * so sorting never depends on presentation.
  */
-export function formatPostDate(date: string, locale: string): string {
+export function formatPostDate(date: string): string {
   const parsed = new Date(`${date}T00:00:00Z`);
 
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-GB", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",

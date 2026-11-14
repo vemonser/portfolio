@@ -43,7 +43,7 @@ function hasWebGL2(): boolean {
  * and hands the scene one normalized zone. The scene owns the easing; this
  * file owns the hit testing.
  */
-export default function HeroStage({ locale }: { locale: string }) {
+export default function HeroStage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
@@ -55,7 +55,6 @@ export default function HeroStage({ locale }: { locale: string }) {
     if (!canvas || !section || !stage) return;
 
     const reduced = window.matchMedia(REDUCED);
-    const direction = locale === "ar" ? "rtl" : "ltr";
 
     let scene: HeroScene | null = null;
     let loading = false;
@@ -91,7 +90,6 @@ export default function HeroStage({ locale }: { locale: string }) {
       // A target the viewport cannot see must never drive the shader.
       if (rect.bottom <= 0 || rect.top >= window.innerHeight) return null;
 
-      const declared = node.dataset.compressionDirection;
       return {
         rect: {
           left: rect.left,
@@ -99,7 +97,6 @@ export default function HeroStage({ locale }: { locale: string }) {
           width: rect.width,
           height: rect.height,
         },
-        direction: declared === "rtl" || declared === "ltr" ? declared : direction,
       };
     };
 
@@ -394,7 +391,6 @@ export default function HeroStage({ locale }: { locale: string }) {
 
         scene = createHeroScene({
           canvas,
-          direction,
           initialTime: initialTime || frozenTime(),
           onFirstFrame: () => {
             if (!disposed) setReady(true);
@@ -439,7 +435,7 @@ export default function HeroStage({ locale }: { locale: string }) {
       reduced.removeEventListener("change", onReducedChange);
       detach();
     };
-  }, [locale]);
+  }, []);
 
   return (
     <div

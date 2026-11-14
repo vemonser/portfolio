@@ -49,7 +49,6 @@ const rippleResolution = () => (isCoarsePointer() ? 256 : 384);
 
 export function createMercuryScene({
   canvas,
-  direction = "ltr",
   initialTime = 0,
   onFirstFrame,
   onContextLost,
@@ -120,9 +119,7 @@ export function createMercuryScene({
     uPointer: { value: new THREE.Vector2(0.5, 0.5) },
     uCompressionCenter: { value: new THREE.Vector2(0.5, 0.5) },
     uCompressionHalfSize: { value: new THREE.Vector2(0.2, 0.08) },
-    uCompressionDirection: {
-      value: new THREE.Vector2(direction === "rtl" ? -1 : 1, 0),
-    },
+    uCompressionDirection: { value: new THREE.Vector2(1, 0) },
     uCompressionStrength: { value: 0 },
   };
 
@@ -162,8 +159,6 @@ export function createMercuryScene({
     centerY: 0.5,
     halfX: 0.2,
     halfY: 0.08,
-    directionX: direction === "rtl" ? -1 : 1,
-    directionY: 0,
     strength: 0,
   };
 
@@ -218,10 +213,6 @@ export function createMercuryScene({
     compositeUniforms.uCompressionHalfSize.value.set(
       compression.halfX,
       compression.halfY,
-    );
-    compositeUniforms.uCompressionDirection.value.set(
-      compression.directionX,
-      compression.directionY,
     );
     compositeUniforms.uCompressionStrength.value = compression.strength;
 
@@ -323,8 +314,6 @@ export function createMercuryScene({
         centerY: zone.center[1],
         halfX: zone.halfSize[0],
         halfY: zone.halfSize[1],
-        directionX: zone.direction[0],
-        directionY: zone.direction[1],
         duration: 0.3,
         ease: "power2.out",
         overwrite: "auto",

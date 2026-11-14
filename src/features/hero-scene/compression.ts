@@ -2,8 +2,8 @@ import { clamp } from "./math";
 
 /**
  * The Hero's liquid compression is a shader effect driven by one rectangle:
- * the surface folds anisotropically toward a target (the wordmark or a visible
- * project card) while the pointer is over it.
+ * the surface folds toward a target (the wordmark or a visible project card)
+ * while the pointer is over it.
  *
  * This module is the pure half of that decision. It turns DOM rectangles into
  * normalized, GL-oriented values and decides which target is active. It never
@@ -15,8 +15,6 @@ export type CompressionZone = {
   center: [number, number];
   /** Half extents, as a fraction of the viewport. */
   halfSize: [number, number];
-  /** Unit vector the fold travels along: right in LTR, left in RTL. */
-  direction: [number, number];
   /** 0–1; the scene smooths this toward its uniform. */
   strength: number;
 };
@@ -24,7 +22,6 @@ export type CompressionZone = {
 export type CompressionTarget = {
   /** Client-space rectangle, as getBoundingClientRect reports it. */
   rect: { left: number; top: number; width: number; height: number };
-  direction: "ltr" | "rtl";
 };
 
 export type Viewport = { width: number; height: number };
@@ -71,7 +68,6 @@ export function compressionZone(
       rect.width / (2 * viewportWidth),
       rect.height / (2 * viewportHeight),
     ],
-    direction: target.direction === "rtl" ? [-1, 0] : [1, 0],
     strength: clamped,
   };
 }

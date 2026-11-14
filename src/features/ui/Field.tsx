@@ -60,7 +60,7 @@ export default function Field({
         <p
           id={errorId}
           role="alert"
-          className="m-0 text-t-14 leading-[1.6] text-lime ar:text-t-16"
+          className="m-0 text-t-14 leading-[1.6] text-lime"
         >
           {error}
         </p>

@@ -10,12 +10,10 @@ const VIEWPORT = { width: 1000, height: 500 };
 
 const title: CompressionTarget = {
   rect: { left: 100, top: 50, width: 800, height: 100 },
-  direction: "ltr",
 };
 
 const project: CompressionTarget = {
   rect: { left: 40, top: 300, width: 300, height: 150 },
-  direction: "ltr",
 };
 
 describe("compressionZone", () => {
@@ -23,15 +21,8 @@ describe("compressionZone", () => {
     expect(compressionZone(title, VIEWPORT, 0.8)).toEqual({
       center: [0.5, 0.8],
       halfSize: [0.4, 0.1],
-      direction: [1, 0],
       strength: 0.8,
     });
-  });
-
-  it("points the fold along the reading direction", () => {
-    const rtl = compressionZone({ ...title, direction: "rtl" }, VIEWPORT, 0.5);
-
-    expect(rtl?.direction).toEqual([-1, 0]);
   });
 
   it("clamps strength into the shader's 0–1 range", () => {
@@ -51,14 +42,14 @@ describe("compressionZone", () => {
   it("returns null for an empty target rectangle", () => {
     expect(
       compressionZone(
-        { ...title, rect: { left: 10, top: 10, width: 0, height: 100 } },
+        { rect: { left: 10, top: 10, width: 0, height: 100 } },
         VIEWPORT,
         0.5,
       ),
     ).toBeNull();
     expect(
       compressionZone(
-        { ...title, rect: { left: 10, top: 10, width: 100, height: 0 } },
+        { rect: { left: 10, top: 10, width: 100, height: 0 } },
         VIEWPORT,
         0.5,
       ),
@@ -68,11 +59,9 @@ describe("compressionZone", () => {
   it("rejects a target that is entirely off-screen", () => {
     const offRight: CompressionTarget = {
       rect: { left: 1200, top: 50, width: 300, height: 100 },
-      direction: "ltr",
     };
     const offAbove: CompressionTarget = {
       rect: { left: 100, top: -400, width: 300, height: 100 },
-      direction: "ltr",
     };
 
     expect(compressionZone(offRight, VIEWPORT, 0.5)).toBeNull();
@@ -82,7 +71,6 @@ describe("compressionZone", () => {
   it("keeps a partially visible target", () => {
     const clipped: CompressionTarget = {
       rect: { left: -50, top: 400, width: 200, height: 200 },
-      direction: "ltr",
     };
 
     expect(compressionZone(clipped, VIEWPORT, 0.5)).not.toBeNull();
@@ -98,10 +86,7 @@ describe("activeCompressionZone", () => {
       0.6,
     );
 
-    expect(zone?.center).toEqual([
-      (40 + 150) / 1000,
-      1 - (300 + 75) / 500,
-    ]);
+    expect(zone?.center).toEqual([(40 + 150) / 1000, 1 - (300 + 75) / 500]);
   });
 
   it("returns null when the pointer is over no target", () => {
@@ -113,11 +98,9 @@ describe("activeCompressionZone", () => {
   it("prefers the target whose centre is nearest when rectangles overlap", () => {
     const wide: CompressionTarget = {
       rect: { left: 0, top: 0, width: 900, height: 500 },
-      direction: "ltr",
     };
     const small: CompressionTarget = {
       rect: { left: 500, top: 0, width: 200, height: 200 },
-      direction: "rtl",
     };
 
     // The pointer is inside both; the small rect's centre (600, 100) is closer
@@ -127,7 +110,6 @@ describe("activeCompressionZone", () => {
     expect(zone).toEqual({
       center: [0.6, 0.8],
       halfSize: [0.1, 0.2],
-      direction: [-1, 0],
       strength: 1,
     });
   });
@@ -135,24 +117,20 @@ describe("activeCompressionZone", () => {
   it("keeps catalogue order on an exact distance tie", () => {
     const left: CompressionTarget = {
       rect: { left: 300, top: 0, width: 200, height: 100 },
-      direction: "ltr",
     };
     const right: CompressionTarget = {
       rect: { left: 400, top: 0, width: 200, height: 100 },
-      direction: "rtl",
     };
 
     // Pointer (450, 50) sits exactly between both centres and inside both.
     const zone = activeCompressionZone([left, right], [450, 50], VIEWPORT, 1);
 
     expect(zone?.center).toEqual([0.4, 0.9]);
-    expect(zone?.direction).toEqual([1, 0]);
   });
 
   it("ignores an off-screen target even when the pointer math hits it", () => {
     const offRight: CompressionTarget = {
       rect: { left: 1000, top: 0, width: 400, height: 500 },
-      direction: "ltr",
     };
 
     expect(

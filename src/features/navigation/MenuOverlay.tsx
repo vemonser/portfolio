@@ -11,9 +11,6 @@ import {
   type RefObject,
 } from "react";
 
-import { routing } from "@/i18n/routing";
-
-import { normalizePath, switchLocalePath } from "./locale-href";
 import { setMenuOpen } from "./menu-store";
 import type { NavLink } from "./nav";
 
@@ -26,9 +23,7 @@ type Props = {
   labels: {
     navigation: string;
     close: string;
-    language: string;
   };
-  otherLocale: { code: string; label: string };
   returnFocusRef: RefObject<HTMLButtonElement | null>;
 };
 
@@ -37,7 +32,6 @@ export default function MenuOverlay({
   onClose,
   links,
   labels,
-  otherLocale,
   returnFocusRef,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -50,9 +44,7 @@ export default function MenuOverlay({
   } | null>(null);
   const [phase, setPhase] = useState<Phase>("closed");
   const pathname = usePathname();
-  const currentPath = normalizePath(
-    pathname ?? `/${routing.defaultLocale}`,
-  );
+  const currentPath = pathname ?? "/";
 
   /*
    * Scroll stays locked until the panel has finished leaving, not until the
@@ -256,7 +248,7 @@ export default function MenuOverlay({
 
             <ul className="nav-list">
               {links.map((link) => {
-                const active = currentPath === normalizePath(link.href);
+                const active = currentPath === link.href;
 
                 return (
                   <li className="nav-item" key={link.key}>
@@ -274,21 +266,6 @@ export default function MenuOverlay({
             </ul>
           </div>
 
-          <div className="nav-panel__footer">
-            <p className="ui-label">{labels.language}</p>
-            <Link
-              href={switchLocalePath(
-                currentPath,
-                otherLocale.code,
-                routing.locales,
-              )}
-              lang={otherLocale.code}
-              hrefLang={otherLocale.code}
-              className="nav-locale"
-            >
-              {otherLocale.label}
-            </Link>
-          </div>
         </div>
       </div>
     </dialog>

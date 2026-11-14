@@ -2,13 +2,12 @@ import type { CSSProperties } from "react";
 
 import type { Project } from "@/content/projects/types";
 
-import { formatNumber, type Locale } from "./editorial";
+import { formatNumber } from "./editorial";
 
 type Props = {
   project: Project;
   /** Zero-based position in the sequence; rendered one-based. */
   index: number;
-  locale: Locale;
   className?: string;
 };
 
@@ -39,7 +38,6 @@ const VARIANTS = 3;
 export default function EditorialMedia({
   project,
   index,
-  locale,
   className,
 }: Props) {
   const variant = seed(project.slug) % VARIANTS;
@@ -64,7 +62,7 @@ export default function EditorialMedia({
     >
       <span className="editorial-media__wash" />
       <span className="editorial-media__index">
-        {formatNumber(index + 1, locale, { pad: 2 })}
+        {formatNumber(index + 1, { pad: 2 })}
       </span>
       <span className="editorial-media__initial">
         {project.title.trim().charAt(0)}

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 type Props = {
   href: string;
   children: ReactNode;
-  /** Renders a plain anchor with target/rel instead of the locale-aware Link. */
+  /** Renders a plain anchor with target/rel instead of a Next link. */
   external?: boolean;
   className?: string;
   ariaLabel?: string;
@@ -12,8 +12,8 @@ type Props = {
 
 /**
  * The site-wide link: text plus the signature underline. The line enters from
- * the inline start and leaves toward the inline end (mirrored in RTL), fully in
- * CSS so it survives server rendering and reduced motion.
+ * the inline start and leaves toward the inline end, fully in CSS so it
+ * survives server rendering and reduced motion.
  */
 export default function LinkLine({
   href,

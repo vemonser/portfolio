@@ -32,7 +32,7 @@ export default function SiteFooter({ labels, links }: Props) {
               <li key={link.key} className="flex">
                 <LinkLine
                   href={link.href}
-                  className="inline-flex min-h-11 items-center text-t-16 ar:text-t-20"
+                  className="inline-flex min-h-11 items-center text-t-16"
                 >
                   {link.label}
                 </LinkLine>

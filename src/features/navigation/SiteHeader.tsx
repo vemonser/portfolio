@@ -4,10 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { routing } from "@/i18n/routing";
-
 import MenuOverlay from "./MenuOverlay";
-import { normalizePath, switchLocalePath } from "./locale-href";
 import { buildHeaderLinks, type NavLink } from "./nav";
 
 type Props = {
@@ -18,9 +15,7 @@ type Props = {
     open: string;
     close: string;
     navigation: string;
-    language: string;
   };
-  otherLocale: { code: string; label: string };
 };
 
 /**
@@ -34,13 +29,12 @@ export default function SiteHeader({
   homeHref,
   links,
   labels,
-  otherLocale,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const currentPath = normalizePath(pathname ?? homeHref);
+  const currentPath = pathname ?? homeHref;
   const headerLinks = buildHeaderLinks(links);
 
   const close = useCallback(() => setOpen(false), []);
@@ -76,7 +70,7 @@ export default function SiteHeader({
 
         <nav aria-label={labels.navigation} className="site-header__nav">
           {headerLinks.map((link) => {
-            const active = currentPath === normalizePath(link.href);
+            const active = currentPath === link.href;
 
             return (
               <Link
@@ -90,23 +84,6 @@ export default function SiteHeader({
               </Link>
             );
           })}
-
-          {/*
-            The header is the only navigation that survives a page too short to
-            scroll, so the locale switch cannot live in the modal menu alone.
-          */}
-          <Link
-            href={switchLocalePath(
-              currentPath,
-              otherLocale.code,
-              routing.locales,
-            )}
-            lang={otherLocale.code}
-            hrefLang={otherLocale.code}
-            className="site-header__locale"
-          >
-            {otherLocale.label}
-          </Link>
         </nav>
       </header>
 
@@ -130,9 +107,7 @@ export default function SiteHeader({
         labels={{
           navigation: labels.navigation,
           close: labels.close,
-          language: labels.language,
         }}
-        otherLocale={otherLocale}
         returnFocusRef={triggerRef}
       />
     </>

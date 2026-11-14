@@ -2,40 +2,27 @@
  * The editorial system's shared numbers.
  *
  * CSS owns colour and layout; this module owns the decisions that must agree
- * between TypeScript and the stylesheet — the locale compositions, the spacing
- * scale and the number formatting that switches script with the locale.
+ * between TypeScript and the stylesheet — the English composition's type
+ * ceiling, reading measure and the counters the site shows.
  */
-
-export type Locale = "en" | "ar";
 
 export type EditorialType = {
   /** One ratio for the whole composition, never a second scale. */
   ratio: number;
-  /** Ceiling for the display face. Arabic gets more room for its ascenders. */
+  /** Ceiling for the display face. */
   displayMax: string;
   /** Reading measure for argument-sized copy. */
   bodyMeasure: string;
-  /** Leading that Arabic actually needs at body size. */
-  arabicLeading: number;
 };
 
-const TYPE: Record<Locale, EditorialType> = {
-  en: {
-    ratio: 1.25,
-    displayMax: "8.5rem",
-    bodyMeasure: "68ch",
-    arabicLeading: 1.55,
-  },
-  ar: {
-    ratio: 1.25,
-    displayMax: "9rem",
-    bodyMeasure: "58ch",
-    arabicLeading: 1.8,
-  },
+const TYPE: EditorialType = {
+  ratio: 1.25,
+  displayMax: "8.5rem",
+  bodyMeasure: "68ch",
 };
 
-export function editorialType(locale: Locale): EditorialType {
-  return TYPE[locale];
+export function editorialType(): EditorialType {
+  return TYPE;
 }
 
 /**
@@ -70,29 +57,10 @@ export function chapterNumber(index: number): string {
   return String(index + 1).padStart(2, "0");
 }
 
-const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-
-/**
- * Counters, years and dates follow the script of the page: Arabic-Indic
- * digits in Arabic, Latin digits in English. `dateTime` attributes and stored
- * dates stay ISO — only presentation is localized.
- */
+/** Padded counters: chapter numbers, project indices, archive positions. */
 export function formatNumber(
   value: number,
-  locale: Locale,
   options: { pad?: number } = {},
 ): string {
-  const latin = String(value).padStart(options.pad ?? 0, "0");
-
-  if (locale === "en") return latin;
-
-  return latin.replace(/[0-9]/g, (digit) => ARABIC_INDIC[Number(digit)]);
-}
-
-/**
- * Route params arrive as `string`. Everything downstream takes the closed
- * `Locale` union, so the boundary normalizes once instead of casting.
- */
-export function toLocale(value: string | undefined): Locale {
-  return value === "ar" ? "ar" : "en";
+  return String(value).padStart(options.pad ?? 0, "0");
 }

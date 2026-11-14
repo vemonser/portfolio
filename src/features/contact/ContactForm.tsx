@@ -230,7 +230,7 @@ export default function ContactForm({ to, endpoint, labels }: Props) {
           {submitting ? labels.sending : labels.send}
         </button>
 
-        <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm ar:text-t-16">
+        <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm">
           {labels.hint}
         </p>
       </div>
@@ -242,7 +242,7 @@ export default function ContactForm({ to, endpoint, labels }: Props) {
             {mailto ? (
               <a
                 href={mailto}
-                className="font-label text-t-14 uppercase tracking-[var(--track)] text-lime underline underline-offset-4 ar:text-t-16 ar:normal-case ar:tracking-normal"
+                className="font-label text-t-14 uppercase tracking-[var(--track)] text-lime underline underline-offset-4"
               >
                 {labels.openMail}
               </a>

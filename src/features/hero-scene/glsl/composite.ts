@@ -86,8 +86,7 @@ void main() {
    * Liquid compression. The active target arrives in UV space; convert it
    * into the field's own space, then fold the domain toward the rectangle's
    * axis instead of denting it in a circle. The crease runs across the
-   * reading direction, so Arabic folds the other way without mirroring the
-   * lighting. Strength zero makes every term vanish.
+   * reading direction. Strength zero makes every term vanish.
    */
   vec2 zoneCenter = (uCompressionCenter - 0.5) * scale;
   vec2 zoneHalf = max(uCompressionHalfSize * scale, vec2(0.001));
