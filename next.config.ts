@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
+import createMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const withMDX = createMDX({});
 
 const nextConfig: NextConfig = {
+  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+
   // Turbopack's dev filesystem cache has been serving stale compiled CSS after
   // edits to globals.css, which silently undoes style changes. Not worth the
   // confusion for the few hundred ms it saves.
@@ -27,4 +31,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withNextIntl(withMDX(nextConfig));

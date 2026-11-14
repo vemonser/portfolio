@@ -1,0 +1,18 @@
+A site that only works in one direction looks finished long before it is. The first time you switch a genuinely bilingual page, everything that seemed stable turns out to have been leaning on an assumption: the paragraph that was three lines is now four, the icon that sat on the left is pointing the wrong way, and the link underline that entered from one edge now enters from the other.
+
+## The same page, twice
+
+The only honest way to build for two directions is to build both at the same time. Every component gets its mirror on the day it is written, not in a cleanup pass later. Logical properties help — `margin-inline-start` instead of `margin-left` — but the real work is in the sequences: which edge a line enters from, which side a menu slides in from, where focus lands first.
+
+## What breaks without anyone noticing
+
+Transitions are the quiet ones. A panel that slides in from the right is correct in English and wrong in Arabic, and because it still *moves*, it looks intentional. The bug survives review for months. The fix is never a second stylesheet: it is one rule, written once, that reads the document direction.
+
+## A short checklist
+
+- Margins and paddings use logical properties everywhere.
+- Any animation with a horizontal direction is written against the document direction, not the screen.
+- Tracking and uppercasing are disabled in Arabic, where both damage the letter joins.
+- Font stacks switch with the language, not with a class name.
+
+None of this is exotic. It is just easier to do at the start, when the component is five lines long, than at the end, when it is five screens long.

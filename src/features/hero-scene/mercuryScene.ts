@@ -115,6 +115,8 @@ export function createMercuryScene({
     uWarp: { value: IDLE_WARP },
     uWarpDrift: { value: 0 },
     uScroll: { value: 0 },
+    uAccent: { value: new THREE.Color(0xc6f035) },
+    uPointer: { value: new THREE.Vector2(0.5, 0.5) },
   };
 
   const compositeMaterial = new THREE.ShaderMaterial({
@@ -177,6 +179,8 @@ export function createMercuryScene({
     compositeUniforms.uTime.value = seconds;
     compositeUniforms.uWarpDrift.value = seconds * 0.06;
     compositeUniforms.uScroll.value = scroll.value;
+    compositeUniforms.uWarp.value = IDLE_WARP + scroll.value * 0.55;
+    compositeUniforms.uPointer.value.set(pointer.x, pointer.y);
     compositeUniforms.uRipple.value = rippleTargets[rippleIndex].texture;
 
     renderer.render(compositeScene, camera);

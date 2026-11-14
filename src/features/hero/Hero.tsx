@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import HeroOverlay from "./HeroOverlay";
 import HeroStage from "./HeroStage";
 
 export default async function Hero() {
@@ -14,17 +15,30 @@ export default async function Hero() {
       <HeroStage />
 
       {/*
-        Plain HTML text, exactly like the reference hero: the h1 carries the
-        word, nothing is applied to it, and hover belongs entirely to the
-        surface behind it — pointer moves travel through the text to the
-        scene, which is what makes the shape answer the cursor.
+        The overlay owns the entrance: meta labels first, then the wordmark
+        rising out of its mask. Both wait for the first rendered frame.
       */}
-      <h1
-        id="hero-title"
-        className="hero-wordmark pointer-events-none relative z-10"
-      >
-        {t("name")}
-      </h1>
+      <HeroOverlay>
+        <div className="hero-meta">
+          <p className="ui-label hero-meta__status">
+            <span className="hero-meta__dot" aria-hidden="true" />
+            {t("available")}
+          </p>
+
+          <span className="hero-meta__scroll" aria-hidden="true">
+            <span className="ui-label">{t("scroll")}</span>
+            <span className="hero-meta__scroll-line" />
+          </span>
+
+          <p className="ui-label hero-meta__location">{t("location")}</p>
+        </div>
+
+        <h1 id="hero-title" className="hero-wordmark">
+          <span className="hero-wordmark__mask">
+            <span className="hero-wordmark__line">{t("name")}</span>
+          </span>
+        </h1>
+      </HeroOverlay>
     </section>
   );
 }

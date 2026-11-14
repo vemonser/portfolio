@@ -37,6 +37,8 @@ uniform float uSheen;
 uniform float uWarp;
 uniform float uWarpDrift;
 uniform float uScroll;
+uniform vec3 uAccent;
+uniform vec2 uPointer;
 
 varying vec2 vUv;
 
@@ -47,7 +49,7 @@ void main() {
   // any window shape.
   vec2 scale = vec2(uAspect, 1.0) * 0.8;
   vec2 p = (vUv - 0.5) * scale;
-  p.y += uScroll * 0.12;
+  p.y += uScroll * 0.2;
 
   vec2 duv = vec2(0.004) / scale;
   vec3 raw = vec3(
@@ -81,6 +83,12 @@ void main() {
   // Reinhard-ish shoulder: the sun highlight would clip to pure white without
   // it, and clipped white loses the dispersion at exactly its brightest point.
   col = col / (1.0 + col * 0.35);
+
+  // The accent only lives on the crest of a fresh ripple, near the cursor:
+  // idle metal stays monochrome.
+  float crest = smoothstep(0.12, 0.6, raw.x);
+  float near = 1.0 - smoothstep(0.04, 0.4, distance(vUv, uPointer));
+  col += uAccent * crest * near * 0.12;
 
   col += (mHash(gl_FragCoord.xy + fract(uTime) * 91.0) - 0.5) / 255.0;
 

@@ -88,6 +88,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const links = buildNavLinks(locale, {
     home: tNav("home"),
     work: tNav("work"),
+    blog: tNav("blog"),
     about: tNav("about"),
     contact: tNav("contact"),
   });
@@ -101,6 +102,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
       className={fontVariables}
+      suppressHydrationWarning
     >
       {/*
         No <NextIntlClientProvider>: every translated string on this page is
@@ -116,7 +118,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         */}
         <script
           dangerouslySetInnerHTML={{
-            __html: 'document.documentElement.classList.add("js")',
+            __html: 'document.documentElement.dataset.js = "true"',
           }}
         />
         <SiteHeader
@@ -136,6 +138,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         {children}
         <ContactCta locale={locale} />
+        <div className="grain" aria-hidden="true" />
         <SiteFooter
           labels={{
             navigation: tFooter("navigation"),

@@ -14,3 +14,6 @@ Phase 5: complete (/work + /work/[slug], nested generateStaticParams per Next 16
 Ruling: catalogue as one module per locale (projects.en.ts/projects.ar.ts) instead of file-per-project — same type, fewer files; cost if wrong: none.
 Ruling: catalogue tests written after implementation (characterization) — logic is mapping only; cost: low, covered by build + browser pass.
 
+
+Phase 6: complete (about + contact pages, mailto compose form without backend, typecheck/lint green)
+

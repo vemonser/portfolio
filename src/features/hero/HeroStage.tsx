@@ -7,6 +7,8 @@ import { heroScrollProgress } from "@/features/hero-scene/math";
 import { FROZEN_TIME } from "@/features/hero-scene/mercuryScene";
 import type { HeroScene } from "@/features/hero-scene/scene";
 
+import { setHeroReady } from "./hero-ready";
+
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
 /**
@@ -86,7 +88,15 @@ export default function HeroStage() {
 
     const onScroll = () => {
       const rect = section.getBoundingClientRect();
-      scene?.setScroll(heroScrollProgress(rect.top, rect.height, window.innerHeight));
+      const progress = heroScrollProgress(
+        rect.top,
+        rect.height,
+        window.innerHeight,
+      );
+      scene?.setScroll(progress);
+      // The wordmark lags a little behind the section as it leaves, which is
+      // what makes the hand-off to the intro feel deliberate.
+      section.style.setProperty("--hero-scroll", progress.toFixed(4));
     };
 
     const observeVisibility = () => {
@@ -134,7 +144,13 @@ export default function HeroStage() {
 
     const mount = async () => {
       if (scene || loading || disposed) return;
-      if (!hasWebGL2()) return;
+
+      // No WebGL 2: the poster is the whole scene, and the entrance still runs
+      // — a static image should not hold the wordmark hostage.
+      if (!hasWebGL2()) {
+        setHeroReady(true);
+        return;
+      }
 
       loading = true;
       try {
@@ -146,6 +162,7 @@ export default function HeroStage() {
           initialTime: initialTime || frozenTime(),
           onFirstFrame: () => {
             if (!disposed) setReady(true);
+            setHeroReady(true);
           },
           onContextLost: () => {
             if (disposed) return;

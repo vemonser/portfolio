@@ -1,10 +1,13 @@
 {
   "meta": {
     "title": "Abdelrhman",
-    "description": ""
+    "description": "Software developer building fast, bilingual interfaces for the web."
   },
   "hero": {
-    "name": "software developer"
+    "name": "software developer",
+    "available": "Available for work",
+    "location": "Cairo, Egypt",
+    "scroll": "Scroll"
   },
   "nav": {
     "open": "Open navigation",
@@ -13,14 +16,11 @@
     "language": "Language",
     "home": "Home",
     "work": "Work",
+    "blog": "Blog",
     "about": "About",
     "contact": "Contact",
     "en": "English",
     "ar": "العربية"
-  },
-  "stub": {
-    "body": "This section is being built.",
-    "back": "Back to home"
   },
   "cta": {
     "label": "Contact",
@@ -116,5 +116,8 @@
     "title": "Blog",
     "lede": "Notes on building for the web, in Arabic and English.",
     "empty": "The first posts are being written."
+  },
+  "blogPost": {
+    "back": "All posts"
   }
 }

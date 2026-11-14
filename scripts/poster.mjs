@@ -47,7 +47,7 @@ try {
     // wordmark is real HTML layered above the canvas, so it is hidden for the
     // capture — the poster is the liquid alone and the live text stays on top.
     await page.addStyleTag({
-      content: `#hero-title, nextjs-portal { visibility: hidden !important; }`,
+      content: `#hero-title, .hero-meta, .grain, nextjs-portal { visibility: hidden !important; }`,
     });
 
     const buffer = await page.locator("canvas").screenshot({ omitBackground: true });

@@ -1,4 +1,4 @@
-export type NavKey = "home" | "work" | "about" | "contact";
+export type NavKey = "home" | "work" | "blog" | "about" | "contact";
 
 export type NavLink = {
   key: NavKey;
@@ -11,6 +11,7 @@ export type NavLink = {
 const ROUTES: ReadonlyArray<{ key: NavKey; path: string }> = [
   { key: "home", path: "/" },
   { key: "work", path: "/work" },
+  { key: "blog", path: "/blog" },
   { key: "about", path: "/about" },
   { key: "contact", path: "/contact" },
 ];
