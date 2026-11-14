@@ -22,20 +22,18 @@ async function openHero(page: import("@playwright/test").Page, path: string) {
 }
 
 test.describe("liquid compression", () => {
-  test("keeps the canvas inside the hero in both locales", async ({ page }) => {
-    for (const path of ["/en", "/ar"]) {
-      await openHero(page, path);
+  test("keeps the canvas inside the hero", async ({ page }) => {
+    await openHero(page, "/");
 
-      await expect(page.locator(`${HERO} canvas`)).toHaveCount(1);
-      const insideHero = await page
-        .locator("canvas")
-        .evaluate((node) => node.closest("#hero") !== null);
-      expect(insideHero).toBe(true);
-    }
+    await expect(page.locator(`${HERO} canvas`)).toHaveCount(1);
+    const insideHero = await page
+      .locator("canvas")
+      .evaluate((node) => node.closest("#hero") !== null);
+    expect(insideHero).toBe(true);
   });
 
   test("compresses on title hover and releases on leave", async ({ page }) => {
-    await openHero(page, "/en");
+    await openHero(page, "/");
 
     await page.locator(WORDMARK).hover();
     await expect(page.locator(ACTIVE)).toHaveCount(1);
@@ -49,7 +47,7 @@ test.describe("liquid compression", () => {
   });
 
   test("compresses around a visible project target", async ({ page }) => {
-    await openHero(page, "/en");
+    await openHero(page, "/");
 
     const card = page.locator(CARD).first();
     await card.scrollIntoViewIfNeeded();
@@ -67,7 +65,7 @@ test.describe("fallbacks", () => {
   test.use({ reducedMotion: "reduce" });
 
   test("reduced motion never activates pointer compression", async ({ page }) => {
-    await openHero(page, "/en");
+    await openHero(page, "/");
 
     await page.locator(WORDMARK).hover();
     await page.waitForTimeout(250);
@@ -85,7 +83,7 @@ test.describe("coarse pointer", () => {
   });
 
   test("does not activate pointer compression", async ({ page }) => {
-    await openHero(page, "/ar");
+    await openHero(page, "/");
 
     await page.locator(WORDMARK).hover({ force: true });
     await page.waitForTimeout(250);
@@ -102,7 +100,7 @@ test.describe("coarse pointer", () => {
   });
 
   test("opening the menu pauses the scene", async ({ page }) => {
-    await openHero(page, "/ar");
+    await openHero(page, "/");
 
     await page.locator(".menu-trigger").click();
     await expect(page.locator("[data-scene-state]")).toHaveAttribute(
@@ -116,7 +114,7 @@ test.describe("responsive integrity", () => {
   test("no horizontal overflow at any required width", async ({ page }) => {
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
-      await openHero(page, "/en");
+      await openHero(page, "/");
 
       const overflow = await page.evaluate(
         () =>
