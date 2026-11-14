@@ -82,18 +82,6 @@ html.lenis body {
   }
 }
 
-/*
- * Arabic swaps the whole type stack in two declarations, and every utility
- * that reads these variables follows. Reem Kufi is a geometric kufic: it is
- * the display style Arabic has always used for architecture and signage, so
- * it holds up against the chrome object instead of competing with it.
- */
-html[lang="ar"] {
-  --font-display: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
-  --font-body: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
-  --font-label: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
-}
-
 :root {
   --track: 0.18em;
   --nav-inset: clamp(1.5rem, 3.2vw, 2.75rem);
@@ -118,7 +106,6 @@ html[lang="ar"] {
   --type-ratio: 1.25;
   --type-display-max: 8.5rem;
   --measure-body: 68ch;
-  --leading-arabic: 1.55;
 
   --dur-fast: 200ms;
   --dur-base: 300ms;
@@ -141,24 +128,6 @@ html[lang="ar"] {
   --focus-offset: 3px;
   --focus-radius: 2px;
 }
-
-/*
- * The Arabic composition is not the English one stretched: it gets a taller
- * display ceiling (the script needs the room), a narrower measure and its own
- * leading. Only the values that genuinely differ are overridden.
- */
-html[lang="ar"] {
-  --type-display-max: 9rem;
-  --measure-body: 58ch;
-  --leading-arabic: 1.8;
-}
-
-/*
- * Language-scoped utilities. Arabic typography drops tracking and casing
- * (a joined script falls apart with either), English keeps the label styling.
- */
-@custom-variant ar (&:where(html[lang="ar"] *));
-@custom-variant en (&:where(html[lang="en"] *));
 
 @layer base {
   html {
@@ -199,9 +168,6 @@ html[lang="ar"] {
  * 1 means the glyph box overflows its layout box, so the word already bleeds
  * past the section's bottom edge. `drop` is the extra distance the box is
  * pushed down (a negative margin), which decides how much survives.
- *
- * Arabic is a joined script — any letter tracking tears the joins apart, so
- * the Arabic variant drops tracking to zero and the kufic stack takes over.
  */
 .hero-wordmark {
   --wordmark-drop: -0.06em;
@@ -219,27 +185,9 @@ html[lang="ar"] {
   color: var(--color-bone);
   margin: 0;
   margin-block-end: var(--wordmark-drop);
+  text-transform: uppercase;
   user-select: none;
 }
-
-html[lang="en"] .hero-wordmark {
-  text-transform: uppercase;
-}
-
-/*
- * Arabic: 0 tracking (a joined script falls apart with any), one full line of
- * leading so the kufic forms are not compressed, and almost no crop. Cutting
- * a Latin stem reads as deliberate; cutting the bowl of ن reads as broken.
- */
-html[lang="ar"] .hero-wordmark {
-  --wordmark-drop: 0.06em;
-
-  font-size: clamp(2.6rem, 11vw, var(--type-display-max));
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: 0;
-}
-
 /*
  * The wordmark is plain text: no filter, no transform, nothing applied. Hover
  * belongs to the liquid behind it, like the reference.
@@ -266,12 +214,6 @@ html[lang="ar"] .hero-wordmark {
   color: var(--color-warm);
 }
 
-html[lang="ar"] .ui-label {
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 .site-header {
   position: absolute;
   inset-block-start: 0;
@@ -287,7 +229,6 @@ html[lang="ar"] .ui-label {
 
 .site-header__brand,
 .site-header__link,
-.site-header__locale,
 .menu-trigger,
 .nav-close {
   pointer-events: auto;
@@ -301,12 +242,6 @@ html[lang="ar"] .ui-label {
   text-transform: uppercase;
   color: var(--color-bone);
   text-decoration: none;
-}
-
-html[lang="ar"] .site-header__brand {
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 .site-header__nav {
@@ -343,48 +278,6 @@ html[lang="ar"] .site-header__brand {
   border-radius: 50%;
   background: var(--color-lime);
   transform: translateY(-50%);
-}
-
-html[lang="ar"] .site-header__link {
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.site-header__locale {
-  padding-block: 0.9rem;
-  padding-inline-start: clamp(0.75rem, 2.4vw, 1.75rem);
-  border-inline-start: 1px solid
-    color-mix(in srgb, var(--color-bone) 18%, transparent);
-  font-family: var(--font-label);
-  font-size: var(--text-t-14);
-  letter-spacing: var(--track);
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-bone) 55%, transparent);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.site-header__locale:hover {
-  color: var(--color-bone);
-}
-
-html[lang="ar"] .site-header__locale {
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/*
- * On an English page the locale link carries `lang="ar"` itself, so the
- * document-level override above does not reach it. Arabic is a joined script:
- * any tracking tears it, and JetBrains Mono has no Arabic glyphs.
- */
-.site-header__locale:lang(ar) {
-  font-family: var(--font-plex-arabic), "Noto Sans Arabic", sans-serif;
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 .menu-trigger {
@@ -489,14 +382,6 @@ html[lang="ar"] .site-header__locale {
   transition: opacity 0.8s cubic-bezier(0.7, 0, 0.2, 1);
 }
 
-html[dir="rtl"] .nav-dialog::backdrop {
-  background: linear-gradient(
-    to left,
-    rgb(11 11 10 / 0.3) 40%,
-    rgb(11 11 10) 80%
-  );
-}
-
 .nav-dialog[data-state="open"]::backdrop {
   opacity: 0.35;
 }
@@ -512,10 +397,6 @@ html[dir="rtl"] .nav-dialog::backdrop {
   transform: translateX(calc(100% + 9vw)) rotate(0.001deg);
   transition: transform 0.8s cubic-bezier(0.7, 0, 0.2, 1);
   will-change: transform;
-}
-
-html[dir="rtl"] .nav-panel {
-  transform: translateX(calc(-100% - 9vw)) rotate(0.001deg);
 }
 
 .nav-dialog[data-state="open"] .nav-panel {
@@ -551,19 +432,9 @@ html[dir="rtl"] .nav-panel {
 }
 
 /*
- * Mirrored: the lip stays on the panel's inline-start edge, which in RTL is
- * its right edge — the page-facing side. Only the direction it is pushed out
- * changes. (Anchoring it with inset-inline-end would put it inside the panel,
- * where the ellipse is invisible.)
+ * The lip sits outside the panel's leading edge and is closed with the panel;
+ * collapsing its width is what straightens the leading edge.
  */
-html[dir="rtl"] .nav-lip {
-  transform: translateX(100%);
-}
-
-html[dir="rtl"] .nav-lip::before {
-  transform: translate(6.5%, -50%);
-}
-
 .nav-dialog[data-state="open"] .nav-lip {
   width: 0;
 }
@@ -663,11 +534,6 @@ html[dir="rtl"] .nav-lip::before {
   letter-spacing: 0.05em;
 }
 
-html[lang="ar"] .nav-panel .ui-label {
-  font-size: 0.85rem;
-  letter-spacing: 0;
-}
-
 .nav-rule {
   height: 1px;
   margin: 0 0 2.8rem;
@@ -688,10 +554,6 @@ html[lang="ar"] .nav-panel .ui-label {
   transform: translateX(15vw) rotate(0.001deg);
   transition: transform 0.8s cubic-bezier(0.7, 0, 0.2, 1);
   will-change: transform;
-}
-
-html[dir="rtl"] .nav-item {
-  transform: translateX(-15vw) rotate(0.001deg);
 }
 
 .nav-dialog[data-state="open"] .nav-item {
@@ -728,12 +590,6 @@ html[dir="rtl"] .nav-item {
   color: var(--color-lime);
 }
 
-html[lang="ar"] .nav-item a {
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: 0;
-}
-
 /*
  * The reference puts the active dot in the left margin, so every label stays
  * on the same x. An inline dot would indent only the active row.
@@ -748,37 +604,6 @@ html[lang="ar"] .nav-item a {
   border-radius: 50%;
   background: var(--color-bone);
   transform: translateY(-50%);
-}
-
-.nav-panel__footer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.nav-locale {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  min-height: 44px;
-  font-family: var(--font-label);
-  font-size: var(--text-t-16);
-  color: var(--color-bone);
-  text-decoration: underline;
-  text-decoration-color: color-mix(
-    in srgb,
-    var(--color-bone) 35%,
-    transparent
-  );
-  text-underline-offset: 6px;
-  transition:
-    color 0.2s ease,
-    text-decoration-color 0.2s ease;
-}
-
-.nav-locale:hover {
-  color: var(--color-lime);
-  text-decoration-color: var(--color-lime);
 }
 
 @media (max-width: 639px) {
@@ -798,7 +623,7 @@ html[lang="ar"] .nav-item a {
 /*
  * LinkLine: the underline needs a pseudo-element and a transform origin that
  * flips between enter and exit; a static utility cannot carry both states.
- * Base = exit origin, hover = enter origin, mirrored under RTL.
+ * Base = exit origin, hover = enter origin.
  */
 .link-line {
   position: relative;
@@ -823,15 +648,6 @@ html[lang="ar"] .nav-item a {
 .link-line:focus-visible::after {
   transform: scaleX(1);
   transform-origin: left;
-}
-
-html[dir="rtl"] .link-line::after {
-  transform-origin: left;
-}
-
-html[dir="rtl"] .link-line:hover::after,
-html[dir="rtl"] .link-line:focus-visible::after {
-  transform-origin: right;
 }
 
 /* Header links carry generous padding, so their line sits inside the box. */
@@ -869,10 +685,6 @@ html[data-js="true"] .reveal[data-revealed="true"] {
   line-height: 1.85;
 }
 
-html[lang="ar"] .prose-blog {
-  line-height: 2.05;
-}
-
 .prose-blog h2 {
   margin: 2.4em 0 0.7em;
   font-family: var(--font-display);
@@ -881,11 +693,6 @@ html[lang="ar"] .prose-blog {
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--color-bone);
-}
-
-html[lang="ar"] .prose-blog h2 {
-  line-height: 1.45;
-  letter-spacing: 0;
 }
 
 .prose-blog h3 {
@@ -951,28 +758,17 @@ html[lang="ar"] .prose-blog h2 {
 }
 
 /* ---------------------------------------------------------------------------
- * Editorial composition variants.
+ * Editorial composition.
  *
- * English opens from the reading edge with a wide display measure; Arabic
- * opens from its own reading edge with a narrower one, because the script is
- * taller and wants fewer characters per line. Values are logical properties
- * so nothing here needs an RTL branch.
+ * The opening is anchored at the reading edge with a wide display measure; the
+ * measure, gap and display leading are tokens so a page never types its own.
  * --------------------------------------------------------------------------- */
 
 .page-frame {
   display: block;
-}
-
-[data-locale="en"] {
   --chapter-open-measure: 64rem;
   --chapter-gap: var(--space-7);
   --display-lead: 0.94;
-}
-
-[data-locale="ar"] {
-  --chapter-open-measure: 46rem;
-  --chapter-gap: var(--space-6);
-  --display-lead: 1.28;
 }
 
 .chapter-open {
@@ -1003,12 +799,6 @@ html[lang="ar"] .prose-blog h2 {
   inline-size: clamp(1.25rem, 4vw, 3rem);
   block-size: 1px;
   background: var(--line-hairline);
-}
-
-html[lang="ar"] .chapter-label {
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1067,11 +857,6 @@ html[lang="ar"] .chapter-label {
   color: rgb(245 241 232 / 0.72);
 }
 
-html[lang="ar"] .editorial-media__index {
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-}
-
 .editorial-media__initial {
   position: absolute;
   inset-block-end: -0.18em;
@@ -1094,12 +879,6 @@ html[lang="ar"] .editorial-media__index {
   color: rgb(245 241 232 / 0.62);
 }
 
-html[lang="ar"] .editorial-media__meta {
-  font-size: var(--text-t-16);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 /* The next-project chapter: one full-width link, its underline sweeping from
    the reading edge. The whole block is the target, so the line is the only
    hover affordance besides the disc. */
@@ -1119,29 +898,16 @@ html[lang="ar"] .editorial-media__meta {
   transition: transform var(--dur-slow) var(--ease-editorial);
 }
 
-html[dir="rtl"] .next-project::after {
-  transform-origin: left;
-}
-
 .next-project:hover::after,
 .next-project:focus-visible::after {
   transform: scaleX(1);
   transform-origin: left;
 }
 
-html[dir="rtl"] .next-project:hover::after,
-html[dir="rtl"] .next-project:focus-visible::after {
-  transform-origin: right;
-}
-
 /* Prose inherits .prose-blog's rhythm and only restates the measure, which is
    a locale token rather than a fixed rem. */
 .prose-editorial {
   max-width: var(--measure-body);
-}
-
-html[lang="ar"] .prose-editorial {
-  line-height: var(--leading-arabic);
 }
 
 /* Reading refinements: no orphaned last words in running copy, and headings

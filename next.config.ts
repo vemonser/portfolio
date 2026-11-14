@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
-import createNextIntlPlugin from "next-intl/plugin";
 
-const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const withMDX = createMDX({});
 
 const nextConfig: NextConfig = {
@@ -24,11 +22,19 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Arabic is the default locale, so the bare origin has no page of its own.
-  // A config-level redirect is served statically — no proxy/middleware hop.
+  /*
+   * The site used to be bilingual and every URL carried a locale. Those URLs
+   * still exist in the wild, so they permanently point at the single-language
+   * paths instead of 404ing.
+   */
   async redirects() {
-    return [{ source: "/", destination: "/ar", permanent: false }];
+    return [
+      { source: "/en", destination: "/", permanent: true },
+      { source: "/en/:path*", destination: "/:path*", permanent: true },
+      { source: "/ar", destination: "/", permanent: true },
+      { source: "/ar/:path*", destination: "/:path*", permanent: true },
+    ];
   },
 };
 
-export default withNextIntl(withMDX(nextConfig));
+export default withMDX(nextConfig);
