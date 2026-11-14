@@ -1,4 +1,6 @@
 import Hero from "@/features/hero/Hero";
+import IntroSection from "@/features/intro/IntroSection";
+import SelectedWork from "@/features/work/SelectedWork";
 import { setRequestLocale } from "next-intl/server";
 
 type Props = {
@@ -12,6 +14,8 @@ export default async function HomePage({ params }: Props) {
   return (
     <main>
       <Hero />
+      <IntroSection locale={locale} />
+      <SelectedWork locale={locale} />
     </main>
   );
 }

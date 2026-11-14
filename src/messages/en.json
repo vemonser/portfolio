@@ -40,5 +40,26 @@
     "instagram": "Instagram",
     "twitter": "Twitter",
     "linkedin": "LinkedIn"
+  },
+  "intro": {
+    "label": "Introduction",
+    "statement": "I design and build fast, bilingual interfaces that feel inevitable — precise in structure, alive in movement.",
+    "body": "A software developer working between Cairo and the web. I care about the quiet details: a paragraph that reads well in Arabic and English, a transition that settles instead of bouncing, a page that opens before you notice it."
+  },
+  "workSection": {
+    "label": "Selected work",
+    "more": "See all projects"
+  },
+  "workPage": {
+    "label": "Archive",
+    "title": "Work",
+    "lede": "Six selected projects — each one built around a single idea, executed until it stops needing explanation."
+  },
+  "project": {
+    "caseStudy": "Case study",
+    "role": "Role",
+    "year": "Year",
+    "stack": "Stack",
+    "next": "Next project"
   }
 }
