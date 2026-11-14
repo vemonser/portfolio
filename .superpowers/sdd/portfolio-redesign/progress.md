@@ -44,3 +44,9 @@ Ruling: Lenis stylesheet inlined instead of @import from node_modules — the Tu
 Verification: tests 24/24, lint/typecheck/build clean; Playwright checks pass with Lenis active (lenis class present, scrollbar-width none, wheel scrolls, reduced-motion has no Lenis, no console errors, no overflow).
 Evidence Gate PASS on run 2026-11-14T15-25-00-000Z (AC-01..AC-08, real exit codes).
 
+
+Tailwind migration: intro, selected work, project card, CTA, footer, about, contact/form, blog index/post now use utilities (+ ar:/en: custom variants, shared class constants in features/ui/styles.ts). globals.css 1865 → 999 lines; remaining CSS is tokens/base, pre-existing nav+hero, link-line pseudo-element choreography, reveal state gate, hero entrance keyframes, grain, Lenis rules, and MDX prose.
+Ruling: semantic class hooks removed by utility migration → added stable data-* hooks (data-project, data-section, data-clock) and updated scripts/evidence-qa.mjs selectors; cost if wrong: tests must target data hooks.
+Ruling: dev server restart required after adding @custom-variant — Turbopack served a stale tailwind bundle once; cost if wrong: re-verify CSS after variant changes.
+Verification: tests 24/24, lint/typecheck/build clean; browser checks pass (EN uppercase / AR normal-case via custom variants, 3-up flat grid, hover swap, Lenis active, no console errors, no overflow). Evidence Gate PASS on run 2026-11-14T15-50-00-000Z.
+
