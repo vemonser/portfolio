@@ -113,9 +113,9 @@ export default async function LocaleLayout({ children, params }: Props) {
       */}
       <body className="min-h-dvh bg-black font-body text-bone antialiased">
         {/*
-          `js` is what arms the reveal animations: without it the CSS keeps
-          every Reveal element visible, so a no-JS visitor loses motion, not
-          content.
+          Arms the reveal CSS before the first paint. The React warning about
+          script tags is dev-only: this runs during HTML parse on every real
+          load, and no-JS visitors never get the hidden state.
         */}
         <script
           dangerouslySetInnerHTML={{
