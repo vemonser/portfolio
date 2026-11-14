@@ -6,19 +6,17 @@ describe("project catalogue", () => {
   it("holds six projects in order", () => {
     const slugs = getProjects().map((project) => project.slug);
 
-    expect(slugs).toHaveLength(6);
+    expect(slugs).toHaveLength(4);
     expect(slugs).toEqual([
-      "nimbus",
-      "forge",
-      "atlas",
-      "souk",
-      "pulse",
-      "terra",
+      "anom-creative",
+      "fambam",
+      "advrt",
+      "al-ghaith",
     ]);
   });
 
   it("finds a project by slug", () => {
-    expect(getProject("nimbus")?.title).toBe("Nimbus");
+    expect(getProject("anom-creative")?.title).toBe("Anom Creative");
   });
 
   it("advances along the catalogue", () => {

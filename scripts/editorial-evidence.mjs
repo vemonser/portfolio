@@ -13,7 +13,7 @@ const OUT = "audit-shots/editorial";
 const ROUTES = [
   ["home", ""],
   ["work", "/work"],
-  ["project-nimbus", "/work/nimbus"],
+  ["project-anom", "/work/anom-creative"],
   ["blog", "/blog"],
   ["post", "/blog/two-directions"],
   ["about", "/about"],

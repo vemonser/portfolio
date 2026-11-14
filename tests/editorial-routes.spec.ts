@@ -158,7 +158,7 @@ test.describe("footer and targets", () => {
 const ROUTES = [
   "",
   "/work",
-  "/work/nimbus",
+  "/work/anom-creative",
   "/blog",
   "/blog/two-directions",
   "/about",

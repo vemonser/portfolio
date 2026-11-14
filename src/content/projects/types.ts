@@ -14,8 +14,13 @@ export type Project = {
   tagline: string;
   role: string;
   year: string;
+  /** Empty when the owner has not published a stack for the project. */
   stack: string[];
-  /** Two duotone pairs: the card swaps one for the other on hover. */
+  /** Live site, when there is one. */
+  url?: string;
+  /** Real capture of the live site, served from /public/work. */
+  image?: string;
+  /** Fallback duotone pair, used only when there is no image. */
   cover: ProjectCover;
   coverAlt: ProjectCover;
   sections: ProjectSection[];

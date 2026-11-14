@@ -841,6 +841,33 @@ html[data-js="true"] .reveal[data-revealed="true"] {
   background: linear-gradient(135deg, var(--cover-from), var(--cover-to));
 }
 
+/* A real capture: the image fills the frame and a quiet scrim keeps the index
+   legible on both bright and dark sites. */
+.editorial-media--image {
+  background: var(--color-ink);
+}
+
+.editorial-media__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgb(11 11 10 / 0.18),
+    transparent 32%,
+    rgb(11 11 10 / 0.42)
+  );
+}
+
+.editorial-media--image .editorial-media__index {
+  z-index: 2;
+  padding: 0.35rem 0.5rem;
+  background: rgb(11 11 10 / 0.55);
+  color: rgb(245 241 232 / 0.9);
+  backdrop-filter: blur(6px);
+}
+
 .editorial-media__wash {
   position: absolute;
   inset: 0;

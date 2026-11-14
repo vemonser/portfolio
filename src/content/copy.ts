@@ -71,6 +71,7 @@ export const copy = {
     year: "Year",
     stack: "Stack",
     next: "Next project",
+    visit: "Visit site",
   },
 
   about: {

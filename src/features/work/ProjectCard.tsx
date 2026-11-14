@@ -16,12 +16,7 @@ type Props = {
  * Project media ratios follow the sequence position, so the Home run breathes
  * unevenly on purpose. The archive keeps one ratio for comparison.
  */
-const HOME_ASPECT = [
-  "aspect-[16/10]",
-  "aspect-square",
-  "aspect-[4/3]",
-  "aspect-[3/2]",
-];
+const HOME_ASPECT = "aspect-[16/10]";
 
 /**
  * A project entry. The whole card is the link, the media is a designed field
@@ -50,8 +45,9 @@ export default function ProjectCard({
         <EditorialMedia
           project={project}
           index={index}
+          priority={index === 0}
           className={`${
-            home ? HOME_ASPECT[index % HOME_ASPECT.length] : "aspect-[4/3]"
+            home ? HOME_ASPECT : "aspect-[4/3]"
           } transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] will-change-transform group-hover:scale-[1.015] group-focus-visible:scale-[1.015]`}
         />
 

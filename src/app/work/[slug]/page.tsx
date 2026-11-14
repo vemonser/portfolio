@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { copy } from "@/content/copy";
 import { getNextProject, getProject, getProjects } from "@/content/projects";
 import EditorialMedia from "@/features/ui/EditorialMedia";
+import LinkLine from "@/features/ui/LinkLine";
 import NextProject from "@/features/ui/NextProject";
 import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
@@ -53,7 +54,11 @@ export default async function ProjectPage({ params }: Props) {
             {project.tagline}
           </p>
 
-          <dl className="m-0 mt-[var(--space-5)] grid gap-[var(--space-3)] border-y border-[var(--line-hairline)] py-[var(--space-3)] sm:grid-cols-3">
+          <dl
+            className={`m-0 mt-[var(--space-5)] grid gap-[var(--space-3)] border-y border-[var(--line-hairline)] py-[var(--space-3)] ${
+              project.stack.length > 0 ? "sm:grid-cols-3" : "sm:grid-cols-2"
+            }`}
+          >
             <div className="flex flex-col gap-[0.35rem]">
               <dt className="ui-label">{copy.project.role}</dt>
               <dd className="m-0 text-t-16">{project.role}</dd>
@@ -62,12 +67,14 @@ export default async function ProjectPage({ params }: Props) {
               <dt className="ui-label">{copy.project.year}</dt>
               <dd className="m-0 text-t-16">{yearLabel}</dd>
             </div>
-            <div className="flex flex-col gap-[0.35rem]">
-              <dt className="ui-label">{copy.project.stack}</dt>
-              <dd className="m-0 text-start text-t-16" dir="ltr">
-                {project.stack.join(" · ")}
-              </dd>
-            </div>
+            {project.stack.length > 0 ? (
+              <div className="flex flex-col gap-[0.35rem]">
+                <dt className="ui-label">{copy.project.stack}</dt>
+                <dd className="m-0 text-start text-t-16" dir="ltr">
+                  {project.stack.join(" · ")}
+                </dd>
+              </div>
+            ) : null}
           </dl>
         </header>
 
@@ -78,7 +85,7 @@ export default async function ProjectPage({ params }: Props) {
             <EditorialMedia
               project={project}
               index={0}
-              className="aspect-[4/3] md:aspect-[21/9]"
+              className="aspect-[16/10]"
             />
           </div>
         </Reveal>
@@ -106,6 +113,18 @@ export default async function ProjectPage({ params }: Props) {
             </Reveal>
           ))}
         </div>
+
+        {project.url ? (
+          <div className="mt-[var(--space-4)]">
+            <LinkLine
+              href={project.url}
+              external
+              className="inline-flex min-h-11 items-center text-[clamp(1.05rem,1.6vw,1.3rem)]"
+            >
+              {copy.project.visit}
+            </LinkLine>
+          </div>
+        ) : null}
       </article>
 
       <div className="mt-[var(--space-8)]">

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { CSSProperties } from "react";
 
 import type { Project } from "@/content/projects/types";
@@ -9,6 +10,8 @@ type Props = {
   /** Zero-based position in the sequence; rendered one-based. */
   index: number;
   className?: string;
+  /** Load the first card eagerly; everything else waits for the viewport. */
+  priority?: boolean;
 };
 
 /**
@@ -27,19 +30,42 @@ function seed(slug: string): number {
 const VARIANTS = 3;
 
 /**
- * Project media built from the data that actually exists: the two cover
- * colours, the project's initial, its index and the first stack item. It is a
- * designed placeholder, not a fake screenshot — no image the owner has not
- * supplied is implied.
+ * Project media. Real work uses a capture of the live site; everything else
+ * falls back to a designed field built from the project's own cover colours and
+ * metadata. The fallback is a placeholder with intent, never an implied
+ * screenshot.
  *
- * Three deterministic compositions keep the sequence from reading as a grid of
- * identical tiles: a bloom, a horizon split and a contour field.
+ * The image is decorative here: the card's link text names the project, so an
+ * empty alt avoids announcing the title twice.
  */
 export default function EditorialMedia({
   project,
   index,
   className,
+  priority = false,
 }: Props) {
+  if (project.image) {
+    return (
+      <span
+        aria-hidden="true"
+        className={`editorial-media editorial-media--image ${className ?? ""}`}
+      >
+        <Image
+          src={project.image}
+          alt=""
+          fill
+          loading={priority ? "eager" : "lazy"}
+          sizes="(min-width: 1024px) 60vw, 100vw"
+          className="object-cover object-top"
+        />
+        <span className="editorial-media__scrim" />
+        <span className="editorial-media__index">
+          {formatNumber(index + 1, { pad: 2 })}
+        </span>
+      </span>
+    );
+  }
+
   const variant = seed(project.slug) % VARIANTS;
   const classes = [
     "editorial-media",
@@ -68,7 +94,8 @@ export default function EditorialMedia({
         {project.title.trim().charAt(0)}
       </span>
       <span className="editorial-media__meta">
-        {project.year} — {project.stack[0]}
+        {project.year}
+        {project.stack[0] ? ` — ${project.stack[0]}` : ""}
       </span>
     </span>
   );
