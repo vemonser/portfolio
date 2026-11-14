@@ -8,6 +8,8 @@ type Props = {
   project: Project;
   index: number;
   href: string;
+  /** Reading direction of the page; the Hero mirrors its fold axis with it. */
+  direction: "ltr" | "rtl";
 };
 
 function formatIndex(index: number): string {
@@ -19,9 +21,15 @@ function formatIndex(index: number): string {
  * first on hover. Everything except the link is inert markup, so the whole
  * card behaves as one target.
  */
-export default function ProjectCard({ project, index, href }: Props) {
+export default function ProjectCard({ project, index, href, direction }: Props) {
   return (
-    <Link href={href} className="group flex h-full flex-col" data-project={project.slug}>
+    <Link
+      href={href}
+      className="group flex h-full flex-col"
+      data-project={project.slug}
+      data-compression-target="project"
+      data-compression-direction={direction}
+    >
       <span className="relative isolate block aspect-[4/3] overflow-hidden rounded-[2px] bg-ink">
         <span
           className="absolute inset-0 transition-transform duration-[950ms] ease-[cubic-bezier(0.7,0,0.2,1)] will-change-transform group-hover:scale-105 group-focus-visible:scale-105"

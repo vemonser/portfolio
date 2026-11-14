@@ -39,10 +39,23 @@ uniform float uWarpDrift;
 uniform float uScroll;
 uniform vec3 uAccent;
 uniform vec2 uPointer;
+uniform vec2 uCompressionCenter;
+uniform vec2 uCompressionHalfSize;
+uniform vec2 uCompressionDirection;
+uniform float uCompressionStrength;
 
 varying vec2 vUv;
 
 ${MERCURY_GLSL}
+
+/**
+ * Signed distance to the active compression rectangle, in the same centred,
+ * aspect-correct space as the mercury field.
+ */
+float compressionDistance(vec2 p, vec2 center, vec2 halfSize) {
+  vec2 d = abs(p - center) - halfSize;
+  return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
 
 void main() {
   // Working in a centred, aspect-correct space keeps the folds isotropic on
@@ -68,12 +81,33 @@ void main() {
   p += warp * 0.16 * scale;
 
   vec2 slope = vec2(raw.x - raw.y, raw.x - raw.z);
+
+  /*
+   * Liquid compression. The active target arrives in UV space; convert it
+   * into the field's own space, then fold the domain toward the rectangle's
+   * axis instead of denting it in a circle. The crease runs across the
+   * reading direction, so Arabic folds the other way without mirroring the
+   * lighting. Strength zero makes every term vanish.
+   */
+  vec2 zoneCenter = (uCompressionCenter - 0.5) * scale;
+  vec2 zoneHalf = max(uCompressionHalfSize * scale, vec2(0.001));
+  vec2 foldDir = normalize(uCompressionDirection + vec2(0.0001));
+  vec2 fromCenter = p - zoneCenter;
+  float edge =
+    1.0 - smoothstep(0.0, 0.14, abs(compressionDistance(p, zoneCenter, zoneHalf)));
+  float fold = edge * uCompressionStrength;
+  float along = dot(fromCenter, foldDir);
+  float across = dot(fromCenter, vec2(-foldDir.y, foldDir.x));
+
+  p += foldDir * (-along * 0.55 * fold);
+  p += foldDir * (sin(across * 18.0 + uTime * 0.8) * 0.012 * fold);
+
   vec3 col = mercury(
     p,
     uTime,
     raw * uRippleAmp,
     slope * uDispersion + warp * 0.12,
-    raw.x * uSheen + length(warp) * 0.06
+    raw.x * uSheen + length(warp) * 0.06 + fold * 0.18
   );
 
   float vig = smoothstep(1.25, 0.35, length((vUv - 0.5) * vec2(uAspect * 0.8, 1.0)));

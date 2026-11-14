@@ -13,7 +13,7 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <main>
-      <Hero />
+      <Hero locale={locale} />
       <IntroSection locale={locale} />
       <SelectedWork locale={locale} />
     </main>

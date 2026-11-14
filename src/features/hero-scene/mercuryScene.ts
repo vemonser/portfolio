@@ -49,6 +49,7 @@ const rippleResolution = () => (isCoarsePointer() ? 256 : 384);
 
 export function createMercuryScene({
   canvas,
+  direction = "ltr",
   initialTime = 0,
   onFirstFrame,
   onContextLost,
@@ -117,6 +118,12 @@ export function createMercuryScene({
     uScroll: { value: 0 },
     uAccent: { value: new THREE.Color(0xc6f035) },
     uPointer: { value: new THREE.Vector2(0.5, 0.5) },
+    uCompressionCenter: { value: new THREE.Vector2(0.5, 0.5) },
+    uCompressionHalfSize: { value: new THREE.Vector2(0.2, 0.08) },
+    uCompressionDirection: {
+      value: new THREE.Vector2(direction === "rtl" ? -1 : 1, 0),
+    },
+    uCompressionStrength: { value: 0 },
   };
 
   const compositeMaterial = new THREE.ShaderMaterial({
@@ -143,6 +150,27 @@ export function createMercuryScene({
 
   const easeHover = gsap.quickTo(hover, "value", { duration: 0.8, ease: "power2.out" });
   const easeScroll = gsap.quickTo(scroll, "value", { duration: 1.1, ease: "power2.out" });
+
+  /*
+   * Liquid compression. Positional values travel to a new target over 300ms
+   * while strength is quicked over 350ms. On release only strength falls — the
+   * centre stays where it was, so the fold collapses in place instead of
+   * shooting back to the middle of the screen.
+   */
+  const compression = {
+    centerX: 0.5,
+    centerY: 0.5,
+    halfX: 0.2,
+    halfY: 0.08,
+    directionX: direction === "rtl" ? -1 : 1,
+    directionY: 0,
+    strength: 0,
+  };
+
+  const easeCompression = gsap.quickTo(compression, "strength", {
+    duration: 0.35,
+    ease: "power2.out",
+  });
 
   // --- drawing ------------------------------------------------------------
 
@@ -182,6 +210,20 @@ export function createMercuryScene({
     compositeUniforms.uWarp.value = IDLE_WARP + scroll.value * 0.55;
     compositeUniforms.uPointer.value.set(pointer.x, pointer.y);
     compositeUniforms.uRipple.value = rippleTargets[rippleIndex].texture;
+
+    compositeUniforms.uCompressionCenter.value.set(
+      compression.centerX,
+      compression.centerY,
+    );
+    compositeUniforms.uCompressionHalfSize.value.set(
+      compression.halfX,
+      compression.halfY,
+    );
+    compositeUniforms.uCompressionDirection.value.set(
+      compression.directionX,
+      compression.directionY,
+    );
+    compositeUniforms.uCompressionStrength.value = compression.strength;
 
     renderer.render(compositeScene, camera);
 
@@ -268,6 +310,27 @@ export function createMercuryScene({
     setScroll(progress) {
       easeScroll(Math.min(1, Math.max(0, progress)));
     },
+    setCompressionZone(zone) {
+      if (!zone || zone.strength <= 0) {
+        // Release: collapse the fold where it is. The next activation will
+        // slide the centre over; the surface never teleports.
+        easeCompression(0);
+        return;
+      }
+
+      gsap.to(compression, {
+        centerX: zone.center[0],
+        centerY: zone.center[1],
+        halfX: zone.halfSize[0],
+        halfY: zone.halfSize[1],
+        directionX: zone.direction[0],
+        directionY: zone.direction[1],
+        duration: 0.3,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+      easeCompression(zone.strength);
+    },
     start: frozen ? () => {} : start,
     stop,
     dispose() {
@@ -275,7 +338,7 @@ export function createMercuryScene({
       stop();
       observer.disconnect();
       canvas.removeEventListener("webglcontextlost", onLost);
-      gsap.killTweensOf([hover, scroll]);
+      gsap.killTweensOf([hover, scroll, compression]);
       rippleTargets.forEach((target) => target.dispose());
       rippleMaterial.dispose();
       compositeMaterial.dispose();

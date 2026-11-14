@@ -45,6 +45,7 @@ export default async function SelectedWork({ locale }: Props) {
               project={project}
               index={index}
               href={localizedHref(locale, `/work/${project.slug}`)}
+              direction={locale === "ar" ? "rtl" : "ltr"}
             />
           </Reveal>
         ))}

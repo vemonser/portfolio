@@ -46,6 +46,7 @@ export default async function WorkPage({ params }: Props) {
               project={project}
               index={index}
               href={localizedHref(locale, `/work/${project.slug}`)}
+              direction={locale === "ar" ? "rtl" : "ltr"}
             />
           </Reveal>
         ))}

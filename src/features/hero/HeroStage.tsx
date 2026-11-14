@@ -6,10 +6,17 @@ import { isMenuOpen, subscribeMenu } from "@/features/navigation/menu-store";
 import { heroScrollProgress } from "@/features/hero-scene/math";
 import { FROZEN_TIME } from "@/features/hero-scene/mercuryScene";
 import type { HeroScene } from "@/features/hero-scene/scene";
+import {
+  activeCompressionZone,
+  compressionZone,
+  type CompressionTarget,
+} from "@/features/hero-scene/compression";
 
 import { setHeroReady } from "./hero-ready";
 
 const REDUCED = "(prefers-reduced-motion: reduce)";
+
+type CompressionKind = "title" | "project";
 
 /**
  * The wave simulator keeps its state in half-float render targets, which is a
@@ -31,21 +38,24 @@ function hasWebGL2(): boolean {
  * the first frame lands, and it is the whole page for a browser without
  * WebGL 2.
  *
- * There is no viewport gate: the surface is pure shading, so a phone runs the
- * same shader as a desktop. Reduced motion still gets the real thing — one
- * frozen frame at the same drift the posters use — because the alternative is
- * a static image that can never match it.
+ * It also owns the input side of Liquid Compression: it measures the wordmark
+ * and visible project cards, decides which one the pointer or keyboard is on,
+ * and hands the scene one normalized zone. The scene owns the easing; this
+ * file owns the hit testing.
  */
-export default function HeroStage() {
+export default function HeroStage({ locale }: { locale: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    const stage = stageRef.current;
     const section = canvas?.closest("section");
-    if (!canvas || !section) return;
+    if (!canvas || !section || !stage) return;
 
     const reduced = window.matchMedia(REDUCED);
+    const direction = locale === "ar" ? "rtl" : "ltr";
 
     let scene: HeroScene | null = null;
     let loading = false;
@@ -53,13 +63,144 @@ export default function HeroStage() {
     let visible = true;
     let scrollFrame = 0;
     let lastProgress = -1;
+    let pointerFrame = 0;
+    let lastPointer: [number, number] | null = null;
     const cleanups: Array<() => void> = [];
+
+    const setSceneState = (value: "idle" | "running" | "paused" | "off") => {
+      stage.dataset.sceneState = value;
+    };
+
+    const viewport = () => ({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+
+    /*
+     * Hover-only deformation belongs to devices that actually hover. Touch and
+     * reduced-motion visitors keep the ambient surface, which is the whole
+     * interaction for them.
+     */
+    const compressionAllowed = () =>
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+      !reduced.matches;
+
+    const toTarget = (node: HTMLElement): CompressionTarget | null => {
+      const rect = node.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return null;
+      // A target the viewport cannot see must never drive the shader.
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return null;
+
+      const declared = node.dataset.compressionDirection;
+      return {
+        rect: {
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+        },
+        direction: declared === "rtl" || declared === "ltr" ? declared : direction,
+      };
+    };
+
+    const collectTargets = (): CompressionTarget[] => {
+      const targets: CompressionTarget[] = [];
+
+      const title = section.querySelector<HTMLElement>("[data-hero-wordmark]");
+      if (title) {
+        const target = toTarget(title);
+        if (target) targets.push(target);
+      }
+
+      const cards = document.querySelectorAll<HTMLElement>(
+        '[data-compression-target="project"]',
+      );
+      for (const card of cards) {
+        const target = toTarget(card);
+        if (target) targets.push(target);
+      }
+
+      return targets;
+    };
+
+    const contains = (node: HTMLElement, x: number, y: number) => {
+      const rect = node.getBoundingClientRect();
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    };
+
+    const kindAt = (x: number, y: number): CompressionKind | null => {
+      const title = section.querySelector<HTMLElement>("[data-hero-wordmark]");
+      if (title && contains(title, x, y)) return "title";
+
+      const cards = document.querySelectorAll<HTMLElement>(
+        '[data-compression-target="project"]',
+      );
+      for (const card of cards) {
+        if (contains(card, x, y)) return "project";
+      }
+
+      return null;
+    };
+
+    /*
+     * Diagnostics, not behaviour: the browser tests need to know that the
+     * input layer decided a zone is active, which is otherwise only visible in
+     * GPU state. The shader reads the uniform, never this attribute.
+     */
+    const applyZone = (
+      zone: ReturnType<typeof activeCompressionZone>,
+      kind: CompressionKind | null,
+    ) => {
+      scene?.setCompressionZone(zone);
+      section.dataset.compressionActive = zone ? "true" : "false";
+      if (zone && kind) section.dataset.compressionKind = kind;
+      else delete section.dataset.compressionKind;
+    };
+
+    const clearZone = () => applyZone(null, null);
+
+    const updatePointerZone = () => {
+      pointerFrame = 0;
+
+      if (!lastPointer || !compressionAllowed() || isMenuOpen()) {
+        clearZone();
+        return;
+      }
+
+      const [x, y] = lastPointer;
+      const zone = activeCompressionZone(
+        collectTargets(),
+        lastPointer,
+        viewport(),
+        1,
+      );
+      const kind = zone ? kindAt(x, y) : null;
+
+      applyZone(
+        zone && kind === "project"
+          ? { ...zone, strength: zone.strength * 0.9 }
+          : zone,
+        kind,
+      );
+    };
+
+    const schedulePointerZone = () => {
+      if (pointerFrame !== 0) return;
+      pointerFrame = requestAnimationFrame(updatePointerZone);
+    };
 
     // The menu covers the hero but does not remove it from the viewport, so
     // IntersectionObserver would happily keep the shader running underneath.
     const unsubscribeMenu = subscribeMenu((menuOpen) => {
-      if (menuOpen) scene?.stop();
-      else if (visible) scene?.start();
+      if (menuOpen) {
+        clearZone();
+        scene?.stop();
+        setSceneState("paused");
+      } else if (visible) {
+        scene?.start();
+        setSceneState(scene ? "running" : "idle");
+        schedulePointerZone();
+      }
     });
 
     // `?t=` freezes the drift at a chosen second so the poster can be captured
@@ -74,6 +215,8 @@ export default function HeroStage() {
       while (cleanups.length) cleanups.pop()?.();
       scene?.dispose();
       scene = null;
+      clearZone();
+      setSceneState("idle");
       setReady(false);
     };
 
@@ -82,11 +225,57 @@ export default function HeroStage() {
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
       scene?.setPointer(x, y);
+
+      if (event.pointerType === "touch") return;
+      lastPointer = [event.clientX, event.clientY];
+      schedulePointerZone();
     };
 
     const onPointerEnter = () => scene?.setHover(1);
     const onPointerLeave = () => scene?.setHover(0);
     const onPointerDown = () => scene?.pulse();
+
+    // Cards live below the hero, outside the section: the pointer can be over
+    // a compression target without the section ever seeing the event.
+    const onDocumentPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      lastPointer = [event.clientX, event.clientY];
+      schedulePointerZone();
+    };
+
+    const onDocumentPointerLeave = () => {
+      lastPointer = null;
+      if (pointerFrame !== 0) cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
+      clearZone();
+    };
+
+    const onFocusIn = (event: FocusEvent) => {
+      if (reduced.matches) return;
+
+      const node = (event.target as Element | null)?.closest?.(
+        '[data-compression-target="project"]',
+      );
+
+      if (!(node instanceof HTMLElement)) {
+        clearZone();
+        return;
+      }
+
+      const target = toTarget(node);
+      applyZone(
+        target ? compressionZone(target, viewport(), 0.9) : null,
+        target ? "project" : null,
+      );
+    };
+
+    const onFocusOut = () => {
+      // Focus may be moving into the pointer's target; the next frame decides
+      // from the real state rather than guessing here.
+      schedulePointerZone();
+    };
+
+    const onResize = () => schedulePointerZone();
 
     const onScroll = () => {
       if (scrollFrame !== 0) return;
@@ -107,6 +296,10 @@ export default function HeroStage() {
           lastProgress = progress;
           section.style.setProperty("--hero-scroll", progress.toFixed(3));
         }
+
+        // The wordmark and cards move with the scroll; a stationary pointer can
+        // be over a new target without a pointermove.
+        schedulePointerZone();
       });
     };
 
@@ -114,8 +307,13 @@ export default function HeroStage() {
       const observer = new IntersectionObserver(
         ([entry]) => {
           visible = entry.isIntersecting && !document.hidden;
-          if (visible && !isMenuOpen()) scene?.start();
-          else scene?.stop();
+          if (visible && !isMenuOpen()) {
+            scene?.start();
+            setSceneState(scene ? "running" : "idle");
+          } else {
+            scene?.stop();
+            setSceneState("paused");
+          }
         },
         { threshold: 0 },
       );
@@ -124,8 +322,13 @@ export default function HeroStage() {
 
       const onVisibilityChange = () => {
         visible = !document.hidden;
-        if (visible && !isMenuOpen()) scene?.start();
-        else scene?.stop();
+        if (visible && !isMenuOpen()) {
+          scene?.start();
+          setSceneState(scene ? "running" : "idle");
+        } else {
+          scene?.stop();
+          setSceneState("paused");
+        }
       };
       document.addEventListener("visibilitychange", onVisibilityChange);
       cleanups.push(() =>
@@ -139,6 +342,14 @@ export default function HeroStage() {
       section.addEventListener("pointerleave", onPointerLeave);
       section.addEventListener("pointerdown", onPointerDown);
       window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onResize);
+
+      document.addEventListener("pointermove", onDocumentPointerMove, {
+        passive: true,
+      });
+      document.addEventListener("pointerleave", onDocumentPointerLeave);
+      document.addEventListener("focusin", onFocusIn);
+      document.addEventListener("focusout", onFocusOut);
 
       cleanups.push(() => {
         section.removeEventListener("pointermove", onPointerMove);
@@ -146,12 +357,23 @@ export default function HeroStage() {
         section.removeEventListener("pointerleave", onPointerLeave);
         section.removeEventListener("pointerdown", onPointerDown);
         window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onResize);
+        document.removeEventListener("pointermove", onDocumentPointerMove);
+        document.removeEventListener("pointerleave", onDocumentPointerLeave);
+        document.removeEventListener("focusin", onFocusIn);
+        document.removeEventListener("focusout", onFocusOut);
         if (scrollFrame !== 0) cancelAnimationFrame(scrollFrame);
+        if (pointerFrame !== 0) cancelAnimationFrame(pointerFrame);
       });
 
       observeVisibility();
       onScroll();
-      if (!visible || isMenuOpen()) instance.stop();
+      if (!visible || isMenuOpen()) {
+        instance.stop();
+        setSceneState("paused");
+      } else {
+        setSceneState("running");
+      }
     };
 
     const mount = async () => {
@@ -160,6 +382,7 @@ export default function HeroStage() {
       // No WebGL 2: the poster is the whole scene, and the entrance still runs
       // — a static image should not hold the wordmark hostage.
       if (!hasWebGL2()) {
+        setSceneState("off");
         setHeroReady(true);
         return;
       }
@@ -171,6 +394,7 @@ export default function HeroStage() {
 
         scene = createHeroScene({
           canvas,
+          direction,
           initialTime: initialTime || frozenTime(),
           onFirstFrame: () => {
             if (!disposed) setReady(true);
@@ -181,6 +405,8 @@ export default function HeroStage() {
             setReady(false);
             scene?.dispose();
             scene = null;
+            clearZone();
+            setSceneState("off");
           },
         });
 
@@ -189,6 +415,7 @@ export default function HeroStage() {
         // A refused context (GPU process gone, too many live contexts) must
         // degrade to the poster, not surface an unhandled error. The entrance
         // still runs so the title is never held hostage.
+        setSceneState("off");
         setHeroReady(true);
       } finally {
         loading = false;
@@ -212,12 +439,14 @@ export default function HeroStage() {
       reduced.removeEventListener("change", onReducedChange);
       detach();
     };
-  }, []);
+  }, [locale]);
 
   return (
     <div
+      ref={stageRef}
       aria-hidden="true"
       data-ready={ready ? "true" : "false"}
+      data-scene-state="idle"
       className="group absolute inset-0 z-0 overflow-hidden"
     >
       <picture className="absolute inset-0 block opacity-100 transition-opacity duration-700 group-data-[ready=true]:opacity-0">

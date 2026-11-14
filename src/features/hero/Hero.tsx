@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import HeroOverlay from "./HeroOverlay";
 import HeroStage from "./HeroStage";
 
-export default async function Hero() {
+export default async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations("hero");
 
   return (
@@ -12,7 +12,7 @@ export default async function Hero() {
       aria-labelledby="hero-title"
       className="relative isolate flex min-h-[100dvh] flex-col justify-end overflow-hidden bg-black"
     >
-      <HeroStage />
+      <HeroStage locale={locale} />
 
       {/*
         The overlay owns the entrance: meta labels first, then the wordmark
@@ -42,7 +42,7 @@ export default async function Hero() {
           <p className="ui-label m-0 ms-auto text-end">{t("location")}</p>
         </div>
 
-        <h1 id="hero-title" className="hero-wordmark">
+        <h1 id="hero-title" className="hero-wordmark" data-hero-wordmark>
           <span className="block overflow-hidden py-[0.12em] -my-[0.12em]">
             <span className="block translate-y-[115%] transition-transform duration-[1050ms] ease-[cubic-bezier(0.7,0,0.2,1)] delay-[150ms] will-change-transform group-data-[in=true]:translate-y-0">
               {t("name")}
