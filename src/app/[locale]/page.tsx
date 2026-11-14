@@ -1,6 +1,8 @@
 import Hero from "@/features/hero/Hero";
 import IntroSection from "@/features/intro/IntroSection";
 import SelectedWork from "@/features/work/SelectedWork";
+import PageFrame from "@/features/ui/PageFrame";
+import { toLocale } from "@/features/ui/editorial";
 import { setRequestLocale } from "next-intl/server";
 
 type Props = {
@@ -12,10 +14,10 @@ export default async function HomePage({ params }: Props) {
   setRequestLocale(locale);
 
   return (
-    <main>
+    <PageFrame locale={toLocale(locale)}>
       <Hero locale={locale} />
       <IntroSection locale={locale} />
       <SelectedWork locale={locale} />
-    </main>
+    </PageFrame>
   );
 }

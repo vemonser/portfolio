@@ -2,58 +2,109 @@ import Link from "next/link";
 
 import type { Project } from "@/content/projects/types";
 
-import { coverStyle } from "./cover";
+import { formatNumber, type Locale } from "@/features/ui/editorial";
+import EditorialMedia from "@/features/ui/EditorialMedia";
 
 type Props = {
   project: Project;
   index: number;
   href: string;
+  locale: Locale;
   /** Reading direction of the page; the Hero mirrors its fold axis with it. */
   direction: "ltr" | "rtl";
+  variant: "home" | "archive";
 };
 
-function formatIndex(index: number): string {
-  return String(index + 1).padStart(2, "0");
-}
+/**
+ * Project media ratios follow the sequence position, so the Home run breathes
+ * unevenly on purpose. The archive keeps one ratio for comparison.
+ */
+const HOME_ASPECT = [
+  "aspect-[16/10]",
+  "aspect-[4/5]",
+  "aspect-[5/4]",
+  "aspect-[3/2]",
+];
 
 /**
- * The crz.studio card: two stacked duotone covers, the second rising over the
- * first on hover. Everything except the link is inert markup, so the whole
- * card behaves as one target.
+ * A project entry. The whole card is the link, the media is a designed field
+ * built from real project metadata, and hover reveals the one action the card
+ * has: open the case study. Nothing here talks to the Hero — the
+ * `data-compression-target` attribute is the only contract between them.
  */
-export default function ProjectCard({ project, index, href, direction }: Props) {
+export default function ProjectCard({
+  project,
+  index,
+  href,
+  locale,
+  direction,
+  variant,
+}: Props) {
+  const home = variant === "home";
+
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col"
+      className={`group flex h-full flex-col ${
+        home ? "gap-[var(--space-3)]" : "gap-[var(--space-2)]"
+      }`}
       data-project={project.slug}
       data-compression-target="project"
       data-compression-direction={direction}
     >
-      <span className="relative isolate block aspect-[4/3] overflow-hidden rounded-[2px] bg-ink">
-        <span
-          className="absolute inset-0 transition-transform duration-[950ms] ease-[cubic-bezier(0.7,0,0.2,1)] will-change-transform group-hover:scale-105 group-focus-visible:scale-105"
-          style={{ background: coverStyle(project.cover) }}
+      <span className="relative block overflow-hidden">
+        <EditorialMedia
+          project={project}
+          index={index}
+          locale={locale}
+          className={`${
+            home ? HOME_ASPECT[index % HOME_ASPECT.length] : "aspect-[4/3]"
+          } transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] will-change-transform group-hover:scale-[1.015] group-focus-visible:scale-[1.015]`}
         />
+
         <span
-          className="absolute inset-0 scale-[1.07] opacity-0 transition-[opacity,transform] duration-[950ms] ease-[cubic-bezier(0.7,0,0.2,1)] will-change-[opacity,transform] group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100"
-          style={{ background: coverStyle(project.coverAlt) }}
-        />
-        <span className="pointer-events-none absolute inset-0 z-[1] grid place-items-center font-display text-[clamp(6rem,17vw,13rem)] font-semibold leading-none tracking-[-0.04em] text-bone/15">
-          {project.title.trim().charAt(0)}
+          aria-hidden="true"
+          className="pointer-events-none absolute z-[1] m-[var(--space-2)] grid h-11 w-11 translate-y-2 place-items-center rounded-full bg-bone/10 text-bone opacity-0 backdrop-blur-sm transition-[opacity,transform] duration-[var(--dur-base)] ease-[var(--ease-editorial)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 [inset-block-end:0] [inset-inline-end:0]"
+        >
+          <span className={direction === "rtl" ? "-scale-x-100" : undefined}>
+            ↗
+          </span>
         </span>
       </span>
 
-      <span className="flex flex-1 flex-col gap-[0.55rem] border-b border-bone/15 pb-[1.2rem] pt-4">
-        <span className="flex items-baseline justify-between gap-4">
-          <span className="font-display text-[clamp(1.05rem,1.5vw,1.35rem)] font-bold leading-[1.2] tracking-[-0.01em] en:uppercase en:tracking-[0.005em] ar:leading-[1.45] ar:tracking-normal">
+      <span
+        className={`flex flex-col border-t border-[var(--line-hairline)] ${
+          home
+            ? "gap-[0.6rem] pt-[var(--space-2)]"
+            : "gap-[0.4rem] pt-[var(--space-1)]"
+        }`}
+      >
+        <span className="flex items-baseline justify-between gap-[var(--space-3)]">
+          <span
+            className={
+              home
+                ? "font-display text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.02] tracking-[-0.03em] en:uppercase en:tracking-[-0.015em] ar:leading-[1.35] ar:tracking-normal"
+                : "font-display text-[clamp(1.15rem,1.6vw,1.45rem)] font-semibold leading-[1.2] tracking-[-0.02em] en:uppercase en:tracking-[-0.005em] ar:leading-[1.45] ar:tracking-normal"
+            }
+          >
             {project.title}
           </span>
           <span className="shrink-0 font-label text-t-14 tracking-[var(--track)] text-warm ar:tracking-normal">
-            P / {formatIndex(index)}
+            P / {formatNumber(index + 1, locale, { pad: 2 })}
           </span>
         </span>
-        <span className="max-w-[44ch] text-[clamp(0.95rem,1.1vw,1.05rem)] leading-[1.6] text-bone/60 ar:leading-[1.8]">
+
+        <span className="font-label text-t-14 uppercase tracking-[var(--track)] text-lime/75 ar:text-t-16 ar:normal-case ar:tracking-normal">
+          {project.role} · {project.year}
+        </span>
+
+        <span
+          className={
+            home
+              ? "max-w-[48ch] leading-[1.7] text-bone/60 ar:leading-[1.9]"
+              : "max-w-[44ch] leading-[1.6] text-bone/60 ar:leading-[1.85]"
+          }
+        >
           {project.tagline}
         </span>
       </span>

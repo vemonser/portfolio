@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
+import ChapterLabel from "@/features/ui/ChapterLabel";
+import { toLocale } from "@/features/ui/editorial";
 import Reveal from "@/features/ui/Reveal";
 
 type Props = {
@@ -7,37 +9,73 @@ type Props = {
 };
 
 /**
- * dennissnellenberg's intro section, cut down to the statement and its
- * support paragraph — no "About me" button, as agreed.
+ * The first chapter after the Hero: one statement, one supporting argument and
+ * one quiet metadata line. The English spread puts the argument in a narrow
+ * right-hand column; Arabic hangs it under an indented statement, because a
+ * narrower measure is what its script wants, not a mirrored column.
  */
 export default async function IntroSection({ locale }: Props) {
   const t = await getTranslations({ locale, namespace: "intro" });
+  const hero = await getTranslations({ locale, namespace: "hero" });
+  const typed = toLocale(locale);
+  const arabic = typed === "ar";
 
   return (
     <section
       aria-labelledby="intro-title"
-      className="px-[var(--nav-inset)] pb-[clamp(6rem,13vh,10rem)] pt-[clamp(7rem,18vh,13rem)]"
+      data-section="intro"
+      className="px-[var(--inset-edge)] pb-[var(--inset-chapter)] pt-[var(--inset-chapter-lg)]"
     >
-      <Reveal className="mb-[clamp(2rem,5vw,3.75rem)]">
-        <p className="ui-label">{t("label")}</p>
+      <Reveal className="border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
+        <ChapterLabel locale={typed} index={0}>
+          {t("label")}
+        </ChapterLabel>
       </Reveal>
 
-      <div className="grid items-start gap-[clamp(2.5rem,5vw,4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(15rem,23rem)] lg:gap-x-[clamp(2rem,6vw,7rem)]">
-        <Reveal>
+      <div className="mt-[var(--space-6)] grid items-start gap-[var(--space-5)] lg:grid-cols-12 lg:gap-x-[var(--space-5)]">
+        <Reveal className={arabic ? "lg:col-span-11" : "lg:col-span-8"}>
           <h2
             id="intro-title"
-            className="m-0 max-w-[24ch] font-display text-[clamp(1.7rem,3.6vw,3.4rem)] font-medium leading-[1.14] tracking-[-0.03em] ar:max-w-[30ch] ar:leading-[1.55] ar:tracking-normal"
+            className={`m-0 font-display text-[clamp(1.9rem,4.2vw,4rem)] font-medium leading-[1.1] tracking-[-0.03em] ${
+              arabic
+                ? "max-w-[26ch] leading-[1.5] tracking-normal"
+                : "max-w-[22ch]"
+            }`}
           >
             {t("statement")}
           </h2>
         </Reveal>
+
         <Reveal
-          delay={100}
-          className="max-w-[34ch] text-t-20 leading-[1.7] text-bone/60 ar:leading-[1.9]"
+          delay={120}
+          className={
+            arabic
+              ? "lg:col-span-8 lg:col-start-3 lg:mt-[var(--space-6)]"
+              : "lg:col-span-4 lg:col-start-9 lg:mt-[var(--space-5)]"
+          }
         >
-          <p className="m-0">{t("body")}</p>
+          <p className="m-0 max-w-[34ch] text-[clamp(1.05rem,1.5vw,1.3rem)] leading-[1.75] text-bone/65 ar:max-w-[30ch] ar:leading-[1.9]">
+            {t("body")}
+          </p>
         </Reveal>
       </div>
+
+      <Reveal
+        delay={180}
+        className="mt-[var(--space-6)] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-1)] border-t border-[var(--line-hairline)] pt-[var(--space-2)] font-label text-t-14 uppercase tracking-[var(--track)] text-warm ar:text-t-16 ar:normal-case ar:tracking-normal"
+      >
+        <span>{hero("location")}</span>
+        <span aria-hidden="true" className="text-bone/25">
+          ·
+        </span>
+        <span className="inline-flex items-center gap-[0.45rem] text-bone/70">
+          <span
+            className="h-[6px] w-[6px] rounded-full bg-lime"
+            aria-hidden="true"
+          />
+          {hero("available")}
+        </span>
+      </Reveal>
     </section>
   );
 }

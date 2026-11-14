@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { getProjects } from "@/content/projects";
 import { localizedHref } from "@/features/navigation/nav";
+import { toLocale } from "@/features/ui/editorial";
 import Reveal from "@/features/ui/Reveal";
 import { pageLede, pageShell, pageTitle, workGrid } from "@/features/ui/styles";
 
@@ -46,7 +47,9 @@ export default async function WorkPage({ params }: Props) {
               project={project}
               index={index}
               href={localizedHref(locale, `/work/${project.slug}`)}
+              locale={toLocale(locale)}
               direction={locale === "ar" ? "rtl" : "ltr"}
+              variant="archive"
             />
           </Reveal>
         ))}

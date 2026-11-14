@@ -212,7 +212,7 @@ html[lang="ar"] {
   text-align: center;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 8.4vw, 8.5rem);
+  font-size: clamp(2rem, 8.4vw, var(--type-display-max));
   font-weight: 600;
   line-height: 0.86;
   letter-spacing: -0.035em;
@@ -232,11 +232,11 @@ html[lang="en"] .hero-wordmark {
  * a Latin stem reads as deliberate; cutting the bowl of ن reads as broken.
  */
 html[lang="ar"] .hero-wordmark {
-  --wordmark-drop: 0.11em;
+  --wordmark-drop: 0.06em;
 
-  font-size: clamp(2.6rem, 13vw, 11rem);
+  font-size: clamp(2.6rem, 11vw, var(--type-display-max));
   font-weight: 700;
-  line-height: 1.18;
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
@@ -838,7 +838,9 @@ html[dir="rtl"] .link-line:focus-visible::after {
   --link-line-offset: 0.5rem;
 }
 
-/* Reveal — IntersectionObserver flips data-revealed once; CSS does the rest. */
+/* Reveal — IntersectionObserver flips data-revealed once; CSS does the rest.
+   The `data-js` flag is set by one inline script in the layout, during HTML
+   parse, so grid/hero content is never painted in its hidden state. */
 html[data-js="true"] .reveal {
   opacity: 0;
   transform: translateY(1.25rem) rotate(0.001deg);
@@ -1003,6 +1005,95 @@ html[lang="ar"] .prose-blog h2 {
 }
 
 html[lang="ar"] .chapter-label {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Editorial media
+ *
+ * A project's field is built from data the site actually has: its two cover
+ * colours, its initial, its index and its first stack item. Three deterministic
+ * compositions (seeded by the slug) keep a sequence from reading as one tile
+ * repeated. It is a placeholder with intent, not an implied screenshot.
+ * --------------------------------------------------------------------------- */
+
+.editorial-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, var(--cover-from), var(--cover-to));
+}
+
+.editorial-media__wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 15% 0%, rgb(245 241 232 / 0.18), transparent 55%),
+    linear-gradient(180deg, rgb(11 11 10 / 0.05), rgb(11 11 10 / 0.55));
+}
+
+.editorial-media--v1 .editorial-media__wash {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.6%,
+      rgb(245 241 232 / 0.32) 50%,
+      transparent 50.4%
+    ),
+    radial-gradient(80% 120% at 70% 90%, rgb(11 11 10 / 0.62), transparent 62%);
+}
+
+.editorial-media--v2 .editorial-media__wash {
+  background:
+    repeating-radial-gradient(
+      circle at 78% 112%,
+      rgb(245 241 232 / 0.13) 0 1px,
+      transparent 1.5px 16px
+    ),
+    linear-gradient(200deg, transparent 30%, rgb(11 11 10 / 0.55));
+}
+
+.editorial-media__index {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  color: rgb(245 241 232 / 0.72);
+}
+
+html[lang="ar"] .editorial-media__index {
+  font-size: var(--text-t-16);
+  letter-spacing: 0;
+}
+
+.editorial-media__initial {
+  position: absolute;
+  inset-block-end: -0.18em;
+  inset-inline-end: 0.02em;
+  font-family: var(--font-display);
+  font-size: clamp(7rem, 20vw, 16rem);
+  font-weight: 600;
+  line-height: 1;
+  color: rgb(245 241 232 / 0.16);
+}
+
+.editorial-media__meta {
+  position: absolute;
+  inset-block-end: var(--space-2);
+  inset-inline-start: var(--space-2);
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: rgb(245 241 232 / 0.62);
+}
+
+html[lang="ar"] .editorial-media__meta {
   font-size: var(--text-t-16);
   letter-spacing: 0;
   text-transform: none;
