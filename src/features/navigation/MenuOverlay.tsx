@@ -11,6 +11,10 @@ import {
   type RefObject,
 } from "react";
 
+import type { Social } from "@/content/socials";
+
+import LinkLine from "@/features/ui/LinkLine";
+
 import { setMenuOpen } from "./menu-store";
 import type { NavLink } from "./nav";
 
@@ -23,7 +27,9 @@ type Props = {
   labels: {
     navigation: string;
     close: string;
+    socials: string;
   };
+  socials: Social[];
   returnFocusRef: RefObject<HTMLButtonElement | null>;
 };
 
@@ -32,6 +38,7 @@ export default function MenuOverlay({
   onClose,
   links,
   labels,
+  socials,
   returnFocusRef,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -266,6 +273,31 @@ export default function MenuOverlay({
             </ul>
           </div>
 
+          <nav
+            aria-label={labels.socials}
+            className="flex flex-col gap-[var(--space-2)]"
+          >
+            <p className="ui-label m-0">{labels.socials}</p>
+            <ul className="m-0 flex list-none flex-wrap gap-x-[var(--space-4)] gap-y-0 p-0">
+              {socials.map((social) => (
+                <li key={social.key} className="flex">
+                  {social.href ? (
+                    <LinkLine
+                      href={social.href}
+                      external
+                      className="inline-flex min-h-11 items-center text-t-16"
+                    >
+                      {social.label}
+                    </LinkLine>
+                  ) : (
+                    <span className="inline-flex min-h-11 items-center text-t-16 text-bone/45">
+                      {social.label}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
     </dialog>

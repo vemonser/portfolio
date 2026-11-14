@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { Social } from "@/content/socials";
+
 import MenuOverlay from "./MenuOverlay";
 import { buildHeaderLinks, type NavLink } from "./nav";
 
@@ -15,7 +17,9 @@ type Props = {
     open: string;
     close: string;
     navigation: string;
+    socials: string;
   };
+  socials: Social[];
 };
 
 /**
@@ -29,6 +33,7 @@ export default function SiteHeader({
   homeHref,
   links,
   labels,
+  socials,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -107,7 +112,9 @@ export default function SiteHeader({
         labels={{
           navigation: labels.navigation,
           close: labels.close,
+          socials: labels.socials,
         }}
+        socials={socials}
         returnFocusRef={triggerRef}
       />
     </>

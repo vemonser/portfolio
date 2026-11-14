@@ -69,7 +69,9 @@ export default function RootLayout({
             open: copy.nav.open,
             close: copy.nav.close,
             navigation: copy.nav.navigation,
+            socials: copy.footer.socials,
           }}
+          socials={socials}
         />
         {children}
         <ContactChapter>

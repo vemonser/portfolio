@@ -52,6 +52,11 @@ test.describe("mobile drawer", () => {
 
     const dialog = page.locator("dialog#site-menu");
     await expect(dialog).toHaveAttribute("data-state", "open");
+
+    const socials = dialog.getByRole("navigation", { name: "Socials" });
+    for (const label of ["Instagram", "Twitter", "LinkedIn"]) {
+      await expect(socials).toContainText(label);
+    }
     await expect
       .poll(() =>
         page.evaluate(
