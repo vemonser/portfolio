@@ -1224,6 +1224,226 @@ html[lang="ar"] .project-section p {
   font-size: clamp(1.05rem, 1.6vw, 1.3rem);
 }
 
+/* About -------------------------------------------------------------------- */
+.about-page,
+.contact-page,
+.blog-index {
+  padding: clamp(8rem, 22vh, 13rem) var(--nav-inset) clamp(4rem, 9vh, 7rem);
+}
+
+.about-grid {
+  display: grid;
+  gap: 2.5rem;
+  margin-block-start: clamp(2.5rem, 7vw, 5rem);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .about-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 26rem);
+    gap: clamp(2rem, 6vw, 6rem);
+  }
+}
+
+.about-bio {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 42rem;
+}
+
+.about-bio p {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-bone) 68%, transparent);
+  font-size: var(--text-t-20);
+  line-height: 1.8;
+}
+
+html[lang="ar"] .about-bio p {
+  line-height: 2;
+}
+
+.about-portrait {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border-radius: 2px;
+  background: var(--color-ink);
+}
+
+.about-portrait__layer {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 80% at 30% 20%, rgb(198 240 53 / 0.18), transparent 60%),
+    linear-gradient(160deg, #2f4a3c, #171614 55%, #0b0b0a);
+}
+
+.about-portrait__mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: clamp(8rem, 20vw, 16rem);
+  font-weight: 600;
+  line-height: 1;
+  color: color-mix(in srgb, var(--color-bone) 10%, transparent);
+}
+
+.about-services {
+  margin-block-start: clamp(4rem, 10vw, 7rem);
+}
+
+.services-grid {
+  display: grid;
+  gap: 2rem;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .services-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 3rem;
+  }
+}
+
+.service {
+  padding-block-start: 1.1rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-bone) 14%, transparent);
+}
+
+.service__index {
+  font-family: var(--font-label);
+  font-size: var(--text-t-14);
+  letter-spacing: var(--track);
+  color: var(--color-lime);
+}
+
+html[lang="ar"] .service__index {
+  letter-spacing: 0;
+}
+
+.service__title {
+  margin: 0.4rem 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: var(--text-t-28);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+html[lang="ar"] .service__title {
+  letter-spacing: 0;
+}
+
+.service__body {
+  margin: 0;
+  max-width: 38ch;
+  color: color-mix(in srgb, var(--color-bone) 60%, transparent);
+  line-height: 1.7;
+}
+
+html[lang="ar"] .service__body {
+  line-height: 1.9;
+}
+
+/* Contact ------------------------------------------------------------------ */
+.contact-grid {
+  display: grid;
+  gap: 3rem;
+  margin-block-start: clamp(2.5rem, 7vw, 5rem);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .contact-grid {
+    grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 6rem);
+  }
+}
+
+.contact-details__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  margin: 1.25rem 0 0;
+}
+
+.contact-details__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.contact-details__row dd {
+  margin: 0;
+  font-size: var(--text-t-20);
+}
+
+.contact-form {
+  display: grid;
+  gap: 1.6rem;
+  max-width: 40rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.field__control {
+  width: 100%;
+  padding: 0.95rem 0.5rem;
+  border: 0;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--color-bone) 28%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-bone);
+  font: inherit;
+  font-size: var(--text-t-20);
+  transition: border-color 0.3s ease;
+}
+
+.field__control:focus {
+  border-color: var(--color-lime);
+}
+
+.field__control--area {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+.contact-form__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  margin-block-start: 0.5rem;
+}
+
+.contact-form__submit {
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-label);
+}
+
+.contact-form__hint {
+  margin: 0;
+  max-width: 26ch;
+  color: var(--color-warm);
+  font-size: var(--text-t-14);
+  line-height: 1.6;
+}
+
+html[lang="ar"] .contact-form__hint {
+  font-size: var(--text-t-16);
+}
+
 }
 
 @media (prefers-reduced-motion: reduce) {
