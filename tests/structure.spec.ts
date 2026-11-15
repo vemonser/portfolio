@@ -54,6 +54,50 @@ test.describe("chapter numbering", () => {
   });
 });
 
+test.describe("reading layout", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("the article shares one left edge and one measure", async ({ page }) => {
+    await page.goto("/blog/two-directions");
+
+    const h1 = await page.locator("h1").boundingBox();
+    const firstParagraph = await page.locator(".prose-blog p").first().boundingBox();
+    const back = await page.getByRole("link", { name: "All posts" }).boundingBox();
+
+    expect(h1).not.toBeNull();
+    expect(firstParagraph).not.toBeNull();
+    expect(back).not.toBeNull();
+
+    expect(Math.abs(h1!.x - firstParagraph!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(h1!.x - back!.x)).toBeLessThanOrEqual(1);
+  });
+
+  test("does not repeat a project counter", async ({ page }) => {
+    await page.goto("/work");
+
+    const text = await page.locator("main").innerText();
+    expect(text).not.toMatch(/P \/ \d/);
+    expect(text).not.toMatch(/\b\d{2} — \d{2}\b/);
+  });
+});
+
+test.describe("reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("keeps the poster and never starts the scene", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(page.locator("[data-scene-state]")).toHaveAttribute(
+      "data-scene-state",
+      "off",
+    );
+    const opacity = await page
+      .locator("#hero canvas")
+      .evaluate((node) => getComputedStyle(node).opacity);
+    expect(opacity).toBe("0");
+  });
+});
+
 test.describe("Work structure", () => {  test.use({ viewport: { width: 1440, height: 900 } });
 
   test("uses one 16:10 cover ratio on the archive", async ({ page }) => {
