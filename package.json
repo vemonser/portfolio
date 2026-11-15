@@ -10,7 +10,8 @@
     "poster": "node scripts/poster.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "evidence": "node scripts/editorial-evidence.mjs"
+    "evidence": "node scripts/editorial-evidence.mjs",
+    "capture:work": "node scripts/capture-work.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
