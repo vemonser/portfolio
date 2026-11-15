@@ -134,3 +134,29 @@ the hero parallax can clip the wordmark as the hero leaves the viewport.
   stacks to one column (3,334px at 768) — unchanged behaviour.
 - Phase 3 (project copy) is not done: rewriting client blurbs would invent
   claims the source does not support.
+
+## Follow-up (commit `51d09d4`)
+
+**Reported:** the ghost header still appeared when navigating to `/` from
+another route, and on first open.
+
+**Root cause:** not a code regression. The regenerated files on disk were clean
+(a fresh browser context showed no ghost), but the poster URL never changed, so
+an already-open tab kept serving the old frame from its image cache — client
+side navigation reused the same URL within the same document. The old frame is
+the only place the removed Arabic label still exists.
+
+**Fix:** `scripts/poster.mjs` now writes a content hash to
+`src/content/poster-version.ts`, and every poster URL (`<source>` and `<img>`)
+carries `?v=<hash>`. New bytes always produce a new URL, so a warm cache cannot
+outlive a regeneration. One reload is still needed for tabs opened before this
+commit.
+
+**Also changed:** the hero shows the wordmark only. "Available for work",
+"Scroll" and "Cairo, Egypt" are removed from the hero; availability and
+location remain in the intro chapter, which already repeated them. The pulse
+and scroll-cue keyframes are deleted with their last consumer.
+
+**Verification:** 50 Playwright tests pass (2 new: hero carries the wordmark
+only; every poster URL is versioned), 42 Vitest tests pass, typecheck/lint/build
+exit 0. Evidence Gate re-ran with AC-10 and AC-11 added: PASS.
