@@ -18,15 +18,15 @@ async function hideHeroScenery(page: Page) {
   });
 }
 
-/** Bottom-most row that still carries wordmark ink, measured from pixels. */
-async function lastInkRow(page: Page) {
+/** Bottom-most row that still carries wordmark ink, searched from `fromRow`. */
+async function lastInkRow(page: Page, fromRow: number) {
   const buffer = await page.screenshot();
   const { data, info } = await sharp(buffer)
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
 
-  for (let y = info.height - 1; y >= 0; y -= 1) {
+  for (let y = info.height - 1; y >= fromRow; y -= 1) {
     let bright = 0;
     for (let x = 0; x < info.width; x += 1) {
       const i = (y * info.width + x) * 3;
@@ -56,9 +56,12 @@ test.describe("P1-1 hero wordmark", () => {
       await hideHeroScenery(page);
 
       const viewportHeight = await page.evaluate(() => window.innerHeight);
-      const ink = await lastInkRow(page);
+      // Only the bottom band can hold the wordmark; searching the whole frame
+      // would let the header satisfy the check even if the wordmark vanished.
+      const band = Math.floor(viewportHeight * 0.5);
+      const ink = await lastInkRow(page, band);
 
-      expect(ink).toBeGreaterThan(0);
+      expect(ink).toBeGreaterThan(viewportHeight - 140);
       expect(ink).toBeLessThanOrEqual(viewportHeight - 6);
     });
   }

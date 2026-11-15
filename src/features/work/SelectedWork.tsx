@@ -2,12 +2,11 @@ import { copy } from "@/content/copy";
 import { getProjects } from "@/content/projects";
 import ChapterLabel from "@/features/ui/ChapterLabel";
 import { formatNumber } from "@/features/ui/editorial";
+import { HOME_COUNT } from "@/features/ui/home-layout";
 import LinkLine from "@/features/ui/LinkLine";
 import ProjectIndex from "@/features/ui/ProjectIndex";
 import Reveal from "@/features/ui/Reveal";
 import { displayTitle } from "@/features/ui/styles";
-
-const HOME_COUNT = 6;
 
 /**
  * The work chapter of Home: a display heading over an asymmetric sequence,

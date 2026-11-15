@@ -61,9 +61,13 @@ export default function SiteHeader({
       if (!belowHero) {
         setSuppressed(false);
         lastY = y;
-      } else if (Math.abs(delta) > 6) {
+      } else if (delta < 0) {
+        // Any upward movement returns the trigger, even a slow trackpad nudge.
         lastY = y;
-        setSuppressed(delta > 0);
+        setSuppressed(false);
+      } else if (delta > 6) {
+        lastY = y;
+        setSuppressed(true);
       }
 
       // Below 768 the header's inline links are gone, so the trigger is the

@@ -127,16 +127,28 @@ test.describe("footer and targets", () => {
     }
   });
 
-  test("the fixed trigger clears contact links", async ({ page }) => {
+  test("the trigger never sits on contact links", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
+    await page.waitForSelector('[data-ready="true"]', { timeout: 20_000 });
 
     const contact = page.locator(CONTACT_LINK).first();
     await contact.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(250);
+    await page.waitForTimeout(600);
+
+    // Scrolling down steps the trigger aside; that, not a tighter layout, is
+    // what guarantees the copy is clear. Once it returns, the boxes must not
+    // intersect either.
+    await expect(page.locator(".menu-trigger")).toBeHidden();
+
+    await page.evaluate(() => window.scrollBy(0, -120));
+    await page.waitForTimeout(600);
+
+    const trigger = page.locator(".menu-trigger");
+    await expect(trigger).toBeVisible();
 
     const contactBox = await contact.boundingBox();
-    const triggerBox = await page.locator(".menu-trigger").boundingBox();
+    const triggerBox = await trigger.boundingBox();
 
     expect(contactBox).not.toBeNull();
     expect(triggerBox).not.toBeNull();
