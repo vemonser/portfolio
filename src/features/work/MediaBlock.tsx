@@ -14,6 +14,11 @@ type Props = {
   /** Live site, when there is one; its hostname labels the browser chrome. */
   url?: string;
   priority?: boolean;
+  /**
+   * The case-study hero is full-bleed; the rest of the stream sits in one
+   * frame (max 80rem) so captures are never upscaled past their source.
+   */
+  bleed?: boolean;
   className?: string;
 };
 
@@ -44,12 +49,17 @@ export default function MediaBlock({
   title,
   url,
   priority = false,
+  bleed = false,
   className,
 }: Props) {
+  const width = bleed ? "" : "mx-auto w-full max-w-[80rem]";
+
   if (block.kind === "phones") {
     return (
       <figure className={`m-0 ${className ?? ""}`}>
-        <PhoneTrio srcs={block.srcs} alts={block.alts} />
+        <div className={width}>
+          <PhoneTrio srcs={block.srcs} alts={block.alts} />
+        </div>
         <Caption>{block.caption}</Caption>
       </figure>
     );
@@ -75,20 +85,22 @@ export default function MediaBlock({
 
   return (
     <figure className={`m-0 ${className ?? ""}`}>
-      <BrowserFrame address={hostname(url)}>
-        <Parallax>
-          <span className={`relative block ${COVER_ASPECT}`}>
-            <Image
-              src={block.src}
-              alt={block.alt}
-              fill
-              loading={priority ? "eager" : "lazy"}
-              sizes="100vw"
-              className="object-cover object-top"
-            />
-          </span>
-        </Parallax>
-      </BrowserFrame>
+      <div className={width}>
+        <BrowserFrame address={hostname(url)}>
+          <Parallax>
+            <span className={`relative block ${COVER_ASPECT}`}>
+              <Image
+                src={block.src}
+                alt={block.alt}
+                fill
+                loading={priority ? "eager" : "lazy"}
+                sizes="100vw"
+                className="object-cover object-top"
+              />
+            </span>
+          </Parallax>
+        </BrowserFrame>
+      </div>
       <Caption>{block.caption}</Caption>
     </figure>
   );

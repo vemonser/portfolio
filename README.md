@@ -10,7 +10,7 @@ built.
 
 | | |
 |---|---|
-| Framework | Next.js 16.4 (App Router, Turbopack, fully static) |
+| Framework | Next.js 16.4 (App Router, Turbopack; static routes + one API route) |
 | Language | TypeScript, strict |
 | Styling | Tailwind CSS 4 (`@theme` tokens, no JS config) |
 | 3D | three.js 0.187, imperative, no react-three-fiber |
@@ -191,10 +191,12 @@ Resend over plain `fetch` — no SDK, no dependency. Set:
 
 With any of them missing the route answers 503 and the form composes a `mailto:`
 instead, so the button never claims a delivery that did not happen. Spam
-protection is a hidden honeypot plus a minimum fill time. There is deliberately
-no in-memory rate limit: on serverless it counts per instance and disappears on
-a cold start. Put Cloudflare Turnstile (server-side siteverify) or the platform's
-WAF in front before the form is advertised widely.
+protection is a hidden honeypot plus a 10 KB body cap. There is deliberately no
+in-memory rate limit (on serverless it counts per instance and disappears on a
+cold start) and no client-supplied timer (a bot can lie about it, and a fast
+autofill user would be punished). Put Cloudflare Turnstile with server-side
+siteverify, or the platform's WAF, in front before the form is advertised
+widely.
 
 ## Changing things
 

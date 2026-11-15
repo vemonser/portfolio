@@ -5,7 +5,6 @@ const valid = {
   email: "sam@example.com",
   message: "A project enquiry with enough text.",
   company: "",
-  startedAt: Date.now() - 5_000,
 };
 
 test.describe("contact route", () => {
@@ -26,13 +25,20 @@ test.describe("contact route", () => {
     expect(await response.json()).toEqual({ ok: true });
   });
 
-  test("rejects a submission faster than a human fill", async ({ request }) => {
+  test("rejects a malformed body", async ({ request }) => {
     const response = await request.post("/api/contact", {
-      data: { ...valid, startedAt: Date.now() },
+      data: "not-an-object",
     });
 
     expect(response.status()).toBe(400);
-    expect((await response.json()).error).toBe("too-fast");
+  });
+
+  test("rejects an oversized body", async ({ request }) => {
+    const response = await request.post("/api/contact", {
+      data: { ...valid, message: "x".repeat(20_000) },
+    });
+
+    expect(response.status()).toBe(413);
   });
 
   test("reports unconfigured when no provider is set", async ({ request }) => {

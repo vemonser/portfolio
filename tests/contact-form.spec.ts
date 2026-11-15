@@ -115,8 +115,6 @@ test.describe("contact form", () => {
   }) => {
     await openContact(page);
     await fillValid(page);
-    // The route rejects submissions that arrive faster than a human form fill.
-    await page.waitForTimeout(700);
 
     await page.getByRole("button", { name: copy.send }).click();
 

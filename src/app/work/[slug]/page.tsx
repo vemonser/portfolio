@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { copy } from "@/content/copy";
 import { getNextProject, getProject, getProjects } from "@/content/projects";
 import ChapterLabel from "@/features/ui/ChapterLabel";
+import LinkLine from "@/features/ui/LinkLine";
 import NextProject from "@/features/ui/NextProject";
 import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
@@ -103,6 +104,7 @@ export default async function ProjectPage({ params }: Props) {
                 title={project.title}
                 url={project.url}
                 priority
+                bleed
               />
             </div>
           </Reveal>
@@ -141,6 +143,26 @@ export default async function ProjectPage({ params }: Props) {
                 />
               </Reveal>
             ))}
+          </div>
+        ) : null}
+
+        {/*
+          The header pill scrolls away on a long case study, so the live site is
+          repeated once at the end as a real action — not the 14px orphan the
+          audit found.
+        */}
+        {project.url ? (
+          <div className="mt-[var(--space-7)] border-t border-[var(--line-hairline)] pt-[var(--space-3)]">
+            <LinkLine
+              href={project.url}
+              external
+              className="inline-flex min-h-11 items-center text-[clamp(1.05rem,1.6vw,1.3rem)]"
+            >
+              {copy.project.visit}
+              <span aria-hidden="true" className="ms-2">
+                ↗
+              </span>
+            </LinkLine>
           </div>
         ) : null}
       </article>

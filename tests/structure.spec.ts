@@ -11,7 +11,22 @@ test.describe("About structure", () => {
     await expect(page.locator('aside[aria-label="At a glance"]')).toBeVisible();
     await expect(page.locator("#stack-title")).toBeVisible();
     await expect(page.locator("#capabilities-title")).toBeVisible();
-    await expect(page.locator('[data-section="capabilities"] li')).toHaveCount(4);
+
+    const items = page.locator('[data-section="capabilities"] li');
+    await expect(items).toHaveCount(4);
+
+    // Two balanced columns: items 1 and 3 share a left edge, items 2 and 4
+    // share the second, and the last item is not a full-width span.
+    const boxes = await items.evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const rect = node.getBoundingClientRect();
+        return { x: Math.round(rect.x), width: Math.round(rect.width) };
+      }),
+    );
+    expect(boxes[0].x).toBe(boxes[2].x);
+    expect(boxes[1].x).toBe(boxes[3].x);
+    expect(boxes[1].x).toBeGreaterThan(boxes[0].x);
+    expect(boxes[3].width).toBe(boxes[1].width);
 
     // experience and cv are empty in src/content/about.ts, so no placeholder
     // section and no dead download link may ship.
@@ -37,11 +52,13 @@ test.describe("Work structure", () => {
     for (const ratio of ratios) expect(ratio).toBeCloseTo(1.6, 1);
   });
 
-  test("offers one live-site action per case study", async ({ page }) => {
+  test("offers the live site at the top and at the close", async ({ page }) => {
     await page.goto("/work/anom-creative");
 
-    await expect(
-      page.getByRole("link", { name: /visit site/i }),
-    ).toHaveCount(1);
+    const links = page.getByRole("link", { name: /visit site/i });
+    await expect(links).toHaveCount(2);
+    for (const link of await links.all()) {
+      await expect(link).toHaveAttribute("href", "https://anomcreative.com/");
+    }
   });
 });

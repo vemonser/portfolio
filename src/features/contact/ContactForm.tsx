@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import Field from "@/features/ui/Field";
 import StatusMessage from "@/features/ui/StatusMessage";
@@ -61,8 +61,8 @@ const EMPTY: Values = { name: "", email: "", message: "" };
  *
  * The transport is the internal `/api/contact` route. If the provider is not
  * configured the route answers 503 and the form composes a mailto instead, so
- * "Send" always has a real destination. A hidden honeypot and the time the form
- * was opened travel with the payload.
+ * "Send" always has a real destination. A hidden honeypot travels with the
+ * payload.
  */
 export default function ContactForm({
   to,
@@ -74,12 +74,6 @@ export default function ContactForm({
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [mailto, setMailto] = useState<string | null>(null);
-  const startedAt = useRef(0);
-
-  // Stamped after mount: Date.now() during render is impure and unstable.
-  useEffect(() => {
-    startedAt.current = Date.now();
-  }, []);
 
   const fieldError = (field: FieldName, value: string): string | undefined => {
     const trimmed = value.trim();
@@ -164,7 +158,6 @@ export default function ContactForm({
         body: JSON.stringify({
           ...payload,
           company,
-          startedAt: startedAt.current,
         }),
       });
 
@@ -180,7 +173,6 @@ export default function ContactForm({
 
       setValues(EMPTY);
       setCompany("");
-      startedAt.current = Date.now();
       setStatus("success");
     } catch {
       // Deliberately generic: the visitor gets an action, not a status code.
