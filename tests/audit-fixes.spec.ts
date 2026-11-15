@@ -75,9 +75,15 @@ test.describe("P1-2 menu trigger clearance", () => {
   }) => {
     await page.goto("/");
     const trigger = page.locator(".menu-trigger");
-    // Lenis owns the scroll position from its first frame; scrolling before
-    // that is reset to zero, so wait for the scene to settle.
-    await page.waitForSelector('[data-ready="true"]', { timeout: 20_000 });
+    // This test is about the trigger, not the renderer. Lenis owns the scroll
+    // from its first frame; wait for its marker rather than for a WebGL frame,
+    // so a machine without a GPU does not fail the navigation test.
+    await page.waitForFunction(
+      () => document.documentElement.classList.contains("lenis"),
+      undefined,
+      { timeout: 10_000 },
+    );
+    await page.waitForTimeout(300);
 
     await page.evaluate(() => window.scrollTo(0, 2400));
     await page.waitForTimeout(700);
