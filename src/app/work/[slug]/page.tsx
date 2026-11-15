@@ -2,13 +2,13 @@ import { notFound } from "next/navigation";
 
 import { copy } from "@/content/copy";
 import { getNextProject, getProject, getProjects } from "@/content/projects";
-import EditorialMedia from "@/features/ui/EditorialMedia";
 import LinkLine from "@/features/ui/LinkLine";
 import NextProject from "@/features/ui/NextProject";
 import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
 import { formatNumber } from "@/features/ui/editorial";
 import { chapterFrame, displayTitle } from "@/features/ui/styles";
+import MediaBlock from "@/features/work/MediaBlock";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -76,19 +76,32 @@ export default async function ProjectPage({ params }: Props) {
               </div>
             ) : null}
           </dl>
+
+          {project.url ? (
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-[var(--space-4)] inline-flex min-h-11 items-center gap-[var(--space-1)] rounded-full border border-[var(--line-strong)] px-[var(--space-4)] font-label text-t-14 uppercase tracking-[var(--track)] text-bone no-underline transition-colors duration-[var(--dur-base)] hover:border-lime hover:bg-lime hover:text-ink"
+            >
+              {copy.project.visit}
+              <span aria-hidden="true">↗</span>
+            </a>
+          ) : null}
         </header>
 
-        {/* Full-bleed field: the media is the project's atmosphere, not a
-            fabricated screenshot. */}
-        <Reveal delay={80}>
-          <div className="-mx-[var(--inset-edge)] mt-[var(--space-6)]">
-            <EditorialMedia
-              project={project}
-              index={0}
-              className="aspect-[16/10]"
-            />
-          </div>
-        </Reveal>
+        {project.media[0] ? (
+          <Reveal delay={80}>
+            <div className="-mx-[var(--inset-edge)] mt-[var(--space-6)]">
+              <MediaBlock
+                block={project.media[0]}
+                title={project.title}
+                url={project.url}
+                priority
+              />
+            </div>
+          </Reveal>
+        ) : null}
 
         <div className="mt-[var(--space-8)] grid gap-[var(--space-7)]">
           {project.sections.map((section, index) => (
@@ -113,6 +126,28 @@ export default async function ProjectPage({ params }: Props) {
             </Reveal>
           ))}
         </div>
+
+        {project.media.length > 1 ? (
+          <div className="mt-[var(--space-8)] grid grid-cols-[minmax(0,1fr)] gap-[var(--chapter-gap)]">
+            {project.media.slice(1).map((block, i) => (
+              <Reveal
+                key={`${block.kind}-${i}`}
+                delay={60}
+                className={
+                  block.kind === "browser" && i % 2 === 1
+                    ? "lg:w-[78%] lg:ms-auto"
+                    : undefined
+                }
+              >
+                <MediaBlock
+                  block={block}
+                  title={project.title}
+                  url={project.url}
+                />
+              </Reveal>
+            ))}
+          </div>
+        ) : null}
 
         {project.url ? (
           <div className="mt-[var(--space-4)]">
