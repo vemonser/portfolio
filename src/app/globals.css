@@ -201,15 +201,20 @@ html.lenis body {
   gap: 2rem;
   padding: var(--nav-inset);
   pointer-events: none;
+  /* The scrim below sits at z-index -1; isolate the header so it can never
+     slip behind a positioned child. */
+  isolation: isolate;
 }
 
 /*
  * The hero is a live, bright surface: a crest can drift under the header at any
  * frame (it reached CONTACT at t≈4s). The labels cannot depend on the frame, so
- * the header carries its own ground. The scrim holds ~0.64 behind the text row
- * and is gone by 190px, so it reads as a vignette rather than a bar.
+ * the hero gives the header its own ground. It is scoped to the home route —
+ * everywhere else the page is already black and a tint would be noise. The
+ * scrim holds ~0.64 behind the text row and is gone by 190px, so it reads as a
+ * vignette rather than a bar.
  */
-.site-header::before {
+.site-header[data-hero="true"]::before {
   content: "";
   position: absolute;
   inset-block-start: 0;

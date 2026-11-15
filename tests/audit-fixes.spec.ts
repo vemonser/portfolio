@@ -242,10 +242,14 @@ test.describe("hero first paint", () => {
   test.use({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
 
   test("paints the wordmark without JavaScript", async ({ page }) => {
+    // The h1 must be in the server response, not mounted by an effect.
+    const html = await (await page.request.get("/")).text();
+    expect(html).toContain('id="hero-title"');
+
     await page.goto("/");
 
-    // Content never waits for the effect. With scripting off there is no
-    // hydration and no scene, and the h1 must still be on screen.
+    // With scripting off there is no hydration and no scene, and the h1 must
+    // still be on screen, above the fold.
     await expect(page.locator("#hero-title")).toBeVisible();
     const box = await page.locator("#hero-title").boundingBox();
     expect(box).not.toBeNull();
@@ -257,27 +261,52 @@ test.describe("hero fit at 320", () => {
   test.use({ viewport: { width: 320, height: 800 } });
 
   test("does not clip the wordmark", async ({ page }) => {
+    for (const width of [320, 360]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/");
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(200);
+      await hideHeroScenery(page);
+
+      const buffer = await page.screenshot();
+      const { data, info } = await sharp(buffer)
+        .removeAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
+      const brightInColumn = (x: number) => {
+        for (let y = 120; y < info.height; y += 1) {
+          const i = (y * info.width + x) * 3;
+          if (data[i] > 180 && data[i + 1] > 175 && data[i + 2] > 165) return true;
+        }
+        return false;
+      };
+
+      // A clipped line leaves ink against the viewport edge.
+      expect(brightInColumn(0), `ink at x=0 at ${width}px`).toBe(false);
+      expect(
+        brightInColumn(info.width - 1),
+        `ink at x=${info.width - 1} at ${width}px`,
+      ).toBe(false);
+    }
+  });
+});
+
+test.describe("header ground", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("scopes the scrim to the hero route", async ({ page }) => {
     await page.goto("/");
-    await page.waitForTimeout(1400);
-    await hideHeroScenery(page);
+    const home = await page
+      .locator(".site-header")
+      .evaluate((node) => getComputedStyle(node, "::before").backgroundImage);
+    expect(home).toContain("linear-gradient");
 
-    const buffer = await page.screenshot();
-    const { data, info } = await sharp(buffer)
-      .removeAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-
-    const brightInColumn = (x: number) => {
-      for (let y = 120; y < info.height; y += 1) {
-        const i = (y * info.width + x) * 3;
-        if (data[i] > 180 && data[i + 1] > 175 && data[i + 2] > 165) return true;
-      }
-      return false;
-    };
-
-    // A clipped line leaves ink against the viewport edge.
-    expect(brightInColumn(0)).toBe(false);
-    expect(brightInColumn(info.width - 1)).toBe(false);
+    await page.goto("/about");
+    const about = await page
+      .locator(".site-header")
+      .evaluate((node) => getComputedStyle(node, "::before").content);
+    expect(about).toBe("none");
   });
 });
 
@@ -285,7 +314,7 @@ test.describe("English-only copy", () => {
   for (const route of ["/", "/work", "/about", "/contact", "/blog"]) {
     test(`${route} makes no bilingual claim`, async ({ page }) => {
       await page.goto(route);
-      const text = await page.locator("main").innerText();
+      const text = await page.locator("body").innerText();
       expect(text).not.toMatch(/bilingual|two languages|\brtl\b/i);
     });
   }
@@ -308,6 +337,13 @@ test.describe("editorial voice", () => {
       .locator("h1")
       .evaluate((node) => getComputedStyle(node).textTransform);
     expect(contact).toBe("none");
+
+    // The display classes are assembled from constants; this proves Tailwind
+    // kept the arbitrary clamp in the production stylesheet (7vw at 1440).
+    const size = await page
+      .locator("h1")
+      .evaluate((node) => parseFloat(getComputedStyle(node).fontSize));
+    expect(size).toBeGreaterThan(90);
 
     await page.goto("/blog/two-directions");
     const post = await page

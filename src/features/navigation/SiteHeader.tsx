@@ -92,7 +92,7 @@ export default function SiteHeader({
 
   return (
     <>
-      <header className="site-header">
+      <header className="site-header" data-hero={currentPath === homeHref ? "true" : "false"}>
         <Link href={homeHref} className="site-header__brand">
           {brand}
         </Link>
