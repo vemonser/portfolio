@@ -180,6 +180,22 @@ was removed it appeared at **3.1 s**, and the LCP was the 14px header wordmark.
   project appears without editing either file.
 - **`not-found.tsx`** is the styled 404; it is the only page with no CTA chapter.
 
+## Contact delivery
+
+`src/app/api/contact/route.ts` validates the message and sends it through
+Resend over plain `fetch` — no SDK, no dependency. Set:
+
+- `RESEND_API_KEY`
+- `CONTACT_TO` — one address, or several separated by commas
+- `CONTACT_FROM` — a sender verified on your domain
+
+With any of them missing the route answers 503 and the form composes a `mailto:`
+instead, so the button never claims a delivery that did not happen. Spam
+protection is a hidden honeypot plus a minimum fill time. There is deliberately
+no in-memory rate limit: on serverless it counts per instance and disappears on
+a cold start. Put Cloudflare Turnstile (server-side siteverify) or the platform's
+WAF in front before the form is advertised widely.
+
 ## Changing things
 
 - **All copy** lives in `src/content/copy.ts` — the name under `hero.name`,

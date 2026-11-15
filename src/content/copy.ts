@@ -144,7 +144,7 @@ export const copy = {
       email: "Email",
       message: "Message",
       send: "Send message",
-      hint: "This opens your mail app with the message ready to send.",
+      hint: "I usually reply within two working days.",
       subjectPrefix: "Project enquiry from",
       requiredName: "Please add your name.",
       requiredEmail: "Please add an email address.",

@@ -110,11 +110,13 @@ test.describe("contact form", () => {
     await expect(page.getByRole("button", { name: copy.send })).toBeEnabled();
   });
 
-  test("composes a real mailto link when no endpoint is configured", async ({
+  test("falls back to a real mailto when the API is unconfigured", async ({
     page,
   }) => {
     await openContact(page);
     await fillValid(page);
+    // The route rejects submissions that arrive faster than a human form fill.
+    await page.waitForTimeout(700);
 
     await page.getByRole("button", { name: copy.send }).click();
 

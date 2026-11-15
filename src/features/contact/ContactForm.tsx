@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import Field from "@/features/ui/Field";
 import StatusMessage from "@/features/ui/StatusMessage";
@@ -29,9 +29,9 @@ type Labels = {
 type Props = {
   to: string;
   /**
-   * Optional JSON endpoint. When it is set the form POSTs there; when it is
-   * absent it composes a mailto: message, which is the shipped behaviour. The
-   * markup is the same either way, so wiring a backend never touches the UI.
+   * Same-origin route that delivers the message. The prop exists so tests can
+   * point at a mock; the shipped value is the internal route. The UI never
+   * changes when the transport does.
    */
   endpoint?: string;
   labels: Labels;
@@ -59,15 +59,27 @@ const EMPTY: Values = { name: "", email: "", message: "" };
  * field exactly as typed. Validation runs on blur and on submit, never on each
  * keystroke; an existing error clears as soon as the field is edited.
  *
- * The transport is one branch: `data-contact-endpoint` (or the prop) POSTs
- * JSON, otherwise the message is handed to the visitor's mail app through a
- * composed mailto link they can click — no hidden "send" that goes nowhere.
+ * The transport is the internal `/api/contact` route. If the provider is not
+ * configured the route answers 503 and the form composes a mailto instead, so
+ * "Send" always has a real destination. A hidden honeypot and the time the form
+ * was opened travel with the payload.
  */
-export default function ContactForm({ to, endpoint, labels }: Props) {
+export default function ContactForm({
+  to,
+  endpoint = "/api/contact",
+  labels,
+}: Props) {
   const [values, setValues] = useState<Values>(EMPTY);
+  const [company, setCompany] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [mailto, setMailto] = useState<string | null>(null);
+  const startedAt = useRef(0);
+
+  // Stamped after mount: Date.now() during render is impure and unstable.
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
   const fieldError = (field: FieldName, value: string): string | undefined => {
     const trimmed = value.trim();
@@ -111,11 +123,17 @@ export default function ContactForm({ to, endpoint, labels }: Props) {
     }));
   };
 
+  const composeMailto = (payload: Values) => {
+    const subject = `${labels.subjectPrefix} ${payload.name}`;
+    const body = `${payload.message}\n\n— ${payload.name} <${payload.email}>`;
+    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const form = event.currentTarget;
-    const target = (form.dataset.contactEndpoint ?? endpoint ?? "").trim();
+    const target = (form.dataset.contactEndpoint ?? endpoint).trim();
 
     setStatus("idle");
     setMailto(null);
@@ -137,26 +155,32 @@ export default function ContactForm({ to, endpoint, labels }: Props) {
       message: values.message.trim(),
     };
 
-    if (!target) {
-      const subject = `${labels.subjectPrefix} ${payload.name}`;
-      const body = `${payload.message}\n\n— ${payload.name} <${payload.email}>`;
-      setMailto(
-        `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-      );
-      setStatus("success");
-      return;
-    }
-
     setStatus("submitting");
 
     try {
       const response = await fetch(target, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...payload,
+          company,
+          startedAt: startedAt.current,
+        }),
       });
 
+      // The route has no provider key yet: keep the message and hand it to the
+      // visitor's mail app rather than reporting a delivery that did not happen.
+      if (response.status === 503) {
+        setMailto(composeMailto(values));
+        setStatus("success");
+        return;
+      }
+
       if (!response.ok) throw new Error("contact endpoint rejected the message");
+
+      setValues(EMPTY);
+      setCompany("");
+      startedAt.current = Date.now();
       setStatus("success");
     } catch {
       // Deliberately generic: the visitor gets an action, not a status code.
@@ -175,6 +199,27 @@ export default function ContactForm({ to, endpoint, labels }: Props) {
       onSubmit={onSubmit}
       noValidate
     >
+      {/*
+        Honeypot: off-screen, not focusable, not announced. A person never fills
+        it; a form-filling bot usually does, and the route then discards the
+        submission while answering as if it succeeded.
+      */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden"
+      >
+        <label htmlFor="contact-company">Company</label>
+        <input
+          id="contact-company"
+          name="company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={company}
+          onChange={(event) => setCompany(event.target.value)}
+        />
+      </div>
+
       <Field id={IDS.name} label={labels.name} error={errors.name}>
         {(control) => (
           <input
@@ -183,6 +228,7 @@ export default function ContactForm({ to, endpoint, labels }: Props) {
             type="text"
             name="name"
             autoComplete="name"
+            maxLength={100}
             value={values.name}
             onChange={(event) => onChange("name", event.target.value)}
             onBlur={() => onBlur("name")}
@@ -198,6 +244,7 @@ export default function ContactForm({ to, endpoint, labels }: Props) {
             type="email"
             name="email"
             autoComplete="email"
+            maxLength={200}
             dir="ltr"
             value={values.email}
             onChange={(event) => onChange("email", event.target.value)}

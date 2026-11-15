@@ -73,11 +73,7 @@ export default function ContactPage() {
         </Reveal>
 
         <Reveal delay={100} className="lg:col-span-7 lg:col-start-6">
-          <ContactForm
-            to={contact.email}
-            endpoint={process.env.NEXT_PUBLIC_CONTACT_ENDPOINT}
-            labels={contact.form}
-          />
+          <ContactForm to={contact.email} labels={contact.form} />
         </Reveal>
       </div>
     </PageFrame>
