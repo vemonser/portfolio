@@ -8,7 +8,7 @@ import LinkLine from "@/features/ui/LinkLine";
 import PageFrame from "@/features/ui/PageFrame";
 import Prose from "@/features/ui/Prose";
 import Reveal from "@/features/ui/Reveal";
-import { chapterFrame, displayTitle } from "@/features/ui/styles";
+import { chapterFrame, displayStatement } from "@/features/ui/styles";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -43,7 +43,7 @@ export default async function BlogPostPage({ params }: Props) {
         <Reveal className="flex flex-col gap-[var(--space-3)]">
           <ChapterLabel index={2}>{copy.blogPage.label}</ChapterLabel>
 
-          <h1 className={`${displayTitle} text-[clamp(2.2rem,5.4vw,4.5rem)]`}>
+          <h1 className={`${displayStatement} text-[clamp(2.2rem,5.4vw,4.5rem)]`}>
             {post.title}
           </h1>
 

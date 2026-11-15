@@ -12,8 +12,20 @@ export const roundButton =
  */
 export const chapterFrame = "px-[var(--inset-edge)]";
 
-export const displayTitle =
-  "m-0 font-display text-[clamp(2.75rem,7vw,var(--type-display-max))] font-semibold uppercase leading-[var(--display-lead,0.94)] tracking-[-0.025em]";
+const displayBase =
+  "m-0 font-display font-semibold leading-[var(--display-lead,0.94)] tracking-[-0.025em]";
+const displaySize =
+  "text-[clamp(2.75rem,7vw,var(--type-display-max))]";
+
+/**
+ * Uppercase is the label voice: a page title or a section name is read as a
+ * sign, not a sentence. A heading that speaks to the reader keeps its own case,
+ * so the CTA and the contact page can share one line without shouting it.
+ */
+export const displayTitle = `${displayBase} ${displaySize} uppercase`;
+
+/** The same display face, sentence case: for spoken headings and article titles. */
+export const displayStatement = `${displayBase} ${displaySize}`;
 
 export const bodyMeasure =
   "max-w-[var(--measure-body)] leading-[1.75] text-bone/65";

@@ -4,10 +4,14 @@ import ChapterLabel from "@/features/ui/ChapterLabel";
 import LinkLine from "@/features/ui/LinkLine";
 import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
-import { bodyMeasure, chapterFrame, displayTitle } from "@/features/ui/styles";
+import {
+  bodyMeasure,
+  chapterFrame,
+  displayStatement,
+} from "@/features/ui/styles";
 
 export const metadata = {
-  title: copy.contact.title,
+  title: copy.contact.label,
   description: copy.contact.lede,
 };
 
@@ -21,7 +25,7 @@ export default function ContactPage() {
       <Reveal className="chapter-open">
         <ChapterLabel index={4}>{contact.label}</ChapterLabel>
 
-        <h1 className={`${displayTitle} mt-[var(--space-3)]`}>
+        <h1 className={`${displayStatement} mt-[var(--space-3)]`}>
           {contact.title}
         </h1>
 

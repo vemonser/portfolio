@@ -4,11 +4,31 @@
  * a typed object rather than a locale-keyed catalogue. Editing copy never
  * requires touching a component.
  */
+
+/** Spelled-out counts read as editorial; digits read as a dashboard. */
+const COUNT_WORDS = [
+  "Zero",
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six",
+  "Seven",
+  "Eight",
+  "Nine",
+  "Ten",
+] as const;
+
+function countWord(count: number): string {
+  return COUNT_WORDS[count] ?? String(count);
+}
+
 export const copy = {
   meta: {
     title: "Abdelrhman",
     description:
-      "Software developer building fast, bilingual interfaces for the web.",
+      "Software developer building fast, precise interfaces for the web.",
   },
 
   hero: {
@@ -49,8 +69,8 @@ export const copy = {
   intro: {
     label: "Introduction",
     statement:
-      "I design and build fast, bilingual interfaces that feel inevitable — precise in structure, alive in movement.",
-    body: "A software developer working between Cairo and the web. I care about the quiet details: a paragraph that reads well in Arabic and English, a transition that settles instead of bouncing, a page that opens before you notice it.",
+      "I design and build fast interfaces that feel inevitable — precise in structure, alive in movement.",
+    body: "A software developer working between Cairo and the web. I care about the quiet details: a paragraph that holds together when the column narrows, a transition that settles instead of bouncing, a page that opens before you notice it.",
   },
 
   workSection: {
@@ -61,7 +81,11 @@ export const copy = {
   workPage: {
     label: "Archive",
     title: "Work",
-    lede: "Six selected projects — each one built around a single idea, executed until it stops needing explanation.",
+    description:
+      "Selected client work — each project built around a single idea, executed until it stops needing explanation.",
+    /** The count lives in the data, never in the sentence. */
+    lede: (count: number) =>
+      `${countWord(count)} selected projects — each one built around a single idea, executed until it stops needing explanation.`,
   },
 
   project: {
@@ -80,7 +104,7 @@ export const copy = {
     portraitAlt: "Portrait placeholder — replace with a real photograph",
     initial: "A",
     paragraphs: [
-      "I build interfaces for the web, mostly in Next.js and TypeScript, with a soft spot for the parts most people never notice: how a page behaves on a slow connection, how a sentence reads when it is mirrored into Arabic, how a hover state settles.",
+      "I build interfaces for the web, mostly in Next.js and TypeScript, with a soft spot for the parts most people never notice: how a page behaves on a slow connection, how a sentence reads at 320 pixels, how a hover state settles.",
       "My work sits between design and engineering. I like starting from structure — the hierarchy, the reading order, the empty states — and only then deciding what moves.",
       "Away from the screen I read too much about typography and spend too long in bookshops. Both find their way back into the work.",
     ],
@@ -92,22 +116,22 @@ export const copy = {
       },
       {
         title: "Interface design",
-        body: "Hierarchy first. Layouts that survive real copy in two languages.",
+        body: "Hierarchy first. Layouts that survive real copy at every width.",
       },
       {
         title: "Motion",
         body: "CSS-first choreography, with WebGL only where it earns its weight.",
       },
       {
-        title: "Bilingual builds",
-        body: "Arabic and English from the first commit, RTL treated as a first-class direction.",
+        title: "Performance",
+        body: "Core Web Vitals treated as design constraints, not a cleanup pass.",
       },
     ],
   },
 
   contact: {
     label: "Contact",
-    title: "Let's talk",
+    title: "Let's work together",
     lede: "Tell me what you are building. A short note is enough — I answer every message.",
     detailsLabel: "Direct",
     emailLabel: "Email",
@@ -137,7 +161,7 @@ export const copy = {
   blogPage: {
     label: "Writing",
     title: "Blog",
-    lede: "Notes on building for the web, in Arabic and English.",
+    lede: "Notes on building for the web — typography, motion, and the parts nobody photographs.",
     empty: "The first posts are being written.",
   },
 

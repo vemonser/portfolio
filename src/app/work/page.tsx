@@ -8,7 +8,7 @@ import { bodyMeasure, chapterFrame, displayTitle } from "@/features/ui/styles";
 
 export const metadata = {
   title: copy.workPage.title,
-  description: copy.workPage.lede,
+  description: copy.workPage.description,
 };
 
 export default function WorkPage() {
@@ -28,7 +28,7 @@ export default function WorkPage() {
         <p
           className={`${bodyMeasure} mt-[var(--space-3)] text-[clamp(1.05rem,1.5vw,1.3rem)]`}
         >
-          {copy.workPage.lede}
+          {copy.workPage.lede(projects.length)}
         </p>
       </Reveal>
 
