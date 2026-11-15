@@ -35,8 +35,26 @@ test.describe("About structure", () => {
   });
 });
 
-test.describe("Work structure", () => {
+test.describe("chapter numbering", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("does not give the closing Contact block a second number", async ({
+    page,
+  }) => {
+    await page.goto("/about");
+
+    const cta = page.locator('[data-section="contact-cta"] .chapter-label');
+    await expect(cta).toContainText("Contact");
+    await expect(cta.locator(".chapter-label__index")).toHaveCount(0);
+
+    await expect(page.locator("main .chapter-label__index")).toHaveText("04");
+
+    await page.goto("/contact");
+    await expect(page.locator("main .chapter-label__index")).toHaveText("05");
+  });
+});
+
+test.describe("Work structure", () => {  test.use({ viewport: { width: 1440, height: 900 } });
 
   test("uses one 16:10 cover ratio on the archive", async ({ page }) => {
     await page.goto("/work");

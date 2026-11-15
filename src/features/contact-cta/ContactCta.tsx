@@ -19,7 +19,7 @@ export default function ContactCta() {
       className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] pb-[calc(var(--inset-chapter)+2rem)] pt-[var(--inset-chapter)]"
     >
       <Reveal>
-        <ChapterLabel index={5}>{cta.label}</ChapterLabel>
+        <ChapterLabel>{cta.label}</ChapterLabel>
 
         <h2
           id="cta-title"
