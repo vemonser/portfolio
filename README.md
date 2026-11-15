@@ -67,10 +67,12 @@ nothing has to download before it can render.
   different normal, which is where the red/blue fringing on the crests comes
   from.
 - **The wordmark is real HTML**, layered over the canvas: the h1 for search
-  engines and screen readers, the LCP text, and nothing else. No effect is
-  applied to it — hover belongs to the surface. Pointer moves travel through
-  the text, so dragging anywhere on the hero (the word included) disturbs the
-  liquid shape itself.
+  engines and screen readers, the LCP text, and nothing else. It is painted at
+  first paint with no JavaScript and no entrance animation — an entrance that
+  starts hidden turns the first seconds into a black screen while a phone
+  downloads the scene. No effect is applied to it; hover belongs to the surface.
+  Pointer moves travel through the text, so dragging anywhere on the hero (the
+  word included) disturbs the liquid shape itself.
 - **Calm by design.** The drift speeds and the wave energy are deliberately
   low: the surface reads as slow liquid, not a storm.
 
@@ -142,27 +144,32 @@ the form states; `tests/hero-liquid-compression.spec.ts` covers the scene.
 
 ## Measured
 
-Measured on this machine, production build (`gzip -9`), 1440×900. The JS figures
-predate the navigation layer.
+Measured on this machine, production build (`gzip -9`), 1440×900.
 
 | | |
 |---|---|
-| Initial route JS (`/`) | ~176 KB gz |
-| Scene chunk (three + GSAP + scene) | 158 KB gz |
+| Initial route JS (`/`) | ~194 KB gz |
+| Scene chunk (three + the scene) | 131 KB gz |
+| GSAP + ScrollTrigger / Lenis | 44 KB gz / 11 KB gz |
 | Poster, desktop AVIF / WebP | 9 KB / 18 KB |
 | Poster, mobile AVIF / WebP | 6 KB / 13 KB |
 
-The scene chunk is still lazy — first paint is the poster. On mobile it is now
-fetched too (the scene runs there), so the old "0 requests" line no longer
-applies.
+The scene is a separate chunk, but Next flushes it as an `async` script in the
+HTML: it downloads in parallel with the first paint rather than after the
+effect runs. It is off the critical path, not deferred. The headline does not
+wait for it in either case — with JavaScript disabled the h1 is still painted.
+
+Measured on a 390×844 viewport, 4× CPU throttle and 1.6 Mbps: the h1 is on
+screen at **724 ms** and is the LCP element at **1.86 s**. Before the entrance
+was removed it appeared at **3.1 s**, and the LCP was the 14px header wordmark.
 
 ## Changing things
 
 - **All copy** lives in `src/content/copy.ts` — the name under `hero.name`,
   navigation labels under `nav`, and so on. No translation runtime is involved.
 - **The wordmark typography** is `.hero-wordmark` in `src/app/globals.css`. The
-  bottom crop is `--wordmark-drop` (a negative margin). Nothing else is applied
-  to the text — no filter, no transform, no hover state.
+  bottom crop is `--wordmark-drop` (a negative margin). The only transform is
+  the small scroll lag — there is no entrance and no filter.
 - **The surface** dials — wave force, amplitude, dispersion, sheen, warp — are
   the constants at the top of `mercuryScene.ts`; the drift speeds are inside
   `glsl/mercury.ts`.

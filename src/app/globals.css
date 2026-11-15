@@ -152,7 +152,10 @@ html.lenis body {
   text-align: center;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 8.4vw, var(--type-display-max));
+  /* No rem floor above 1.5rem: at 320 the 2rem floor won the comparison and
+     the line was 355px wide in a 320px viewport, so the hero clipped its own
+     name. 8.4vw leaves ~3% air on each side from 381px up. */
+  font-size: clamp(1.5rem, 8.4vw, var(--type-display-max));
   font-weight: 600;
   line-height: 0.86;
   letter-spacing: -0.035em;
@@ -161,11 +164,10 @@ html.lenis body {
   margin-block-end: var(--wordmark-drop);
   text-transform: uppercase;
   user-select: none;
+  /* The only transform: a small lag as the hero leaves. No filter and no
+     entrance — the type is painted at first paint. */
+  transform: translate3d(0, calc(var(--hero-scroll, 0) * 4vh), 0);
 }
-/*
- * The wordmark is plain text: no filter, no transform, nothing applied. Hover
- * belongs to the liquid behind it, like the reference.
- */
 
 /*
  * ---------------------------------------------------------------------------
@@ -201,6 +203,28 @@ html.lenis body {
   pointer-events: none;
 }
 
+/*
+ * The hero is a live, bright surface: a crest can drift under the header at any
+ * frame (it reached CONTACT at t≈4s). The labels cannot depend on the frame, so
+ * the header carries its own ground. The scrim holds ~0.64 behind the text row
+ * and is gone by 190px, so it reads as a vignette rather than a bar.
+ */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: -1;
+  block-size: clamp(7rem, 16vh, 12rem);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(11 11 10 / 0.68) 0,
+    rgb(11 11 10 / 0.62) 4.5rem,
+    rgb(11 11 10 / 0) 100%
+  );
+}
+
 .site-header__brand,
 .site-header__link,
 .menu-trigger,
@@ -232,8 +256,11 @@ html.lenis body {
   font-size: var(--text-t-14);
   letter-spacing: var(--track);
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-bone) 55%, transparent);
+  /* 88% bone instead of 55%: over the scrim's brightest case this is ~4.6:1,
+     while the active state is still carried by the lime dot. */
+  color: color-mix(in srgb, var(--color-bone) 88%, transparent);
   text-decoration: none;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.4);
   transition: color 0.2s ease;
 }
 
@@ -950,12 +977,6 @@ html[data-js="true"] .reveal[data-revealed="true"] {
 .prose-editorial h2,
 .prose-editorial h3 {
   text-wrap: balance;
-}
-
-/* Hero overlay — only the wordmark's type/cropping lives here; the entrance
-   and meta choreography are utilities driven by `data-in` on the overlay. */
-.hero-wordmark {
-  transform: translate3d(0, calc(var(--hero-scroll, 0) * 4vh), 0);
 }
 
 /* Grain — one fixed noise plate above the page, below the header. */
