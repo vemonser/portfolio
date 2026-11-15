@@ -15,7 +15,6 @@ export const copy = {
     name: "software developer",
     available: "Available for work",
     location: "Cairo, Egypt",
-    scroll: "Scroll",
   },
 
   nav: {

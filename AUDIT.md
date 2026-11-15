@@ -51,6 +51,8 @@ These are the criteria Phases 1–2 were executed against. Each one is covered b
 | AC-7 | Given the home page, when the work chapter opens, then it carries chapter number 02 instead of leaving a gap between 01 and 06. |
 | AC-8 | Given the home page, when the work chapter ends, then the archive link carries an arrow so it reads as an action rather than body text. |
 | AC-9 | Given the branch after the changes, when the quality gates run, then Vitest, TypeScript, ESLint and next build all exit 0 and the full Playwright suite passes. |
+| AC-10 | Given the home hero, when it renders, then it carries the wordmark only — no availability label, scroll cue or location line. |
+| AC-11 | Given a regenerated hero poster, when the home page requests it, then every poster URL carries a content version so a warm browser cache cannot serve the previous frame. |
 
 Execution status: AC-1 – AC-9 **PASS** (Evidence Gate run
 `2026-11-15T02-35-34-625Z`).

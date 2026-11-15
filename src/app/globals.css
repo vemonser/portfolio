@@ -53,33 +53,6 @@ html.lenis body {
   --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-label: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
-
-  --animate-hero-pulse: hero-pulse 2.4s ease-out infinite;
-  --animate-hero-scroll: hero-scroll 2.4s cubic-bezier(0.7, 0, 0.2, 1) infinite;
-
-  @keyframes hero-pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgb(198 240 53 / 0.45);
-    }
-    70% {
-      box-shadow: 0 0 0 10px rgb(198 240 53 / 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgb(198 240 53 / 0);
-    }
-  }
-
-  @keyframes hero-scroll {
-    0%,
-    100% {
-      transform: scaleY(0.25);
-      opacity: 0.25;
-    }
-    50% {
-      transform: scaleY(1);
-      opacity: 0.85;
-    }
-  }
 }
 
 :root {
@@ -1010,13 +983,8 @@ html[data-js="true"] .reveal[data-revealed="true"] {
     scroll-behavior: auto !important;
   }
 
-  /* The scroll lag and the looping hints are motion, not information. */
+  /* The scroll lag is motion, not information. */
   .hero-wordmark {
     transform: none !important;
-  }
-
-  .animate-hero-pulse,
-  .animate-hero-scroll {
-    animation: none !important;
   }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { POSTER_VERSION } from "@/content/poster-version";
 import { isMenuOpen, subscribeMenu } from "@/features/navigation/menu-store";
 import { heroScrollProgress } from "@/features/hero-scene/math";
 import { FROZEN_TIME } from "@/features/hero-scene/mercuryScene";
@@ -17,6 +18,10 @@ import { setHeroReady } from "./hero-ready";
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
 type CompressionKind = "title" | "project";
+
+/** Poster paths are stable; the version keeps a regenerated frame from being
+ * served out of a warm browser cache under the same URL. */
+const poster = (file: string) => `/poster/${file}?v=${POSTER_VERSION}`;
 
 /**
  * The wave simulator keeps its state in half-float render targets, which is a
@@ -447,13 +452,13 @@ export default function HeroStage() {
     >
       <picture className="absolute inset-0 block opacity-100 transition-opacity duration-700 group-data-[ready=true]:opacity-0">
         <source
-          srcSet="/poster/hero-780.avif"
+          srcSet={poster("hero-780.avif")}
           media="(max-width: 768px)"
           type="image/avif"
         />
-        <source srcSet="/poster/hero-1440.avif" type="image/avif" />
+        <source srcSet={poster("hero-1440.avif")} type="image/avif" />
         <img
-          src="/poster/hero-1440.webp"
+          src={poster("hero-1440.webp")}
           alt=""
           width={1440}
           height={900}

@@ -191,6 +191,43 @@ test.describe("P2-2 chapter numbering", () => {
   });
 });
 
+test.describe("hero cleanup", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("shows the wordmark only", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("#hero [data-hero-meta]")).toHaveCount(0);
+    await expect(
+      page.locator("#hero").getByText("Available for work"),
+    ).toHaveCount(0);
+    await expect(page.locator("#hero").getByText("Cairo, Egypt")).toHaveCount(0);
+    await expect(page.locator("#hero").getByText("Scroll", { exact: true })).toHaveCount(0);
+  });
+});
+
+test.describe("poster cache busting", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("versions every poster URL", async ({ page }) => {
+    await page.goto("/");
+    const urls = await page.evaluate(() => {
+      const picture = document.querySelector("#hero picture");
+      if (!picture) return [];
+      return [...picture.querySelectorAll("source, img")].map(
+        (node) =>
+          node.getAttribute("srcset") ?? node.getAttribute("src") ?? "",
+      );
+    });
+
+    expect(urls.length).toBe(3);
+    for (const url of urls) {
+      // A regenerated poster keeps the same path, so the browser must be told
+      // the bytes changed; otherwise an open tab keeps the old frame forever.
+      expect(url).toMatch(/\?v=[a-f0-9]{8}/);
+    }
+  });
+});
+
 test.describe("P2-8 archive exit", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
