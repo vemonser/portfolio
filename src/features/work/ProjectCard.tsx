@@ -46,6 +46,7 @@ export default function ProjectCard({
           project={project}
           index={index}
           priority={index === 0}
+          hoverSrc={project.imageHover}
           className={`${
             home ? HOME_ASPECT : "aspect-[4/3]"
           } transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] will-change-transform group-hover:scale-[1.015] group-focus-visible:scale-[1.015]`}

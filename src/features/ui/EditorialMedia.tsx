@@ -12,6 +12,8 @@ type Props = {
   className?: string;
   /** Load the first card eagerly; everything else waits for the viewport. */
   priority?: boolean;
+  /** Second capture, crossfaded in on group hover/focus. */
+  hoverSrc?: string;
 };
 
 /**
@@ -43,6 +45,7 @@ export default function EditorialMedia({
   index,
   className,
   priority = false,
+  hoverSrc,
 }: Props) {
   if (project.image) {
     return (
@@ -56,8 +59,18 @@ export default function EditorialMedia({
           fill
           loading={priority ? "eager" : "lazy"}
           sizes="(min-width: 1024px) 60vw, 100vw"
-          className="object-cover object-top"
+          className="object-cover object-top opacity-100 transition-opacity duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:opacity-0 group-focus-visible:opacity-0"
         />
+        {hoverSrc ? (
+          <Image
+            src={hoverSrc}
+            alt=""
+            fill
+            loading="lazy"
+            sizes="(min-width: 1024px) 60vw, 100vw"
+            className="absolute inset-0 object-cover object-top opacity-0 will-change-opacity transition-opacity duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:opacity-100 group-focus-visible:opacity-100"
+          />
+        ) : null}
         <span className="editorial-media__scrim" />
         <span className="editorial-media__index">
           {formatNumber(index + 1, { pad: 2 })}
