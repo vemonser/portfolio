@@ -237,3 +237,89 @@ test.describe("P2-8 archive exit", () => {
     await expect(link).toContainText("↗");
   });
 });
+
+test.describe("hero first paint", () => {
+  test.use({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
+
+  test("paints the wordmark without JavaScript", async ({ page }) => {
+    await page.goto("/");
+
+    // Content never waits for the effect. With scripting off there is no
+    // hydration and no scene, and the h1 must still be on screen.
+    await expect(page.locator("#hero-title")).toBeVisible();
+    const box = await page.locator("#hero-title").boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(900);
+  });
+});
+
+test.describe("hero fit at 320", () => {
+  test.use({ viewport: { width: 320, height: 800 } });
+
+  test("does not clip the wordmark", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForTimeout(1400);
+    await hideHeroScenery(page);
+
+    const buffer = await page.screenshot();
+    const { data, info } = await sharp(buffer)
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    const brightInColumn = (x: number) => {
+      for (let y = 120; y < info.height; y += 1) {
+        const i = (y * info.width + x) * 3;
+        if (data[i] > 180 && data[i + 1] > 175 && data[i + 2] > 165) return true;
+      }
+      return false;
+    };
+
+    // A clipped line leaves ink against the viewport edge.
+    expect(brightInColumn(0)).toBe(false);
+    expect(brightInColumn(info.width - 1)).toBe(false);
+  });
+});
+
+test.describe("English-only copy", () => {
+  for (const route of ["/", "/work", "/about", "/contact", "/blog"]) {
+    test(`${route} makes no bilingual claim`, async ({ page }) => {
+      await page.goto(route);
+      const text = await page.locator("main").innerText();
+      expect(text).not.toMatch(/bilingual|two languages|\brtl\b/i);
+    });
+  }
+});
+
+test.describe("editorial voice", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("derives the archive count from the data", async ({ page }) => {
+    await page.goto("/work");
+    const count = await page.locator("[data-project]").count();
+    const words = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+    const lede = await page.locator("main h1 + p").innerText();
+    expect(lede).toContain(`${words[count] ?? count} selected projects`);
+  });
+
+  test("keeps uppercase for labels and sentence case for spoken headings", async ({ page }) => {
+    await page.goto("/contact");
+    const contact = await page
+      .locator("h1")
+      .evaluate((node) => getComputedStyle(node).textTransform);
+    expect(contact).toBe("none");
+
+    await page.goto("/blog/two-directions");
+    const post = await page
+      .locator("h1")
+      .evaluate((node) => getComputedStyle(node).textTransform);
+    expect(post).toBe("none");
+
+    await page.goto("/work");
+    const label = await page
+      .locator("h1")
+      .evaluate((node) => getComputedStyle(node).textTransform);
+    expect(label).toBe("uppercase");
+  });
+});
+
