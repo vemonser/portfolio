@@ -130,19 +130,16 @@ export default async function ProjectPage({ params }: Props) {
         {project.media.length > 1 ? (
           <div className="mt-[var(--space-8)] grid grid-cols-[minmax(0,1fr)] gap-[var(--chapter-gap)]">
             {project.media.slice(1).map((block, i) => (
-              <Reveal
-                key={`${block.kind}-${i}`}
-                delay={60}
-                className={
-                  block.kind === "browser" && i % 2 === 1
-                    ? "lg:w-[78%] lg:ms-auto"
-                    : undefined
-                }
-              >
+              <Reveal key={`${block.kind}-${i}`} delay={60}>
                 <MediaBlock
                   block={block}
                   title={project.title}
                   url={project.url}
+                  className={
+                    block.kind === "browser" && i % 2 === 1
+                      ? "lg:w-[78%] lg:ms-auto"
+                      : undefined
+                  }
                 />
               </Reveal>
             ))}

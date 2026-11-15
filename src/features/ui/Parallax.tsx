@@ -13,8 +13,9 @@ type Props = {
 
 /**
  * A quiet vertical drift for media held inside a fixed crop. The constant
- * 1.12 scale covers the ±5% travel, so the frame never shows an edge. Reduced
- * motion opts out entirely and keeps the static crop.
+ * 1.04 scale covers the ±2% travel exactly, so the frame never shows an edge
+ * and the capture's own page margins stay inside the crop. Reduced motion
+ * opts out entirely and keeps the static crop.
  */
 export default function Parallax({ children, className }: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -28,9 +29,9 @@ export default function Parallax({ children, className }: Props) {
     const context = gsap.context(() => {
       gsap.fromTo(
         el,
-        { yPercent: -5 },
+        { yPercent: -2 },
         {
-          yPercent: 5,
+          yPercent: 2,
           ease: "none",
           scrollTrigger: {
             trigger: el,
@@ -46,7 +47,7 @@ export default function Parallax({ children, className }: Props) {
   }, []);
 
   return (
-    <div ref={ref} className={className} style={{ scale: 1.12 }}>
+    <div ref={ref} data-parallax className={className} style={{ scale: 1.04 }}>
       {children}
     </div>
   );

@@ -42,6 +42,12 @@ test.describe("case study (Dennis inside)", () => {
     // Hero, video frame, and two mid shots are browser-framed.
     await expect(frames).toHaveCount(4);
 
+    // The offset (78%-wide) mid shot asks for the 80vw source set.
+    await expect(frames.nth(3).locator("img")).toHaveAttribute(
+      "sizes",
+      /80vw/,
+    );
+
     // Three phone screens.
     await expect(page.locator(".phone-trio img")).toHaveCount(3);
 
@@ -87,6 +93,53 @@ test.describe("case study — reduced motion", () => {
     await page.waitForTimeout(1200);
     expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
   });
+
+  test("parallax stays static", async ({ page }) => {
+    await page.goto(`/work/anom-creative`);
+
+    const parallax = page.locator("[data-parallax]").first();
+    await parallax.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+
+    expect(
+      await parallax.evaluate((el) => getComputedStyle(el).transform),
+    ).toBe("none");
+  });
+});
+
+test.describe("project cards — every project", () => {
+  for (const route of ["/", "/work"]) {
+    test(`renders two captures on every card at ${route}`, async ({ page }) => {
+      await page.goto(route);
+
+      const cards = page.locator("a[data-project]");
+      await expect(cards).toHaveCount(4);
+
+      for (let i = 0; i < 4; i += 1) {
+        const imgs = cards.nth(i).locator("img");
+        await expect(imgs).toHaveCount(2);
+        await expect(imgs.nth(1)).toHaveAttribute("src", /mid-1\.webp/);
+      }
+    });
+  }
+});
+
+test.describe("touched routes — narrow viewports", () => {
+  for (const route of ["/", "/work"]) {
+    for (const width of [360, 390]) {
+      test.describe(`${route} at ${width}px`, () => {
+        test.use({ viewport: { width, height: 844 } });
+
+        test(`no horizontal overflow at ${width}px`, async ({ page }) => {
+          await page.goto(route);
+          const overflow = await page.evaluate(
+            () => document.documentElement.scrollWidth - window.innerWidth,
+          );
+          expect(overflow).toBeLessThanOrEqual(1);
+        });
+      });
+    }
+  }
 });
 
 // One describe per width: `test.use` options merge within a suite, so a loop
