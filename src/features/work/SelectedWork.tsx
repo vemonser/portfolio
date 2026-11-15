@@ -1,5 +1,6 @@
 import { copy } from "@/content/copy";
 import { getProjects } from "@/content/projects";
+import ChapterLabel from "@/features/ui/ChapterLabel";
 import { formatNumber } from "@/features/ui/editorial";
 import LinkLine from "@/features/ui/LinkLine";
 import ProjectIndex from "@/features/ui/ProjectIndex";
@@ -22,14 +23,18 @@ export default function SelectedWork() {
       data-section="selected-work"
       className="px-[var(--inset-edge)] pb-[var(--inset-chapter)] pt-[var(--inset-chapter)]"
     >
-      <Reveal className="flex flex-wrap items-end justify-between gap-[var(--space-3)] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
-        <h2 id="selected-work-title" className={displayTitle}>
-          {copy.workSection.label}
-        </h2>
-        <p className="m-0 font-label text-t-14 uppercase tracking-[var(--track)] text-warm">
-          {formatNumber(1, { pad: 2 })} —{" "}
-          {formatNumber(projects.length, { pad: 2 })}
-        </p>
+      <Reveal className="border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
+        <ChapterLabel index={1}>{copy.nav.work}</ChapterLabel>
+
+        <div className="mt-[var(--space-4)] flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+          <h2 id="selected-work-title" className={displayTitle}>
+            {copy.workSection.label}
+          </h2>
+          <p className="m-0 font-label text-t-14 uppercase tracking-[var(--track)] text-warm">
+            {formatNumber(1, { pad: 2 })} —{" "}
+            {formatNumber(projects.length, { pad: 2 })}
+          </p>
+        </div>
       </Reveal>
 
       <div className="mt-[var(--space-7)]">
@@ -42,9 +47,10 @@ export default function SelectedWork() {
       >
         <LinkLine
           href="/work"
-          className="inline-flex min-h-11 items-center text-[clamp(1.05rem,1.6vw,1.3rem)]"
+          className="inline-flex min-h-11 items-center gap-2 text-[clamp(1.05rem,1.6vw,1.3rem)]"
         >
           {copy.workSection.more}
+          <span aria-hidden="true">↗</span>
         </LinkLine>
       </Reveal>
     </section>

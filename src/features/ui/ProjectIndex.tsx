@@ -9,15 +9,16 @@ type Props = {
 };
 
 /**
- * The asymmetric Home sequence. Project entries get varied scale and entry
- * points, so the page reads as an editorial spread rather than a uniform grid;
- * the archive is calmer and denser because it is a catalogue, not a spread.
+ * The asymmetric Home sequence. Two cards share a row, so the spread reads as
+ * a composition rather than one card per screen: a wide feature beside a
+ * smaller companion, then a balanced pair inset from the reading edge. The
+ * archive is calmer and denser because it is a catalogue, not a spread.
  */
 const HOME_LAYOUT = [
-  "lg:col-span-10",
-  "lg:col-start-7 lg:col-span-6",
-  "lg:col-start-2 lg:col-span-4",
-  "lg:col-start-5 lg:col-span-8",
+  "lg:col-span-7",
+  "lg:col-start-9 lg:col-span-4",
+  "lg:col-start-2 lg:col-span-5",
+  "lg:col-start-8 lg:col-span-5",
 ];
 
 export default function ProjectIndex({ projects, variant }: Props) {
@@ -39,7 +40,7 @@ export default function ProjectIndex({ projects, variant }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-y-[var(--chapter-gap)] lg:grid-cols-12 lg:gap-y-[calc(var(--chapter-gap)*1.3)]">
+    <div className="grid grid-cols-1 gap-y-[var(--chapter-gap)] lg:grid-cols-12">
       {projects.map((project, index) => (
         <Reveal
           as="article"

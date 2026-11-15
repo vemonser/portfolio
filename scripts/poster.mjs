@@ -46,8 +46,10 @@ try {
     // Element screenshots capture whatever is painted over the box. The
     // wordmark is real HTML layered above the canvas, so it is hidden for the
     // capture — the poster is the liquid alone and the live text stays on top.
+    // The header and the menu trigger sit over the same box, so they must go
+    // too: a baked-in header would flash under the live one on every load.
     await page.addStyleTag({
-      content: `#hero-title, [data-hero-meta], .grain, nextjs-portal { visibility: hidden !important; }`,
+      content: `#hero-title, [data-hero-meta], .grain, .site-header, .menu-trigger, .nav-dialog, nextjs-portal { visibility: hidden !important; }`,
     });
 
     const buffer = await page.locator("canvas").screenshot({ omitBackground: true });

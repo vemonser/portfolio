@@ -25,8 +25,9 @@ type Props = {
 /**
  * The header is absolute, not fixed: it belongs to the top of the page and
  * scrolls away with it, so the hero keeps the whole first screen. Past 30% of
- * the viewport the circular trigger takes over — it is fixed, so the menu is
- * always one click away from there on.
+ * the viewport the circular trigger takes over. It steps aside while the page
+ * is scrolling down — otherwise it parks on top of project copy — and returns
+ * as soon as the visitor scrolls back up.
  */
 export default function SiteHeader({
   brand,
@@ -37,6 +38,7 @@ export default function SiteHeader({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [suppressed, setSuppressed] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const currentPath = pathname ?? homeHref;
@@ -46,10 +48,28 @@ export default function SiteHeader({
 
   useEffect(() => {
     let frame = 0;
+    // A page restored mid-scroll counts as downward until the visitor scrolls
+    // back up, so the trigger does not land on the copy it just opened.
+    let lastY = 0;
 
     const measure = () => {
       frame = 0;
-      setRevealed(window.scrollY > window.innerHeight * 0.3);
+      const y = window.scrollY;
+      const delta = y - lastY;
+      const belowHero = y > window.innerHeight * 0.3;
+
+      if (!belowHero) {
+        setSuppressed(false);
+        lastY = y;
+      } else if (Math.abs(delta) > 6) {
+        lastY = y;
+        setSuppressed(delta > 0);
+      }
+
+      // Below 768 the header's inline links are gone, so the trigger is the
+      // only navigation and stays available at the top of the page.
+      const inlineNav = window.matchMedia("(min-width: 768px)").matches;
+      setRevealed(!inlineNav || belowHero);
     };
     const schedule = () => {
       if (frame === 0) frame = requestAnimationFrame(measure);
@@ -96,7 +116,7 @@ export default function SiteHeader({
         ref={triggerRef}
         type="button"
         className="menu-trigger"
-        data-visible={revealed || open ? "true" : "false"}
+        data-visible={open || (revealed && !suppressed) ? "true" : "false"}
         aria-expanded={open}
         aria-controls="site-menu"
         aria-label={labels.open}

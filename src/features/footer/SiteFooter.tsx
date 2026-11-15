@@ -31,12 +31,12 @@ export default function SiteFooter({ labels, links, socials }: Props) {
         <nav aria-label={labels.navigation} className="min-w-0">
           <p className="ui-label m-0">{labels.navigation}</p>
 
-          <ul className="m-0 mt-[var(--space-2)] flex list-none flex-wrap gap-x-[var(--space-4)] gap-y-0 p-0">
+          <ul className="m-0 mt-[var(--space-2)] -ms-2 flex list-none flex-wrap gap-x-[var(--space-2)] gap-y-0 p-0">
             {links.map((link) => (
               <li key={link.key} className="flex">
                 <LinkLine
                   href={link.href}
-                  className="inline-flex min-h-11 items-center text-t-16"
+                  className="site-footer__link inline-flex min-h-11 items-center text-t-16"
                 >
                   {link.label}
                 </LinkLine>
@@ -48,19 +48,19 @@ export default function SiteFooter({ labels, links, socials }: Props) {
         <nav aria-label={labels.socials} className="min-w-0">
           <p className="ui-label m-0">{labels.socials}</p>
 
-          <ul className="m-0 mt-[var(--space-2)] flex list-none flex-wrap gap-x-[var(--space-4)] gap-y-0 p-0">
+          <ul className="m-0 mt-[var(--space-2)] -ms-2 flex list-none flex-wrap gap-x-[var(--space-2)] gap-y-0 p-0">
             {socials.map((social) => (
               <li key={social.key} className="flex">
                 {social.href ? (
                   <LinkLine
                     href={social.href}
                     external
-                    className="inline-flex min-h-11 items-center text-t-16"
+                    className="site-footer__link inline-flex min-h-11 items-center text-t-16"
                   >
                     {social.label}
                   </LinkLine>
                 ) : (
-                  <span className="inline-flex min-h-11 items-center text-t-16 text-bone/45">
+                  <span className="site-footer__link inline-flex min-h-11 items-center text-t-16 text-bone/45">
                     {social.label}
                   </span>
                 )}

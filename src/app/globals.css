@@ -164,17 +164,18 @@ html.lenis body {
 /*
  * The wordmark: real HTML text, the LCP element, and the h1.
  *
- * It sits at the bottom edge and is deliberately cropped: a line-height below
- * 1 means the glyph box overflows its layout box, so the word already bleeds
- * past the section's bottom edge. `drop` is the extra distance the box is
- * pushed down (a negative margin), which decides how much survives.
+ * It sits on the fold, not through it: the baseline rests on the bottom edge
+ * and one spacing step of padding keeps the caps clear of it at every width.
+ * A negative drop used to push the ink past the edge, which clipped the caps
+ * on 390 and 1440, so it is zero and the padding owns the clearance.
  */
 .hero-wordmark {
-  --wordmark-drop: -0.06em;
+  --wordmark-drop: 0em;
 
   display: block;
   width: 100%;
   padding: 0;
+  padding-block-end: var(--space-1);
   text-align: center;
   white-space: nowrap;
   font-family: var(--font-display);
@@ -280,6 +281,16 @@ html.lenis body {
   transform: translateY(-50%);
 }
 
+/* Footer links carry inline padding so the target clears 44px without moving
+   the text off the label's column; the signature line stays under the word. */
+.site-footer__link {
+  padding-inline: var(--space-0);
+}
+
+.site-footer__link.link-line::after {
+  inset-inline: var(--space-0);
+}
+
 .menu-trigger {
   position: fixed;
   inset-block-start: var(--nav-inset);
@@ -345,15 +356,11 @@ html.lenis body {
   top: 100%;
 }
 
-/* No inline links on small screens, so the trigger is always available. */
+/* No inline links on small screens; the trigger carries navigation there.
+   Its visibility is state-driven so it can step aside over running copy. */
 @media (max-width: 767px) {
   .site-header__nav {
     display: none;
-  }
-
-  .menu-trigger {
-    visibility: visible;
-    transform: scale(1) rotate(0.001deg);
   }
 }
 
