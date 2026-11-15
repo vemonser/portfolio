@@ -36,6 +36,26 @@ function hasWebGL2(): boolean {
 }
 
 /**
+ * The poster is a frame of the real scene. A visitor who opted out of motion or
+ * asked to save data gets that still without starting the renderer: no loop, no
+ * GPU context, no battery burn. The chunk is still part of Next's client graph,
+ * so this saves execution rather than bytes.
+ */
+function skipScene(reduced: MediaQueryList): boolean {
+  if (reduced.matches) return true;
+
+  const connection = (
+    navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }
+  ).connection;
+
+  if (connection?.saveData) return true;
+
+  return /(^|-)2g$/.test(connection?.effectiveType ?? "");
+}
+
+/**
  * The scene layer. Everything about *whether* the scene should exist lives
  * here, and the module is imported lazily — the poster carries the page until
  * the first frame lands, and it is the whole page for a browser without
@@ -379,8 +399,9 @@ export default function HeroStage() {
     const mount = async () => {
       if (scene || loading || disposed) return;
 
-      // No WebGL 2: the poster is the whole scene. Nothing else has to know.
-      if (!hasWebGL2()) {
+      // No WebGL 2, reduced motion, or Save-Data: the poster is the whole
+      // scene. Nothing else has to know.
+      if (!hasWebGL2() || skipScene(reduced)) {
         setSceneState("off");
         return;
       }

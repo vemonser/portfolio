@@ -82,16 +82,21 @@ nothing has to download before it can render.
 `HeroStage` owns that decision. The scene module is imported lazily, inside an
 effect, after the checks below.
 
-| Condition | Rendered | three.js fetched |
+| Condition | Rendered | three.js started |
 |---|---|---|
 | Any width, WebGL 2, motion allowed | live canvas over the poster | yes |
-| `prefers-reduced-motion: reduce` | one frozen frame of the real scene | yes |
+| `prefers-reduced-motion` or Save-Data | poster (a real frozen frame) | no |
 | No WebGL 2 | poster | no |
 | Hero scrolled out of view | paused | already loaded |
 
 There is **no viewport gate**: the surface is shading, not tessellation, so a
 phone runs the same shader as a desktop. WebGL 2 is required because the wave
 state lives in half-float render targets.
+
+Reduced motion and Save-Data skip the renderer entirely — no loop, no GPU
+context — but the chunk is still part of Next's client graph, so this saves
+execution and battery, not bytes. The byte win is the renderer swap (OGL or
+hand-rolled WebGL2).
 
 `?t=<seconds>` freezes the drift at a fixed moment for QA and for the poster
 pipeline.
@@ -200,6 +205,9 @@ widely.
 
 ## Changing things
 
+- **Type and colour** are tokens in `globals.css`: five display/statement steps
+  and three ink levels (`fg`, `fg-muted`, `fg-subtle`, all above 4.5:1). A
+  component picks a role, never a size or an alpha.
 - **All copy** lives in `src/content/copy.ts` — the name under `hero.name`,
   navigation labels under `nav`, and so on. No translation runtime is involved.
 - **About data** lives in `src/content/about.ts`. `experience` and `cv` are empty

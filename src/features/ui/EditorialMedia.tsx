@@ -67,7 +67,8 @@ export default function EditorialMedia({
             alt=""
             fill
             loading="lazy"
-            sizes="(min-width: 1024px) 60vw, 100vw"
+            fetchPriority="low"
+            sizes="(min-width: 1024px) 40vw, 90vw"
             className="absolute inset-0 object-cover object-top opacity-0 will-change-opacity transition-opacity duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:opacity-100 group-focus-visible:opacity-100"
           />
         ) : null}
