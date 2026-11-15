@@ -5,11 +5,13 @@ import PageFrame from "@/features/ui/PageFrame";
 import PostIndex from "@/features/ui/PostIndex";
 import Reveal from "@/features/ui/Reveal";
 import { bodyMeasure, chapterFrame, displayTitle } from "@/features/ui/styles";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: copy.blogPage.title,
   description: copy.blogPage.lede,
-};
+  path: "/blog",
+});
 
 export default function BlogPage() {
   const posts = getPosts();

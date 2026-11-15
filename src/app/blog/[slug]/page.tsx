@@ -9,6 +9,7 @@ import PageFrame from "@/features/ui/PageFrame";
 import Prose from "@/features/ui/Prose";
 import Reveal from "@/features/ui/Reveal";
 import { chapterFrame, displayStatement } from "@/features/ui/styles";
+import { pageMetadata } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -24,7 +25,11 @@ export async function generateMetadata({ params }: Props) {
 
   if (!post) return {};
 
-  return { title: post.title, description: post.excerpt };
+  return pageMetadata({
+    title: post.title,
+    description: post.excerpt,
+    path: `/blog/${slug}`,
+  });
 }
 
 export default async function BlogPostPage({ params }: Props) {

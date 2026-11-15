@@ -26,6 +26,7 @@ pnpm typecheck
 pnpm test
 pnpm lint
 pnpm poster       # regenerate the fallback images (needs dev or start running)
+pnpm og           # regenerate the Open Graph image (needs a server on :3100)
 ```
 
 The site used to be bilingual. Old `/en/*` and `/ar/*` URLs permanently redirect
@@ -163,10 +164,29 @@ Measured on a 390×844 viewport, 4× CPU throttle and 1.6 Mbps: the h1 is on
 screen at **724 ms** and is the LCP element at **1.86 s**. Before the entrance
 was removed it appeared at **3.1 s**, and the LCP was the 14px header wordmark.
 
+## Sharing and search
+
+- **One origin** comes from `NEXT_PUBLIC_SITE_URL` (set it in production; Vercel's
+  production domain is the fallback). Every canonical, Open Graph URL and the
+  sitemap are built from it.
+- **One metadata helper** is `pageMetadata()` in `src/lib/seo.ts`. It emits an
+  absolute title, a canonical, matching Open Graph/Twitter fields and the shared
+  image. A page that sets `openGraph` must name the image explicitly, because it
+  replaces the inherited object.
+- **The image** is `src/app/opengraph-image.jpg` (1200×630, 62 KB) captured from
+  the real hero by `pnpm og`; `twitter-image.jpg` is the same file. Regenerate it
+  after changing the hero or the wordmark.
+- **`sitemap.ts` / `robots.ts`** derive from the project and post data, so a new
+  project appears without editing either file.
+- **`not-found.tsx`** is the styled 404; it is the only page with no CTA chapter.
+
 ## Changing things
 
 - **All copy** lives in `src/content/copy.ts` — the name under `hero.name`,
   navigation labels under `nav`, and so on. No translation runtime is involved.
+- **About data** lives in `src/content/about.ts`. `experience` and `cv` are empty
+  on purpose: the page renders those sections only when they have data, so no
+  placeholder ships. `stack` is the toolset this site is built with.
 - **The wordmark typography** is `.hero-wordmark` in `src/app/globals.css`. The
   bottom crop is `--wordmark-drop` (a negative margin). The only transform is
   the small scroll lag — there is no entrance and no filter.

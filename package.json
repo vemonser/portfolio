@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "poster": "node scripts/poster.mjs",
+    "og": "node scripts/og.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "evidence": "node scripts/editorial-evidence.mjs",

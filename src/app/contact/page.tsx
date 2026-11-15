@@ -9,11 +9,13 @@ import {
   chapterFrame,
   displayStatement,
 } from "@/features/ui/styles";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: copy.contact.label,
   description: copy.contact.lede,
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   const { contact } = copy;

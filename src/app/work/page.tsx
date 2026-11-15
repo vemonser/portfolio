@@ -5,11 +5,13 @@ import PageFrame from "@/features/ui/PageFrame";
 import ProjectIndex from "@/features/ui/ProjectIndex";
 import Reveal from "@/features/ui/Reveal";
 import { bodyMeasure, chapterFrame, displayTitle } from "@/features/ui/styles";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: copy.workPage.title,
   description: copy.workPage.description,
-};
+  path: "/work",
+});
 
 export default function WorkPage() {
   const projects = getProjects();

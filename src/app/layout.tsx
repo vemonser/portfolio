@@ -9,6 +9,7 @@ import SiteFooter from "@/features/footer/SiteFooter";
 import SiteHeader from "@/features/navigation/SiteHeader";
 import { buildNavLinks } from "@/features/navigation/nav";
 import SmoothScroll from "@/features/scroll/SmoothScroll";
+import { siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 /*
@@ -33,8 +34,20 @@ const jetbrainsMono = JetBrains_Mono({
 const fontVariables = [inter.variable, jetbrainsMono.variable].join(" ");
 
 export const metadata: Metadata = {
-  title: copy.meta.title,
+  metadataBase: new URL(siteUrl()),
+  title: `${siteName} — Software developer`,
   description: copy.meta.description,
+  applicationName: siteName,
+  authors: [{ name: siteName }],
+  creator: siteName,
+  openGraph: {
+    type: "website",
+    siteName,
+    locale: "en_US",
+    url: "/",
+  },
+  twitter: { card: "summary_large_image" },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
