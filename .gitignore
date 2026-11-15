@@ -12,6 +12,11 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+
+# quality-gate run artifacts (local evidence; the committed record is docs/superpowers/evidence)
+/.quality/
 
 # next.js
 /.next/

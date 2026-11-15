@@ -103,18 +103,19 @@ Close       "Visit site" link · Next project (existing NextProject)
 
 ## Acceptance criteria
 
-1. Every card (Home selected work + `/work` archive) shows two captures and
-   crossfades between them on hover/focus-visible in ~450 ms.
-2. Every case study renders: browser-framed hero (address bar shows the real
-   hostname), one muted looping scroll video, three phone-framed mobile
-   captures, two mid-page browser frames, "Visit site" pill, Next project.
-3. Video: plays only in viewport, pauses off-screen, never plays under
-   `prefers-reduced-motion: reduce`.
-4. No horizontal overflow at 360/390 px on any touched route.
-5. `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm exec playwright test`
-   all pass; evidence screenshots recorded.
-6. The hero compression test (`tests/hero-liquid-compression.spec.ts`) still
-   passes unchanged.
+1. **AC-01** — Every card (Home selected work + `/work` archive) shows two
+   captures and crossfades between them on hover/focus-visible in ~450 ms.
+2. **AC-02** — Every case study renders: browser-framed hero (address bar
+   shows the real hostname), one muted looping scroll video, three
+   phone-framed mobile captures, two mid-page browser frames, "Visit site"
+   pill, Next project.
+3. **AC-03** — Video: plays only in viewport, pauses off-screen, never plays
+   under `prefers-reduced-motion: reduce`.
+4. **AC-04** — No horizontal overflow at 360/390 px on any touched route.
+5. **AC-05** — `pnpm typecheck`, `pnpm lint`, `pnpm test`,
+   `pnpm exec playwright test` all pass; evidence screenshots recorded.
+6. **AC-06** — The hero compression test
+   (`tests/hero-liquid-compression.spec.ts`) still passes unchanged.
 
 ## Out of scope
 
