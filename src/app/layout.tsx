@@ -54,6 +54,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const links = buildNavLinks(copy.nav);
+  // Only destinations that exist. An empty profile is not rendered at all.
+  const liveSocials = socials.filter((social) => social.href);
 
   return (
     <html
@@ -84,7 +86,7 @@ export default function RootLayout({
             navigation: copy.nav.navigation,
             socials: copy.footer.socials,
           }}
-          socials={socials}
+          socials={liveSocials}
         />
         {children}
         <ContactChapter>
@@ -99,7 +101,7 @@ export default function RootLayout({
             localTime: copy.footer.localTime,
           }}
           links={links}
-          socials={socials}
+          socials={liveSocials}
         />
       </body>
     </html>

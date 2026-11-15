@@ -54,8 +54,12 @@ test.describe("mobile drawer", () => {
     await expect(dialog).toHaveAttribute("data-state", "open");
 
     const socials = dialog.getByRole("navigation", { name: "Socials" });
-    for (const label of ["Instagram", "Twitter", "LinkedIn"]) {
-      await expect(socials).toContainText(label);
+    if (await socials.count()) {
+      const socialLinks = socials.locator("a");
+      expect(await socialLinks.count()).toBeGreaterThan(0);
+      for (const link of await socialLinks.all()) {
+        await expect(link).toHaveAttribute("href", /^https?:\/\//);
+      }
     }
     await expect
       .poll(() =>
@@ -114,17 +118,20 @@ test.describe("footer and targets", () => {
     await expect(page.locator('a[href="#"]')).toHaveCount(0);
 
     const socials = page.getByRole("navigation", { name: "Socials" });
-    for (const label of ["Instagram", "Twitter", "LinkedIn"]) {
-      await expect(socials).toContainText(label);
+    if (await socials.count()) {
+      const socialLinks = socials.locator("a");
+      expect(await socialLinks.count()).toBeGreaterThan(0);
+
+      for (let index = 0; index < (await socialLinks.count()); index += 1) {
+        await expect(socialLinks.nth(index)).toHaveAttribute(
+          "href",
+          /^https?:\/\//,
+        );
+      }
     }
 
-    const socialLinks = socials.locator("a");
-    for (let index = 0; index < (await socialLinks.count()); index += 1) {
-      await expect(socialLinks.nth(index)).toHaveAttribute(
-        "href",
-        /^https?:\/\//,
-      );
-    }
+    // Empty profiles are omitted, never rendered as dead text.
+    await expect(page.locator("footer span.site-footer__link")).toHaveCount(0);
   });
 
   test("the trigger never sits on contact links", async ({ page }) => {

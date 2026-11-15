@@ -273,15 +273,15 @@ export default function MenuOverlay({
             </ul>
           </div>
 
-          <nav
-            aria-label={labels.socials}
-            className="flex flex-col gap-[var(--space-2)]"
-          >
-            <p className="ui-label m-0">{labels.socials}</p>
-            <ul className="m-0 flex list-none flex-wrap gap-x-[var(--space-4)] gap-y-0 p-0">
-              {socials.map((social) => (
-                <li key={social.key} className="flex">
-                  {social.href ? (
+          {socials.length > 0 ? (
+            <nav
+              aria-label={labels.socials}
+              className="flex flex-col gap-[var(--space-2)]"
+            >
+              <p className="ui-label m-0">{labels.socials}</p>
+              <ul className="m-0 flex list-none flex-wrap gap-x-[var(--space-4)] gap-y-0 p-0">
+                {socials.map((social) => (
+                  <li key={social.key} className="flex">
                     <LinkLine
                       href={social.href}
                       external
@@ -289,15 +289,11 @@ export default function MenuOverlay({
                     >
                       {social.label}
                     </LinkLine>
-                  ) : (
-                    <span className="inline-flex min-h-11 items-center text-t-16 text-bone/45">
-                      {social.label}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </nav>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : null}
         </div>
       </div>
     </dialog>

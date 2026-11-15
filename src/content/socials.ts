@@ -1,12 +1,16 @@
 /**
  * Social destinations.
  *
- * A `href` is either a real profile URL or an empty string. Empty renders the
- * label as plain text: the row is always visible, but the site never ships a
- * dead `#` link. Fill a URL and that entry becomes a real external link with
- * the same semantics as every other link on the site.
+ * A `href` is either a real profile URL or an empty string. Empty entries are
+ * filtered out before rendering, so the footer and the menu never show a dead
+ * profile name and never ship a `#` link. Fill a URL and it appears.
  */
-export type SocialKey = "instagram" | "twitter" | "linkedin";
+export type SocialKey =
+  | "github"
+  | "x"
+  | "linkedin"
+  | "instagram"
+  | "whatsapp";
 
 export type Social = {
   key: SocialKey;
@@ -15,7 +19,9 @@ export type Social = {
 };
 
 export const socials: Social[] = [
-  { key: "instagram", label: "Instagram", href: "" },
-  { key: "twitter", label: "Twitter", href: "" },
+  { key: "github", label: "GitHub", href: "" },
+  { key: "x", label: "X", href: "" },
   { key: "linkedin", label: "LinkedIn", href: "" },
+  { key: "instagram", label: "Instagram", href: "" },
+  { key: "whatsapp", label: "WhatsApp", href: "" },
 ];

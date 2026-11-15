@@ -205,6 +205,9 @@ widely.
 - **About data** lives in `src/content/about.ts`. `experience` and `cv` are empty
   on purpose: the page renders those sections only when they have data, so no
   placeholder ships. `stack` is the toolset this site is built with.
+- **Social links** live in `src/content/socials.ts` (GitHub, X, LinkedIn,
+  Instagram, WhatsApp). An empty `href` is omitted from the footer and the menu,
+  so you can fill them in one at a time without shipping dead labels.
 - **The wordmark typography** is `.hero-wordmark` in `src/app/globals.css`. The
   bottom crop is `--wordmark-drop` (a negative margin). The only transform is
   the small scroll lag — there is no entrance and no filter.
