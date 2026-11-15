@@ -2,12 +2,13 @@ import { notFound } from "next/navigation";
 
 import { copy } from "@/content/copy";
 import { getNextProject, getProject, getProjects } from "@/content/projects";
-import LinkLine from "@/features/ui/LinkLine";
+import ChapterLabel from "@/features/ui/ChapterLabel";
 import NextProject from "@/features/ui/NextProject";
 import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
 import { formatNumber } from "@/features/ui/editorial";
 import { chapterFrame, displayTitle } from "@/features/ui/styles";
+import { pageMetadata } from "@/lib/seo";
 import MediaBlock from "@/features/work/MediaBlock";
 
 type Props = {
@@ -24,7 +25,11 @@ export async function generateMetadata({ params }: Props) {
 
   if (!project) return {};
 
-  return { title: project.title, description: project.tagline };
+  return pageMetadata({
+    title: project.title,
+    description: project.tagline,
+    path: `/work/${slug}`,
+  });
 }
 
 export default async function ProjectPage({ params }: Props) {
@@ -44,7 +49,7 @@ export default async function ProjectPage({ params }: Props) {
     >
       <article>
         <header className="chapter-open">
-          <p className="ui-label m-0">{copy.project.caseStudy}</p>
+          <ChapterLabel index={1}>{copy.project.caseStudy}</ChapterLabel>
 
           <h1 className={`${displayTitle} mt-[var(--space-2)]`}>
             {project.title}
@@ -103,16 +108,14 @@ export default async function ProjectPage({ params }: Props) {
           </Reveal>
         ) : null}
 
-        <div className="mt-[var(--space-8)] grid gap-[var(--space-7)]">
+        <div className="mt-[var(--space-8)] grid gap-[var(--space-6)]">
           {project.sections.map((section, index) => (
             <Reveal
               as="section"
               key={section.heading}
-              className={
-                index % 2 === 1 ? "ms-auto max-w-[42ch]" : "max-w-[58ch]"
-              }
+              className="max-w-[58ch]"
             >
-              <span className="font-label text-t-14 tracking-[var(--track)] text-lime">
+              <span className="font-label text-t-14 tracking-[var(--track)] text-warm">
                 {formatNumber(index + 1, { pad: 2 })}
               </span>
 
@@ -128,33 +131,16 @@ export default async function ProjectPage({ params }: Props) {
         </div>
 
         {project.media.length > 1 ? (
-          <div className="mt-[var(--space-8)] grid grid-cols-[minmax(0,1fr)] gap-[var(--chapter-gap)]">
+          <div className="mt-[var(--space-7)] grid grid-cols-[minmax(0,1fr)] gap-[var(--space-7)]">
             {project.media.slice(1).map((block, i) => (
               <Reveal key={`${block.kind}-${i}`} delay={60}>
                 <MediaBlock
                   block={block}
                   title={project.title}
                   url={project.url}
-                  className={
-                    block.kind === "browser" && i % 2 === 1
-                      ? "lg:w-[78%] lg:ms-auto"
-                      : undefined
-                  }
                 />
               </Reveal>
             ))}
-          </div>
-        ) : null}
-
-        {project.url ? (
-          <div className="mt-[var(--space-4)]">
-            <LinkLine
-              href={project.url}
-              external
-              className="inline-flex min-h-11 items-center text-[clamp(1.05rem,1.6vw,1.3rem)]"
-            >
-              {copy.project.visit}
-            </LinkLine>
           </div>
         ) : null}
       </article>

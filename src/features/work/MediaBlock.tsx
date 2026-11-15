@@ -6,6 +6,7 @@ import Parallax from "@/features/ui/Parallax";
 import BrowserFrame from "./BrowserFrame";
 import PhoneTrio from "./PhoneTrio";
 import ProjectVideo from "./ProjectVideo";
+import { COVER_ASPECT } from "./cover";
 
 type Props = {
   block: ProjectMediaBlock;
@@ -21,10 +22,22 @@ function hostname(url?: string): string {
   return new URL(url).hostname.replace(/^www\./, "");
 }
 
+function Caption({ children }: { children?: string }) {
+  if (!children) return null;
+
+  return (
+    <figcaption className="mt-[var(--space-1)] max-w-[58ch] text-t-14 leading-[1.6] text-warm">
+      {children}
+    </figcaption>
+  );
+}
+
 /**
  * One block of the case-study stream. Presentation follows the block kind:
  * browser captures sit in chrome, the recording plays inside the same chrome,
- * and the phone trio stands on its own.
+ * and the phone trio stands on its own. Every block uses one cover ratio so a
+ * capture is never cropped by its frame; the recording is capped at its own
+ * source width so it is never upscaled.
  */
 export default function MediaBlock({
   block,
@@ -35,43 +48,48 @@ export default function MediaBlock({
 }: Props) {
   if (block.kind === "phones") {
     return (
-      <PhoneTrio
-        srcs={block.srcs}
-        alts={block.alts}
-        className={className}
-      />
+      <figure className={`m-0 ${className ?? ""}`}>
+        <PhoneTrio srcs={block.srcs} alts={block.alts} />
+        <Caption>{block.caption}</Caption>
+      </figure>
     );
   }
 
   if (block.kind === "video") {
     return (
-      <BrowserFrame address={hostname(url)} className={className}>
-        <ProjectVideo
-          src={block.src}
-          poster={block.poster}
-          label={`${title} — scroll-through recording`}
-          className="block aspect-[16/10] w-full"
-        />
-      </BrowserFrame>
+      <figure className={`m-0 ${className ?? ""}`}>
+        <div className="mx-auto w-full max-w-[80rem]">
+          <BrowserFrame address={hostname(url)}>
+            <ProjectVideo
+              src={block.src}
+              poster={block.poster}
+              label={`${title} — scroll-through recording`}
+              className={`block ${COVER_ASPECT} w-full`}
+            />
+          </BrowserFrame>
+        </div>
+        <Caption>{block.caption}</Caption>
+      </figure>
     );
   }
 
   return (
-    <BrowserFrame address={hostname(url)} className={className}>
-      <Parallax>
-        <span className="relative block aspect-[16/10]">
-          <Image
-            src={block.src}
-            alt={block.alt}
-            fill
-            loading={priority ? "eager" : "lazy"}
-            sizes={
-              className ? "(min-width: 1024px) 80vw, 100vw" : "100vw"
-            }
-            className="object-cover object-top"
-          />
-        </span>
-      </Parallax>
-    </BrowserFrame>
+    <figure className={`m-0 ${className ?? ""}`}>
+      <BrowserFrame address={hostname(url)}>
+        <Parallax>
+          <span className={`relative block ${COVER_ASPECT}`}>
+            <Image
+              src={block.src}
+              alt={block.alt}
+              fill
+              loading={priority ? "eager" : "lazy"}
+              sizes="100vw"
+              className="object-cover object-top"
+            />
+          </span>
+        </Parallax>
+      </BrowserFrame>
+      <Caption>{block.caption}</Caption>
+    </figure>
   );
 }

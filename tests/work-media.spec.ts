@@ -42,10 +42,11 @@ test.describe("case study (Dennis inside)", () => {
     // Hero, video frame, and two mid shots are browser-framed.
     await expect(frames).toHaveCount(4);
 
-    // The offset (78%-wide) mid shot asks for the 80vw source set.
+    // Every capture fills the content width; one source set, no arbitrary
+    // 78%-wide variant.
     await expect(frames.nth(3).locator("img")).toHaveAttribute(
       "sizes",
-      /80vw/,
+      "100vw",
     );
 
     // Three phone screens.

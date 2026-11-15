@@ -51,7 +51,7 @@ export default function ProjectVideo({ src, poster, label, className }: Props) {
       loop
       playsInline
       muted
-      preload="metadata"
+      preload="none"
       poster={poster}
       aria-label={label}
       className={className}

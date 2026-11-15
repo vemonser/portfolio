@@ -9,9 +9,9 @@ export type ProjectSection = {
 };
 
 export type ProjectMediaBlock =
-  | { kind: "browser"; src: string; alt: string }
-  | { kind: "phones"; srcs: string[]; alts: string[] }
-  | { kind: "video"; src: string; poster: string };
+  | { kind: "browser"; src: string; alt: string; caption?: string }
+  | { kind: "phones"; srcs: string[]; alts: string[]; caption?: string }
+  | { kind: "video"; src: string; poster: string; caption?: string };
 
 export type Project = {
   slug: string;

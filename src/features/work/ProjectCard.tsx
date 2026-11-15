@@ -5,6 +5,8 @@ import type { Project } from "@/content/projects/types";
 import { formatNumber } from "@/features/ui/editorial";
 import EditorialMedia from "@/features/ui/EditorialMedia";
 
+import { COVER_ASPECT } from "./cover";
+
 type Props = {
   project: Project;
   index: number;
@@ -16,7 +18,7 @@ type Props = {
  * Project media ratios follow the sequence position, so the Home run breathes
  * unevenly on purpose. The archive keeps one ratio for comparison.
  */
-const HOME_ASPECT = "aspect-[16/10]";
+const HOME_ASPECT = COVER_ASPECT;
 
 /**
  * A project entry. The whole card is the link, the media is a designed field
@@ -48,7 +50,7 @@ export default function ProjectCard({
           priority={index === 0}
           hoverSrc={project.imageHover}
           className={`${
-            home ? HOME_ASPECT : "aspect-[4/3]"
+            home ? HOME_ASPECT : COVER_ASPECT
           } transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] will-change-transform group-hover:scale-[1.015] group-focus-visible:scale-[1.015]`}
         />
 
