@@ -78,7 +78,7 @@ export default function ProjectCard({
           {project.title}
         </span>
 
-        <span className="font-label text-t-14 uppercase tracking-[var(--track)] text-lime/75">
+        <span className="font-label text-t-14 uppercase tracking-[var(--track)] text-warm">
           {project.role} · {project.year}
         </span>
 

@@ -33,7 +33,7 @@ export default function SkillMatrix({ groups, label }: Props) {
             className="border-t border-[var(--line-hairline)] py-[var(--space-3)]"
           >
             <div className="flex items-baseline gap-[var(--space-2)]">
-              <span className="font-label text-t-14 tracking-[var(--track)] text-lime">
+              <span className="font-label text-t-14 tracking-[var(--track)] text-warm">
                 {formatNumber(index + 1, { pad: 2 })}
               </span>
               <h3 className="m-0 font-display text-title font-semibold">

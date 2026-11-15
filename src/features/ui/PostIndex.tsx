@@ -34,7 +34,7 @@ export default function PostIndex({ posts, empty }: Props) {
         <Reveal as="li" key={post.slug} delay={index * 60}>
           <div className="group relative grid gap-[var(--space-2)] border-b border-[var(--line-hairline)] py-[var(--space-4)] md:grid-cols-[7rem_minmax(0,1fr)] md:gap-x-[var(--space-5)]">
             <div className="flex items-baseline gap-[var(--space-2)] font-label text-t-14 uppercase tracking-[var(--track)] text-warm md:flex-col md:items-start">
-              <span className="text-lime">
+              <span className="text-warm">
                 {formatNumber(index + 1, { pad: 2 })}
               </span>
               <time dateTime={post.date} className="whitespace-nowrap">
