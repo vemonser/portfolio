@@ -94,6 +94,7 @@ export default function MediaBlock({
                 alt={block.alt}
                 fill
                 loading={priority ? "eager" : "lazy"}
+                quality={90}
                 sizes="100vw"
                 className="object-cover object-top"
               />

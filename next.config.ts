@@ -6,6 +6,13 @@ const withMDX = createMDX({});
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 
+  images: {
+    // Text-heavy captures benefit from AVIF's smaller artifacts; quality 90 is
+    // the only override the media components use.
+    formats: ["image/avif", "image/webp"],
+    qualities: [75, 90],
+  },
+
   // Turbopack's dev filesystem cache has been serving stale compiled CSS after
   // edits to globals.css, which silently undoes style changes. Not worth the
   // confusion for the few hundred ms it saves.

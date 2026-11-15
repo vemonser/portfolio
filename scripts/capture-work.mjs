@@ -51,7 +51,9 @@ async function scrollToFraction(page, fraction) {
 }
 
 async function saveWebp(pngBuffer, outPath) {
-  await sharp(pngBuffer).webp({ quality: 82 }).toFile(outPath);
+  // 92, not 82: these are text-heavy site captures, and the optimizer will
+  // re-encode once more. Compression artifacts are most visible on type.
+  await sharp(pngBuffer).webp({ quality: 92, effort: 6 }).toFile(outPath);
 }
 
 async function captureStills(browser, target, outDir) {
@@ -119,12 +121,14 @@ async function captureVideo(browser, target, outDir) {
   await context.close();
   const rawPath = await video.path();
 
-  // Compress: VP8, no audio, 1280 wide, constrained quality → ~1 MB for 9 s.
+  // Compress: VP9, no audio, keep the 1440 capture width, constrained quality.
+  // The old pipeline downscaled to 1280 with VP8 CRF 34, which is what made the
+  // recording look soft next to the stills.
   execFileSync("ffmpeg", [
     "-y", "-ss", introSeconds.toFixed(2), "-i", rawPath,
-    "-c:v", "libvpx", "-crf", "34", "-b:v", "0", "-an",
+    "-c:v", "libvpx-vp9", "-crf", "30", "-b:v", "0", "-an",
     "-vf", "scale=1280:-2",
-    "-deadline", "good", "-cpu-used", "2",
+    "-row-mt", "1", "-deadline", "good", "-cpu-used", "2",
     path.join(outDir, "scroll.webm"),
   ]);
   await rm(rawPath, { force: true });

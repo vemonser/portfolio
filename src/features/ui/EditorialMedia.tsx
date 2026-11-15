@@ -59,6 +59,7 @@ export default function EditorialMedia({
           fill
           loading={priority ? "eager" : "lazy"}
           sizes="(min-width: 1024px) 60vw, 100vw"
+          quality={90}
           className="object-cover object-top opacity-100 transition-opacity duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:opacity-0 group-focus-visible:opacity-0"
         />
         {hoverSrc ? (
@@ -69,6 +70,7 @@ export default function EditorialMedia({
             loading="lazy"
             fetchPriority="low"
             sizes="(min-width: 1024px) 40vw, 90vw"
+            quality={90}
             className="absolute inset-0 object-cover object-top opacity-0 will-change-opacity transition-opacity duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:opacity-100 group-focus-visible:opacity-100"
           />
         ) : null}

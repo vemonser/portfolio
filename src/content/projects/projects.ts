@@ -25,7 +25,7 @@ export const projects: Project[] = [
       {
         kind: "video",
         src: "/work/anom-creative/scroll.webm",
-        poster: "/work/anom-creative/hero.webp",
+        poster: "/work/anom-creative/mid-1.webp",
       },
       {
         kind: "phones",
@@ -79,7 +79,7 @@ export const projects: Project[] = [
       {
         kind: "video",
         src: "/work/fambam/scroll.webm",
-        poster: "/work/fambam/hero.webp",
+        poster: "/work/fambam/mid-1.webp",
       },
       {
         kind: "phones",
@@ -133,7 +133,7 @@ export const projects: Project[] = [
       {
         kind: "video",
         src: "/work/advrt/scroll.webm",
-        poster: "/work/advrt/hero.webp",
+        poster: "/work/advrt/mid-1.webp",
       },
       {
         kind: "phones",
@@ -187,7 +187,7 @@ export const projects: Project[] = [
       {
         kind: "video",
         src: "/work/al-ghaith/scroll.webm",
-        poster: "/work/al-ghaith/hero.webp",
+        poster: "/work/al-ghaith/mid-1.webp",
       },
       {
         kind: "phones",
