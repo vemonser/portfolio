@@ -26,19 +26,13 @@ export default function SkillMatrix({ groups, label }: Props) {
         >
           {label}
         </h2>
-
-        <span className="font-label text-t-14 uppercase tracking-[var(--track)] text-warm">
-          {formatNumber(groups.length, { pad: 2 })}
-        </span>
       </div>
 
       <ul className="m-0 mt-[var(--space-5)] grid list-none gap-0 p-0 md:grid-cols-2 md:gap-x-[var(--space-6)]">
         {groups.map((group, index) => (
           <li
             key={group.title}
-            className={`border-t border-[var(--line-hairline)] py-[var(--space-3)] ${
-              index === groups.length - 1 ? "md:col-span-2" : ""
-            }`}
+            className="border-t border-[var(--line-hairline)] py-[var(--space-3)]"
           >
             <div className="flex items-baseline gap-[var(--space-2)]">
               <span className="font-label text-t-14 tracking-[var(--track)] text-lime">
