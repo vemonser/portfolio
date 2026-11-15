@@ -1,3 +1,4 @@
+import { displaySection } from "./styles";
 import { formatNumber } from "./editorial";
 
 type SkillGroup = { title: string; body: string };
@@ -20,10 +21,7 @@ export default function SkillMatrix({ groups, label }: Props) {
       className="border-t border-[var(--line-hairline)] pt-[var(--space-3)]"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
-        <h2
-          id="capabilities-title"
-          className="m-0 font-display text-[clamp(1.8rem,3.6vw,3rem)] font-semibold uppercase leading-[1.05] tracking-[-0.015em]"
-        >
+        <h2 id="capabilities-title" className={displaySection}>
           {label}
         </h2>
       </div>
@@ -38,12 +36,12 @@ export default function SkillMatrix({ groups, label }: Props) {
               <span className="font-label text-t-14 tracking-[var(--track)] text-lime">
                 {formatNumber(index + 1, { pad: 2 })}
               </span>
-              <h3 className="m-0 font-display text-[clamp(1.15rem,2vw,1.6rem)] font-semibold tracking-[-0.02em]">
+              <h3 className="m-0 font-display text-title font-semibold">
                 {group.title}
               </h3>
             </div>
 
-            <p className="m-0 mt-[var(--space-1)] max-w-[42ch] leading-[1.7] text-bone/60">
+            <p className="m-0 mt-[var(--space-1)] max-w-[42ch] leading-[1.7] text-fg-muted">
               {group.body}
             </p>
           </li>

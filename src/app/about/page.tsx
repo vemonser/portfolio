@@ -5,7 +5,7 @@ import LinkLine from "@/features/ui/LinkLine";
 import PageFrame from "@/features/ui/PageFrame";
 import Reveal from "@/features/ui/Reveal";
 import SkillMatrix from "@/features/ui/SkillMatrix";
-import { chapterFrame, displayTitle } from "@/features/ui/styles";
+import { chapterFrame, displaySection, displayTitle } from "@/features/ui/styles";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -30,7 +30,7 @@ export default function AboutPage() {
           {copy.about.title}
         </h1>
 
-        <p className="m-0 mt-[var(--space-3)] max-w-[26ch] font-display text-[clamp(1.6rem,3.6vw,3.2rem)] font-medium leading-[1.12] tracking-[-0.03em] text-bone/85">
+        <p className="m-0 mt-[var(--space-3)] max-w-[26ch] font-display text-statement font-medium text-fg">
           {copy.about.lede}
         </p>
       </Reveal>
@@ -43,8 +43,8 @@ export default function AboutPage() {
                 key={paragraph}
                 className={
                   index === 0
-                    ? "m-0 max-w-[56ch] text-[clamp(1.15rem,1.8vw,1.45rem)] leading-[1.65] text-bone/80"
-                    : "m-0 max-w-[56ch] text-[clamp(1rem,1.3vw,1.15rem)] leading-[1.8] text-bone/60"
+                    ? "m-0 max-w-[56ch] text-lede text-fg"
+                    : "m-0 max-w-[56ch] text-body text-fg-muted"
                 }
               >
                 {paragraph}
@@ -104,7 +104,7 @@ export default function AboutPage() {
           <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
             <h2
               id="experience-title"
-              className="m-0 font-display text-[clamp(1.8rem,3.6vw,3rem)] font-semibold uppercase leading-[1.05] tracking-[-0.015em]"
+              className={`${displaySection}`}
             >
               Experience
             </h2>
@@ -124,10 +124,10 @@ export default function AboutPage() {
                 </span>
 
                 <div>
-                  <h3 className="m-0 font-display text-[clamp(1.15rem,2vw,1.6rem)] font-semibold tracking-[-0.02em]">
+                  <h3 className="m-0 font-display text-title font-semibold">
                     {entry.role} · {entry.company}
                   </h3>
-                  <p className="m-0 mt-[var(--space-1)] max-w-[58ch] leading-[1.7] text-bone/60">
+                  <p className="m-0 mt-[var(--space-1)] max-w-[58ch] text-body text-fg-muted">
                     {entry.summary}
                   </p>
                 </div>
@@ -149,7 +149,7 @@ export default function AboutPage() {
         >
           <h2
             id="stack-title"
-            className="m-0 font-display text-[clamp(1.8rem,3.6vw,3rem)] font-semibold uppercase leading-[1.05] tracking-[-0.015em]"
+            className={`${displaySection}`}
           >
             Stack
           </h2>
@@ -161,7 +161,7 @@ export default function AboutPage() {
                 className="border-t border-[var(--line-hairline)] pt-[var(--space-2)]"
               >
                 <dt className="ui-label m-0">{group.label}</dt>
-                <dd className="m-0 mt-[var(--space-1)] text-t-16 leading-[1.6] text-bone/80">
+                <dd className="m-0 mt-[var(--space-1)] text-t-16 leading-[1.6] text-fg">
                   {group.items.join(" · ")}
                 </dd>
               </div>

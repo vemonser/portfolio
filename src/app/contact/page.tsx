@@ -32,7 +32,7 @@ export default function ContactPage() {
         </h1>
 
         <p
-          className={`${bodyMeasure} mt-[var(--space-3)] text-[clamp(1.05rem,1.5vw,1.3rem)]`}
+          className={`${bodyMeasure} mt-[var(--space-3)] text-lede`}
         >
           {contact.lede}
         </p>
@@ -45,7 +45,7 @@ export default function ContactPage() {
           <dl className="m-0 mt-[var(--space-4)] flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-col gap-[0.4rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
               <dt className="ui-label">{contact.emailLabel}</dt>
-              <dd className="m-0 break-words text-[clamp(1.05rem,1.5vw,1.25rem)] [overflow-wrap:anywhere]">
+              <dd className="m-0 break-words text-lede [overflow-wrap:anywhere]">
                 <LinkLine
                   href={`mailto:${contact.email}`}
                   className="inline-flex min-h-11 scroll-mt-[8rem] items-center"
@@ -58,7 +58,7 @@ export default function ContactPage() {
             <div className="flex flex-col gap-[0.4rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
               <dt className="ui-label">{contact.phoneLabel}</dt>
               <dd
-                className="m-0 text-[clamp(1.05rem,1.5vw,1.25rem)]"
+                className="m-0 text-lede"
                 dir="ltr"
               >
                 <LinkLine

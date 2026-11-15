@@ -22,14 +22,14 @@ export default function IntroSection() {
         <Reveal className="lg:col-span-8">
           <h2
             id="intro-title"
-            className="m-0 max-w-[22ch] font-display text-[clamp(1.9rem,4.2vw,4rem)] font-medium leading-[1.1] tracking-[-0.03em]"
+            className="m-0 max-w-[22ch] font-display text-statement font-medium"
           >
             {copy.intro.statement}
           </h2>
         </Reveal>
 
         <Reveal delay={120} className="lg:col-span-4 lg:col-start-9 lg:mt-[var(--space-5)]">
-          <p className="m-0 max-w-[34ch] text-[clamp(1.05rem,1.5vw,1.3rem)] leading-[1.75] text-bone/65">
+          <p className="m-0 max-w-[34ch] text-lede text-fg-muted">
             {copy.intro.body}
           </p>
         </Reveal>
@@ -43,7 +43,7 @@ export default function IntroSection() {
         <span aria-hidden="true" className="text-bone/25">
           ·
         </span>
-        <span className="inline-flex items-center gap-[0.45rem] text-bone/70">
+        <span className="inline-flex items-center gap-[0.45rem] text-fg-muted">
           <span
             className="h-[6px] w-[6px] rounded-full bg-lime"
             aria-hidden="true"

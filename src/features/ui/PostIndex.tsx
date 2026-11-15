@@ -22,7 +22,7 @@ type Props = {
 export default function PostIndex({ posts, empty }: Props) {
   if (posts.length === 0) {
     return (
-      <p className="m-0 max-w-[46ch] text-[clamp(1.05rem,1.5vw,1.25rem)] leading-[1.7] text-bone/60">
+      <p className="m-0 max-w-[46ch] text-lede leading-[1.7] text-fg-muted">
         {empty}
       </p>
     );
@@ -46,13 +46,13 @@ export default function PostIndex({ posts, empty }: Props) {
               <h2 className="m-0">
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="font-display text-[clamp(1.55rem,3.2vw,2.6rem)] font-semibold leading-[1.12] tracking-[-0.025em] text-bone no-underline transition-colors duration-[var(--dur-base)] after:absolute after:inset-0 after:content-[''] group-hover:text-lime group-focus-within:text-lime"
+                  className="font-display text-display-3 font-semibold text-bone no-underline transition-colors duration-[var(--dur-base)] after:absolute after:inset-0 after:content-[''] group-hover:text-lime group-focus-within:text-lime"
                 >
                   {post.title}
                 </Link>
               </h2>
 
-              <p className="m-0 max-w-[54ch] text-[clamp(0.98rem,1.2vw,1.1rem)] leading-[1.7] text-bone/60">
+              <p className="m-0 max-w-[54ch] text-body leading-[1.7] text-fg-muted">
                 {post.excerpt}
               </p>
             </div>

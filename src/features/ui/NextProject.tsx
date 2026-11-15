@@ -22,7 +22,7 @@ export default function NextProject({ project, label }: Props) {
       <span className="ui-label">{label}</span>
 
       <span className="mt-[var(--space-3)] flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-        <span className="font-display text-[clamp(2rem,5.4vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.035em] transition-colors duration-[var(--dur-base)] group-hover:text-lime">
+        <span className="font-display text-statement font-semibold transition-colors duration-[var(--dur-base)] group-hover:text-lime">
           {project.title}
         </span>
 

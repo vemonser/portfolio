@@ -3,6 +3,7 @@ import ChapterLabel from "@/features/ui/ChapterLabel";
 import LinkLine from "@/features/ui/LinkLine";
 import Reveal from "@/features/ui/Reveal";
 import RoundButton from "@/features/ui/RoundButton";
+import { displayCta } from "@/features/ui/styles";
 
 /**
  * The closing chapter, present on every route except Contact. It is composed
@@ -23,7 +24,7 @@ export default function ContactCta() {
 
         <h2
           id="cta-title"
-          className="m-0 mt-[var(--space-3)] max-w-[18ch] font-display text-[clamp(2.4rem,6.4vw,6rem)] font-semibold leading-[0.98] tracking-[-0.035em]"
+          className={`${displayCta} mt-[var(--space-3)] max-w-[18ch]`}
         >
           {cta.title}
         </h2>
@@ -34,7 +35,7 @@ export default function ContactCta() {
           <dl className="m-0 flex flex-col gap-[var(--space-3)]">
             <div className="flex flex-col gap-[0.35rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
               <dt className="ui-label">{cta.emailLabel}</dt>
-              <dd className="m-0 break-words text-[clamp(1.15rem,2vw,1.6rem)] [overflow-wrap:anywhere]">
+              <dd className="m-0 break-words text-title [overflow-wrap:anywhere]">
                 <LinkLine
                   href={`mailto:${cta.email}`}
                   className="inline-flex min-h-11 items-center"
@@ -46,7 +47,7 @@ export default function ContactCta() {
 
             <div className="flex flex-col gap-[0.35rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
               <dt className="ui-label">{cta.phoneLabel}</dt>
-              <dd className="m-0 text-[clamp(1.15rem,2vw,1.6rem)]" dir="ltr">
+              <dd className="m-0 text-title" dir="ltr">
                 <LinkLine
                   href={cta.phoneHref}
                   className="inline-flex min-h-11 items-center"

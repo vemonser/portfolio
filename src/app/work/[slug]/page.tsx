@@ -56,7 +56,7 @@ export default async function ProjectPage({ params }: Props) {
             {project.title}
           </h1>
 
-          <p className="m-0 mt-[var(--space-3)] max-w-[44ch] text-[clamp(1.1rem,1.8vw,1.45rem)] leading-[1.6] text-warm">
+          <p className="m-0 mt-[var(--space-3)] max-w-[44ch] text-lede leading-[1.6] text-warm">
             {project.tagline}
           </p>
 
@@ -121,11 +121,11 @@ export default async function ProjectPage({ params }: Props) {
                 {formatNumber(index + 1, { pad: 2 })}
               </span>
 
-              <h2 className="mb-[0.9rem] mt-[var(--space-2)] font-display text-[clamp(1.7rem,3vw,2.6rem)] font-semibold leading-[1.1] tracking-[-0.025em]">
+              <h2 className="mb-[0.9rem] mt-[var(--space-2)] font-display text-display-3 font-semibold">
                 {section.heading}
               </h2>
 
-              <p className="m-0 text-[clamp(1.02rem,1.4vw,1.2rem)] leading-[1.8] text-bone/70">
+              <p className="m-0 text-body leading-[1.8] text-fg-muted">
                 {section.body}
               </p>
             </Reveal>
@@ -156,7 +156,7 @@ export default async function ProjectPage({ params }: Props) {
             <LinkLine
               href={project.url}
               external
-              className="inline-flex min-h-11 items-center text-[clamp(1.05rem,1.6vw,1.3rem)]"
+              className="inline-flex min-h-11 items-center text-lede"
             >
               {copy.project.visit}
               <span aria-hidden="true" className="ms-2">

@@ -28,7 +28,7 @@ export default function BlogPage() {
         </h1>
 
         <p
-          className={`${bodyMeasure} mt-[var(--space-3)] text-[clamp(1.05rem,1.5vw,1.3rem)]`}
+          className={`${bodyMeasure} mt-[var(--space-3)] text-lede`}
         >
           {copy.blogPage.lede}
         </p>

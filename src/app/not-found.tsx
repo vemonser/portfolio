@@ -23,7 +23,7 @@ export default function NotFound() {
 
       <h1 className={`${displayTitle} mt-[var(--space-3)]`}>404</h1>
 
-      <p className="m-0 mt-[var(--space-3)] max-w-[42ch] text-[clamp(1.1rem,1.6vw,1.35rem)] leading-[1.7] text-bone/65">
+      <p className="m-0 mt-[var(--space-3)] max-w-[42ch] text-lede leading-[1.7] text-fg-muted">
         This page has moved, or it never existed. The work and the writing are
         both still here.
       </p>

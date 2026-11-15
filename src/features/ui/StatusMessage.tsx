@@ -19,7 +19,7 @@ export default function StatusMessage({ kind, children }: Props) {
       role={error ? "alert" : "status"}
       aria-live={error ? "assertive" : "polite"}
       className={`m-0 flex flex-wrap items-baseline gap-x-[0.5rem] gap-y-[0.35rem] border-s-2 ps-[var(--space-2)] text-t-16 leading-[1.65] ${
-        error ? "border-lime text-bone" : "border-forest text-bone/80"
+        error ? "border-lime text-bone" : "border-forest text-fg"
       }`}
     >
       {children}

@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import type { Project } from "@/content/projects/types";
 
-import { formatNumber } from "@/features/ui/editorial";
 import EditorialMedia from "@/features/ui/EditorialMedia";
 
 import { COVER_ASPECT } from "./cover";
@@ -69,19 +68,14 @@ export default function ProjectCard({
             : "gap-[0.4rem] pt-[var(--space-1)]"
         }`}
       >
-        <span className="flex items-baseline justify-between gap-[var(--space-3)]">
-          <span
-            className={
-              home
-                ? "font-display text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.02] uppercase tracking-[-0.015em]"
-                : "font-display text-[clamp(1.15rem,1.6vw,1.45rem)] font-semibold leading-[1.2] uppercase tracking-[-0.005em]"
-            }
-          >
-            {project.title}
-          </span>
-          <span className="shrink-0 font-label text-t-14 tracking-[var(--track)] text-warm">
-            P / {formatNumber(index + 1, { pad: 2 })}
-          </span>
+        <span
+          className={
+            home
+              ? "font-display text-display-3 font-semibold uppercase"
+              : "font-display text-title font-semibold uppercase"
+          }
+        >
+          {project.title}
         </span>
 
         <span className="font-label text-t-14 uppercase tracking-[var(--track)] text-lime/75">
@@ -91,8 +85,8 @@ export default function ProjectCard({
         <span
           className={
             home
-              ? "max-w-[48ch] leading-[1.7] text-bone/60"
-              : "max-w-[44ch] leading-[1.6] text-bone/60"
+              ? "max-w-[48ch] leading-[1.7] text-fg-muted"
+              : "max-w-[44ch] leading-[1.6] text-fg-muted"
           }
         >
           {project.tagline}
