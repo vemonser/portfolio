@@ -70,6 +70,13 @@ Execution status: AC-1 – AC-9 **PASS** (Evidence Gate run
 
 ## 3. Issues list
 
+**Status after execution:** P1-1, P1-2, P1-3, P1-4, P1-6, P2-1, P2-2 and
+P2-8 are fixed on this branch — see
+`docs/superpowers/evidence/2026-11-15-audit-phases-1-2.md`. P2-3 – P2-7 and
+P2-9 remain open. Two findings were corrected while executing: P1-4's targets
+are footer links, not header links, and P2-4 / P2-5 describe the client's own
+captured content rather than our layer.
+
 Severity: **P0** = broken for users, **P1** = visibly degrades the page or blocks a task, **P2** = polish.
 
 ### P0
