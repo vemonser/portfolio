@@ -13,8 +13,6 @@ import {
   type CompressionTarget,
 } from "@/features/hero-scene/compression";
 
-import { setHeroReady } from "./hero-ready";
-
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
 type CompressionKind = "title" | "project";
@@ -381,11 +379,9 @@ export default function HeroStage() {
     const mount = async () => {
       if (scene || loading || disposed) return;
 
-      // No WebGL 2: the poster is the whole scene, and the entrance still runs
-      // — a static image should not hold the wordmark hostage.
+      // No WebGL 2: the poster is the whole scene. Nothing else has to know.
       if (!hasWebGL2()) {
         setSceneState("off");
-        setHeroReady(true);
         return;
       }
 
@@ -399,7 +395,6 @@ export default function HeroStage() {
           initialTime: initialTime || frozenTime(),
           onFirstFrame: () => {
             if (!disposed) setReady(true);
-            setHeroReady(true);
           },
           onContextLost: () => {
             if (disposed) return;
@@ -414,10 +409,8 @@ export default function HeroStage() {
         attach(scene);
       } catch {
         // A refused context (GPU process gone, too many live contexts) must
-        // degrade to the poster, not surface an unhandled error. The entrance
-        // still runs so the title is never held hostage.
+        // degrade to the poster, not surface an unhandled error.
         setSceneState("off");
-        setHeroReady(true);
       } finally {
         loading = false;
       }

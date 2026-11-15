@@ -1,11 +1,14 @@
 import { copy } from "@/content/copy";
 
-import HeroOverlay from "./HeroOverlay";
 import HeroStage from "./HeroStage";
 
 /**
  * The Hero is the site's signature moment: a centred wordmark over the mercury
- * surface, with availability, the scroll cue and location on one meta row.
+ * surface. The wordmark is server-rendered and visible at first paint. It is
+ * deliberately not animated in: an entrance that starts hidden makes the first
+ * seconds a black screen while a phone downloads the scene, and it delays the
+ * page's largest text. The surface carries the motion; the name carries the
+ * meaning.
  */
 export default function Hero() {
   return (
@@ -16,24 +19,15 @@ export default function Hero() {
     >
       <HeroStage />
 
-      {/*
-        The overlay owns the entrance: the wordmark rises out of its mask once
-        the first frame lands. The hero carries the wordmark and nothing else —
-        availability, location and the scroll cue live in the intro chapter.
-      */}
-      <HeroOverlay>
+      <div className="relative z-10">
         <h1
           id="hero-title"
           className="hero-wordmark text-center"
           data-hero-wordmark
         >
-          <span className="block overflow-hidden py-[0.12em] -my-[0.12em]">
-            <span className="block translate-y-[115%] transition-transform duration-[1050ms] ease-[var(--ease-editorial)] delay-[150ms] will-change-transform group-data-[in=true]:translate-y-0">
-              {copy.hero.name}
-            </span>
-          </span>
+          {copy.hero.name}
         </h1>
-      </HeroOverlay>
+      </div>
     </section>
   );
 }
