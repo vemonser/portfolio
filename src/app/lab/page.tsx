@@ -76,14 +76,14 @@ export default function LabIndexPage() {
       <section className="px-[var(--inset-edge)] pb-[var(--space-7)] pt-[var(--space-8)]">
         <p className="ui-label m-0">Phase 0 / Review build</p>
         <h1 className="mt-[var(--space-3)] text-display-1 uppercase">
-          Four prototypes
+          Five prototypes
           <br />
           and the numbers.
         </h1>
         <p className="mt-[var(--space-4)] max-w-[var(--measure-body)] text-lede text-fg-muted">
-          Hero C, the replacement cursor, the directed-scroll clip and the
-          Remotion showreel. Nothing here is wired into the live site. The
-          production hero and media are untouched.
+          Hero C, the replacement cursor, the one-way peel, the directed-scroll
+          clip and the Remotion showreel. Nothing here is wired into the live
+          site. The production hero and media are untouched.
         </p>
       </section>
 
@@ -175,7 +175,68 @@ export default function LabIndexPage() {
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">03 / Video A</p>
+        <p className="ui-label m-0">03 / Hero Peel</p>
+        <h2 className="mt-2 text-display-2 uppercase">The one-way sheet</h2>
+        <p className="mt-3 max-w-[60ch] text-body text-fg-muted">
+          A lime sheet covers the hero. Moving the pointer tears it open; at 50%
+          the rest releases and it never comes back. Underneath, switch between
+          the live Hero C surface and the Anom directed-scroll clip.
+        </p>
+
+        <div className="mt-[var(--space-4)] grid gap-3 md:grid-cols-2">
+          <a href="/lab/hero-peel" className="group block no-underline">
+            <img
+              src="/lab/peel/pre-peel-lime.webp"
+              alt="Hero Peel — lime sheet before the peel"
+              width={1440}
+              height={900}
+              className="block aspect-[16/10] w-full object-cover"
+            />
+            <span className="mt-2 block font-label text-t-12 uppercase tracking-[var(--track)] text-warm group-hover:text-lime">
+              Open peel lab →
+            </span>
+          </a>
+
+          <div className="grid grid-cols-2 gap-3">
+            <figure className="m-0">
+              <img
+                src="/lab/peel/mid-peel-torn.webp"
+                alt="Hero Peel — a torn edge mid-peel"
+                width={1440}
+                height={900}
+                className="block aspect-[16/10] w-full object-cover"
+              />
+              <figcaption className="mt-2 font-label text-t-12 uppercase tracking-[var(--track)] text-warm">
+                Mid-peel
+              </figcaption>
+            </figure>
+            <figure className="m-0">
+              <img
+                src="/lab/peel/peeled-video.webp"
+                alt="Hero Peel — revealed video underneath"
+                width={1440}
+                height={900}
+                className="block aspect-[16/10] w-full object-cover"
+              />
+              <figcaption className="mt-2 font-label text-t-12 uppercase tracking-[var(--track)] text-warm">
+                Revealed
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <dl className="mt-[var(--space-4)] grid grid-cols-2 gap-x-6 gap-y-2 font-label text-t-12 uppercase tracking-[var(--track)]">
+          <dt className="text-warm">Mechanic</dt>
+          <dd className="m-0 text-bone">one-way canvas erase · 50% release</dd>
+          <dt className="text-warm">Underneath</dt>
+          <dd className="m-0 text-bone">Hero C fluid / Anom clip</dd>
+          <dt className="text-warm">Controls</dt>
+          <dd className="m-0 text-bone">content · sheet · edge · reveal · reset</dd>
+        </dl>
+      </section>
+
+      <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
+        <p className="ui-label m-0">04 / Video A</p>
         <h2 className="mt-2 text-display-2 uppercase">Directed scroll</h2>
         <p className="mt-3 max-w-[60ch] text-body text-fg-muted">
           Five eased hops with holds, captured at 1440×900 and encoded to
@@ -201,7 +262,7 @@ export default function LabIndexPage() {
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">04 / Video B</p>
+        <p className="ui-label m-0">05 / Video B</p>
         <h2 className="mt-2 text-display-2 uppercase">Remotion showreel</h2>
         <p className="mt-3 max-w-[60ch] text-body text-fg-muted">
           A 1.5 s title card, the directed-scroll clip in a 16:10 window with a
@@ -227,7 +288,7 @@ export default function LabIndexPage() {
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">05 / Stills</p>
+        <p className="ui-label m-0">06 / Stills</p>
         <h2 className="mt-2 text-display-2 uppercase">Anom, five frames</h2>
         <p className="mt-3 max-w-[60ch] text-body text-fg-muted">
           Reduced motion, fonts and images settled, banners, chat, scrollbar and
@@ -259,7 +320,7 @@ export default function LabIndexPage() {
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">06 / Method</p>
+        <p className="ui-label m-0">07 / Method</p>
         <h2 className="mt-2 text-display-2 uppercase">Numbers</h2>
 
         <div className="mt-[var(--space-4)] max-w-[70ch] font-label text-t-14 uppercase tracking-[var(--track)]">
@@ -279,7 +340,7 @@ export default function LabIndexPage() {
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">07 / Decisions to make</p>
+        <p className="ui-label m-0">08 / Decisions to make</p>
         <h2 className="mt-2 text-display-2 uppercase">Open questions</h2>
 
         <ol className="mt-[var(--space-4)] grid max-w-[70ch] gap-4 text-body text-fg-muted">

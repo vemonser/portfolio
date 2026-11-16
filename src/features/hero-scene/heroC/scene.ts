@@ -57,6 +57,9 @@ export type HeroCSceneOptions = {
   wordmark: HTMLElement;
   initialTime?: number;
   poster?: number | null;
+  /** Keep the loop stopped until the caller calls start(); used by Hero Peel
+   *  so the surface does not burn GPU while the sheet still covers it. */
+  startPaused?: boolean;
   onFirstFrame?: () => void;
   onContextLost?: () => void;
   onMetrics?: (metrics: HeroCMetrics) => void;
@@ -78,6 +81,7 @@ export function createHeroCScene({
   wordmark,
   initialTime = 0,
   poster = null,
+  startPaused = false,
   onFirstFrame,
   onContextLost,
   onMetrics,
@@ -192,6 +196,7 @@ export function createHeroCScene({
   };
 
   let running = false;
+  let paused = startPaused;
   let disposed = false;
   let frameId = 0;
   let lastTime = 0;
@@ -318,7 +323,7 @@ export function createHeroCScene({
     const dt = lastTime > 0 ? Math.min(seconds - lastTime, 1 / 20) : 1 / 60;
     lastTime = seconds;
 
-    if (fluid && !frozen) {
+    if (fluid && !frozen && running) {
       fluid.metrics.passes = 0;
       if (pointerMoved) splatPointer();
       runSweep();
@@ -343,17 +348,19 @@ export function createHeroCScene({
       onFirstFrame?.();
     }
 
-    frames += 1;
-    if (fpsWindow === 0) fpsWindow = seconds;
-    if (seconds - fpsWindow >= 0.5) {
-      lastFps = frames / (seconds - fpsWindow);
-      frames = 0;
-      fpsWindow = seconds;
+    if (running) {
+      frames += 1;
+      if (fpsWindow === 0) fpsWindow = seconds;
+      if (seconds - fpsWindow >= 0.5) {
+        lastFps = frames / (seconds - fpsWindow);
+        frames = 0;
+        fpsWindow = seconds;
 
-      const metrics = getMetrics();
-      section.dataset.fps = lastFps.toFixed(0);
-      section.dataset.sim = `${metrics.simWidth}x${metrics.simHeight}`;
-      onMetrics?.(metrics);
+        const metrics = getMetrics();
+        section.dataset.fps = lastFps.toFixed(0);
+        section.dataset.sim = `${metrics.simWidth}x${metrics.simHeight}`;
+        onMetrics?.(metrics);
+      }
     }
   };
 
@@ -373,6 +380,7 @@ export function createHeroCScene({
 
   const start = () => {
     if (running || disposed || frozen) return;
+    paused = false;
     running = true;
     lastTime = 0;
     frameId = requestAnimationFrame(loop);
@@ -423,14 +431,14 @@ export function createHeroCScene({
   canvas.addEventListener("webglcontextlost", onLost);
 
   const onVisibility = () => {
-    if (!document.hidden) start();
+    if (!document.hidden && !paused) start();
     else stop();
   };
   document.addEventListener("visibilitychange", onVisibility);
 
   const intersection = new IntersectionObserver(
     ([entry]) => {
-      if (entry.isIntersecting && !document.hidden) start();
+      if (entry.isIntersecting && !document.hidden && !paused) start();
       else stop();
     },
     { threshold: 0 },
@@ -495,7 +503,7 @@ export function createHeroCScene({
     } else {
       draw(initialTime);
     }
-  } else {
+  } else if (!startPaused) {
     gsap.delayedCall(0.35, () => {
       if (disposed) return;
       sweep();

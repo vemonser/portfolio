@@ -158,6 +158,23 @@ if (gallery) {
   records.push({ criterion: "AC-6", gallery });
 }
 
+// AC-7 — Hero Peel lab
+for (const relative of [
+  "public/lab/peel/pre-peel-lime.webp",
+  "public/lab/peel/mid-peel-torn.webp",
+  "public/lab/peel/peeled-video.webp",
+  "public/lab/peel/peeled-fluid.webp",
+  "public/lab/peel/pre-peel-bone.webp",
+]) {
+  const shot = await image(relative);
+  if (!shot) continue;
+  check(
+    shot.width === 1440 && shot.height === 900,
+    `${relative} is ${shot.width}x${shot.height}, expected 1440x900`,
+  );
+  records.push({ criterion: "AC-7", shot });
+}
+
 console.log(JSON.stringify({ ok: errors.length === 0, records, errors }, null, 2));
 if (errors.length > 0) {
   process.exitCode = 1;

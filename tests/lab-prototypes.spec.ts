@@ -36,6 +36,9 @@ test.describe("Hero C lab", () => {
     await expect(stage).toHaveAttribute("data-sim", /^\d+x\d+$/, {
       timeout: 10_000,
     });
+    await expect(stage).toHaveAttribute("data-fps", /^\d+$/, {
+      timeout: 10_000,
+    });
 
     const reveal = page.locator(".lab-panel input[type='range']").first();
     await setRange(reveal, 0.8);
@@ -107,14 +110,183 @@ test.describe("review gallery", () => {
     await page.goto("/lab");
 
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Four prototypes",
+      "Five prototypes",
     );
     await expect(page.locator('a[href="/lab/hero-c"]').first()).toBeVisible();
     await expect(page.locator('a[href="/lab/cursor"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/lab/hero-peel"]').first()).toBeVisible();
     await expect(page.locator("video")).toHaveCount(2);
     await expect(page.locator('img[alt="Hero C at rest"]')).toBeVisible();
     await expect(page.getByText("76 fps", { exact: false })).toBeVisible();
     await expect(page.getByText(/728 ms/).first()).toBeVisible();
+  });
+});
+
+test.describe("Hero Peel lab", () => {
+  test("starts covered, reveals once and resets", async ({ page }) => {
+    await page.goto("/lab/hero-peel");
+
+    const stage = page.locator("[data-hero-peel]");
+    await expect(stage).toHaveAttribute("data-peeled", "false");
+    await expect(page.locator(".peel-overlay")).toBeVisible();
+    await expect(page.locator(".peel-overlay")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+    await expect(page.locator("[data-peel-name]")).toHaveText(
+      "software developer",
+    );
+
+    await page.getByRole("button", { name: "Reveal" }).click();
+    await expect(stage).toHaveAttribute("data-peeled", "true");
+    await expect(page.locator(".peel-overlay")).toHaveCSS("opacity", "0");
+
+    // Reveal is idempotent; a second click must not re-open or throw.
+    await page.getByRole("button", { name: "Reveal" }).click();
+    await expect(stage).toHaveAttribute("data-peeled", "true");
+
+    // One-way: moving the pointer over the revealed hero cannot restore it.
+    await page.mouse.move(200, 300);
+    await page.mouse.move(800, 500);
+    await expect(stage).toHaveAttribute("data-peeled", "true");
+
+    await page.getByRole("button", { name: "Reset" }).click();
+    await expect(stage).toHaveAttribute("data-peeled", "false");
+    await expect(page.locator(".peel-overlay")).toHaveCSS("opacity", "1");
+    await expect
+      .poll(async () => Number(await stage.getAttribute("data-coverage")))
+      .toBeLessThan(0.05);
+  });
+
+  test("starts the fluid scene after the sheet is revealed", async ({
+    page,
+  }) => {
+    await page.goto("/lab/hero-peel");
+
+    const stage = page.locator("[data-hero-peel]");
+    await expect(stage).toHaveAttribute("data-peeled", "false");
+
+    // Click immediately: the dynamic scene import may still be in flight, so
+    // this also covers the "peeled before the scene resolves" race.
+    await page.getByRole("button", { name: "Reveal" }).click();
+    await expect(stage).toHaveAttribute("data-peeled", "true");
+
+    await expect
+      .poll(
+        async () => Number(await stage.getAttribute("data-fps")),
+        { timeout: 20_000 },
+      )
+      .toBeGreaterThan(0);
+  });
+
+  test("plays the video after the sheet is revealed", async ({ page }) => {
+    await page.goto("/lab/hero-peel");
+
+    await page.getByRole("button", { name: "Video" }).click();
+    await page.getByRole("button", { name: "Reveal" }).click();
+
+    await expect
+      .poll(() =>
+        page
+          .locator("video")
+          .evaluate((element) => (element as HTMLVideoElement).paused),
+      )
+      .toBe(false);
+    await expect
+      .poll(() =>
+        page
+          .locator("video")
+          .evaluate((element) => (element as HTMLVideoElement).currentTime),
+      )
+      .toBeGreaterThan(0);
+  });
+
+  test("pointer movement increases the revealed coverage", async ({ page }) => {
+    await page.goto("/lab/hero-peel");
+
+    const stage = page.locator("[data-hero-peel]");
+    await expect(stage).toHaveAttribute("data-peeled", "false");
+
+    const overlay = page.locator(".peel-overlay");
+    const box = await overlay.boundingBox();
+    if (!box) throw new Error("the peel overlay has no box");
+
+    for (let i = 0; i < 16; i += 1) {
+      await page.mouse.move(
+        box.x + 220 + i * 55,
+        box.y + 300 + Math.sin(i) * 70,
+      );
+      await page.waitForTimeout(24);
+    }
+    await page.waitForTimeout(250);
+
+    const coverage = Number(await stage.getAttribute("data-coverage"));
+    expect(coverage).toBeGreaterThan(0);
+    expect(coverage).toBeLessThan(0.5);
+  });
+
+  test("switches between fluid and video content", async ({ page }) => {
+    await page.goto("/lab/hero-peel");
+    const stage = page.locator("[data-hero-peel]");
+
+    await page.getByRole("button", { name: "Video" }).click();
+    await expect(stage).toHaveAttribute("data-content", "video");
+    await expect(page.locator("video")).toHaveCount(1);
+    expect(
+      await page
+        .locator("video")
+        .evaluate((element) => (element as HTMLVideoElement).paused),
+    ).toBe(true);
+
+    await page.getByRole("button", { name: "Fluid" }).click();
+    await expect(stage).toHaveAttribute("data-content", "fluid");
+    await expect(page.locator(".peel-fluid")).toHaveCount(1);
+  });
+
+  test("recolours the sheet and changes the edge treatment", async ({
+    page,
+  }) => {
+    await page.goto("/lab/hero-peel");
+    const stage = page.locator("[data-hero-peel]");
+
+    await page.getByRole("button", { name: "Bone" }).click();
+    await expect(stage).toHaveAttribute("data-color", "bone");
+
+    await page.getByRole("button", { name: "Black" }).click();
+    await expect(stage).toHaveAttribute("data-color", "black");
+
+    await page.getByRole("button", { name: "Soft" }).click();
+    await expect(stage).toHaveAttribute("data-edge", "soft");
+
+    await page.getByRole("button", { name: "Torn" }).click();
+    await expect(stage).toHaveAttribute("data-edge", "torn");
+  });
+
+  test.describe("no JavaScript", () => {
+    test.use({ javaScriptEnabled: false });
+
+    test("the overlay never captures the page", async ({ page }) => {
+      await page.goto("/lab/hero-peel");
+
+      await expect(page.locator(".peel-overlay")).toHaveCSS(
+        "pointer-events",
+        "none",
+      );
+      await expect(page.locator("[data-peel-name]")).toBeAttached();
+    });
+  });
+
+  test.describe("reduced motion", () => {
+    test.use({ reducedMotion: "reduce" });
+
+    test("starts revealed and does not require a pointer", async ({ page }) => {
+      await page.goto("/lab/hero-peel");
+
+      const stage = page.locator("[data-hero-peel]");
+      await expect(stage).toHaveAttribute("data-peeled", "true");
+      await expect(page.locator(".peel-overlay")).toHaveCSS("display", "none");
+      await expect(page.locator(".lab-panel-head strong")).toHaveText("OPEN");
+    });
   });
 });
 

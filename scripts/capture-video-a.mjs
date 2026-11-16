@@ -111,7 +111,11 @@ async function captureTarget(browser, target) {
   await page.addStyleTag({ content: HIDE_CSS });
 
   const scrollStartedAt = Date.now();
-  const introSeconds = Math.max(0, (scrollStartedAt - recordedAt) / 1000 - 0.15);
+  // Playwright's recording begins at context creation, which is hundreds of ms
+  // after `recordedAt`; a conservative offset keeps the hero hold instead of
+  // cutting into the first section. The raw recording's first visible frame is
+  // the settled hero, so a little extra pre-roll is harmless.
+  const introSeconds = Math.max(0, (scrollStartedAt - recordedAt) / 1000 - 1.45);
 
   let current = await page.evaluate(() => window.scrollY);
   const maxScroll = await page.evaluate(

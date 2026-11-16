@@ -3,7 +3,7 @@
   "renders": {
     "mp4": {
       "path": "public/lab/video/b-anom-showreel.mp4",
-      "bytes": 4599194,
+      "bytes": 4681007,
       "duration": 10,
       "width": 1920,
       "height": 1080,
@@ -12,7 +12,7 @@
     },
     "webm": {
       "path": "public/lab/video/b-anom-showreel.webm",
-      "bytes": 3120167,
+      "bytes": 2833164,
       "duration": 10,
       "width": 1920,
       "height": 1080,
