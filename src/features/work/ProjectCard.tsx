@@ -41,6 +41,7 @@ export default function ProjectCard({
       }`}
       data-project={project.slug}
       data-compression-target="project"
+      data-cursor="view"
     >
       <span className="relative block overflow-hidden">
         <EditorialMedia

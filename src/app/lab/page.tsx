@@ -136,8 +136,10 @@ export default function LabIndexPage() {
           <h2 className="mt-2 text-display-2 uppercase">Replace</h2>
           <p className="mt-3 max-w-[46ch] text-body text-fg-muted">
             A 6 px lime dot and a 34 px bone ring, with view, play, link,
-            disabled and text roles. The OS I-beam returns on text fields; the
-            native cursor is removed only after mount.
+            disabled and text roles. Mounted on every route; the role is
+            recomputed after scroll, resize and menu open. The OS I-beam
+            returns on text fields; the native cursor is removed only after
+            mount.
           </p>
 
           <div className="mt-[var(--space-4)] grid grid-cols-3 gap-3">
@@ -161,7 +163,38 @@ export default function LabIndexPage() {
             ))}
           </div>
 
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <figure className="m-0">
+              <img
+                src="/lab/cursor/site-view.webp"
+                alt="The live cursor showing View on a project card"
+                width={1440}
+                height={900}
+                className="block aspect-[16/10] w-full object-cover"
+              />
+              <figcaption className="mt-2 font-label text-t-12 uppercase tracking-[var(--track)] text-warm">
+                Site — View on a card
+              </figcaption>
+            </figure>
+            <figure className="m-0">
+              <img
+                src="/lab/cursor/site-menu.webp"
+                alt="The live cursor above the open menu dialog"
+                width={1440}
+                height={900}
+                className="block aspect-[16/10] w-full object-cover"
+              />
+              <figcaption className="mt-2 font-label text-t-12 uppercase tracking-[var(--track)] text-warm">
+                Site — above the menu
+              </figcaption>
+            </figure>
+          </div>
+
           <dl className="mt-[var(--space-4)] grid grid-cols-2 gap-x-6 gap-y-2 font-label text-t-12 uppercase tracking-[var(--track)]">
+            <dt className="text-warm">Live</dt>
+            <dd className="m-0 text-bone">
+              every route · refresh on scroll / resize / menu
+            </dd>
             <dt className="text-warm">Gates</dt>
             <dd className="m-0 text-bone">
               fine pointer only · no-JS native · touch none

@@ -10,7 +10,6 @@ import {
 } from "react";
 
 import { copy } from "@/content/copy";
-import Cursor from "@/features/cursor/Cursor";
 import type { HeroCScene, HeroCMetrics } from "@/features/hero-scene/heroC/scene";
 
 /*
@@ -533,12 +532,9 @@ export default function HeroPeelLab() {
         : "COVERED";
 
   return (
-    <>
-      <Cursor />
-
-      <section
-        ref={stageRef}
-        data-hero-peel
+    <section
+      ref={stageRef}
+      data-hero-peel
         data-peeled={peeled ? "true" : "false"}
         data-coverage={coverage.toFixed(2)}
         data-content={content}
@@ -711,6 +707,5 @@ export default function HeroPeelLab() {
           </p>
         </div>
       </section>
-    </>
   );
 }

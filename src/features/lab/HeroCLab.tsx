@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { copy } from "@/content/copy";
-import Cursor from "@/features/cursor/Cursor";
 import type {
   HeroCScene,
   HeroCMetrics,
@@ -194,11 +193,9 @@ export default function HeroCLab() {
   const passes = metrics?.passes ?? 0;
 
   return (
-    <>
-      <Cursor />
-      <section
-        ref={sectionRef}
-        aria-labelledby="lab-hero-title"
+    <section
+      ref={sectionRef}
+      aria-labelledby="lab-hero-title"
         data-hero-c
         data-ready={ready ? "true" : "false"}
         data-text={ready ? "canvas" : "dom"}
@@ -328,7 +325,6 @@ export default function HeroCLab() {
           </p>
         </div>
       ) : null}
-      </section>
-    </>
+    </section>
   );
 }

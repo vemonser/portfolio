@@ -351,6 +351,84 @@ test.describe("custom cursor", () => {
     ).toBe("none");
   });
 
+  test("updates the role on scroll with a stationary pointer", async ({
+    page,
+  }) => {
+    await page.goto("/lab/cursor");
+    const html = page.locator("html");
+
+    const view = page.locator('[data-cursor="view"]').first();
+    await view.scrollIntoViewIfNeeded();
+    await view.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "view");
+
+    // The pointer does not move; the page does. The role must not keep
+    // pointing at an element that scrolled away.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(html).not.toHaveAttribute("data-cursor-state", "view");
+  });
+
+  test("keeps the custom cursor above the menu dialog", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+
+    await page.locator(".menu-trigger").dispatchEvent("click");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "open",
+    );
+
+    await page.mouse.move(720, 300);
+    await expect(page.locator(".cursor-dot")).toHaveCSS("opacity", "1");
+    expect(
+      await page
+        .locator(".cursor-layer")
+        .evaluate((element) => element.matches(":popover-open")),
+    ).toBe(true);
+  });
+
+  test("mounts on the site and shows View on project cards", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    expect(
+      await page.evaluate(() => getComputedStyle(document.body).cursor),
+    ).toBe("none");
+
+    const card = page.locator('[data-compression-target="project"]').first();
+    await card.scrollIntoViewIfNeeded();
+    await card.hover();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-state",
+      "view",
+    );
+  });
+
+  test("clears a stale role when the window shrinks", async ({ page }) => {
+    await page.goto("/lab/cursor");
+    const html = page.locator("html");
+
+    const view = page.locator('[data-cursor="view"]').first();
+    await view.scrollIntoViewIfNeeded();
+    await view.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "view");
+
+    // The stored pointer point is now outside the viewport; the role must not
+    // keep pointing at an element that is no longer under it.
+    await page.setViewportSize({ width: 500, height: 400 });
+    await expect(html).not.toHaveAttribute("data-cursor-state", "view");
+  });
+
+  test("survives a client navigation", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Work" }).first().click();
+
+    await expect(page).toHaveURL(/\/work$/);
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await expect(page.locator(".cursor-dot")).toHaveCount(1);
+  });
+
   test.describe("reduced motion", () => {
     test.use({ reducedMotion: "reduce" });
 
@@ -389,6 +467,16 @@ test.describe("custom cursor", () => {
         await page.evaluate(() => getComputedStyle(document.body).cursor),
       ).toBe("auto");
     });
+
+    test("the live site never mounts it either", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator(".cursor-dot, .cursor-ring")).toHaveCount(0);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.dataset.cursor ?? null,
+        ),
+      ).toBeNull();
+    });
   });
 
   test.describe("no JavaScript", () => {
@@ -396,6 +484,14 @@ test.describe("custom cursor", () => {
 
     test("keeps the native pointer", async ({ page }) => {
       await page.goto("/lab/cursor");
+      await expect(page.locator(".cursor-dot, .cursor-ring")).toHaveCount(0);
+      expect(
+        await page.evaluate(() => document.documentElement.dataset.cursor ?? null),
+      ).toBeNull();
+    });
+
+    test("the live site keeps the native pointer", async ({ page }) => {
+      await page.goto("/");
       await expect(page.locator(".cursor-dot, .cursor-ring")).toHaveCount(0);
       expect(
         await page.evaluate(() => document.documentElement.dataset.cursor ?? null),

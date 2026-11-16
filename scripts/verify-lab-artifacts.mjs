@@ -175,6 +175,20 @@ for (const relative of [
   records.push({ criterion: "AC-7", shot });
 }
 
+// AC-8 — Cursor on the live site
+for (const relative of [
+  "public/lab/cursor/site-view.webp",
+  "public/lab/cursor/site-menu.webp",
+]) {
+  const shot = await image(relative);
+  if (!shot) continue;
+  check(
+    shot.width === 1440 && shot.height === 900,
+    `${relative} is ${shot.width}x${shot.height}, expected 1440x900`,
+  );
+  records.push({ criterion: "AC-8", shot });
+}
+
 console.log(JSON.stringify({ ok: errors.length === 0, records, errors }, null, 2));
 if (errors.length > 0) {
   process.exitCode = 1;

@@ -5,6 +5,7 @@ import { copy } from "@/content/copy";
 import { socials } from "@/content/socials";
 import ContactChapter from "@/features/contact-cta/ContactChapter";
 import ContactCta from "@/features/contact-cta/ContactCta";
+import Cursor from "@/features/cursor/Cursor";
 import SiteFooter from "@/features/footer/SiteFooter";
 import SiteHeader from "@/features/navigation/SiteHeader";
 import { buildNavLinks } from "@/features/navigation/nav";
@@ -76,6 +77,7 @@ export default function RootLayout({
           }}
         />
         <SmoothScroll />
+        <Cursor />
         <SiteHeader
           brand={copy.meta.title}
           homeHref="/"

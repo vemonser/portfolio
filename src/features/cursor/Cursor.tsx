@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { isMenuOpen, subscribeMenu } from "@/features/navigation/menu-store";
+
 import "./cursor.css";
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
@@ -27,6 +29,7 @@ const LABELS: Partial<Record<CursorRole, string>> = {
  * `cursor: text`, so the OS I-beam is exact.
  */
 export default function Cursor() {
+  const layerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -47,10 +50,24 @@ export default function Cursor() {
     const dot = dotRef.current;
     const ring = ringRef.current;
     const label = labelRef.current;
-    if (!dot || !ring || !label) return;
+    const layer = layerRef.current;
+    if (!dot || !ring || !label || !layer) return;
 
     const html = document.documentElement;
     const reduced = window.matchMedia(REDUCED);
+    const supportsPopover = typeof layer.showPopover === "function";
+
+    // The cursor lives in the top layer so a modal <dialog> cannot paint over
+    // it. A manual popover keeps the two nodes above the menu without a second
+    // copy; browsers without Popover fall back to the native cursor while the
+    // menu is open.
+    if (supportsPopover) {
+      try {
+        layer.showPopover();
+      } catch {
+        // A popover that is already open is fine; the menu handler re-shows.
+      }
+    }
 
     html.dataset.cursor = "on";
     html.dataset.cursorState = "default";
@@ -107,10 +124,91 @@ export default function Cursor() {
       return "default";
     };
 
+    let roleFrame = 0;
+
+    /*
+     * The pointer can stay still while the page moves under it: Lenis scrolls,
+     * the menu opens, the window resizes. Re-run the hit test at the stored
+     * viewport point in a rAF so "View"/"Play" cannot outlive the element that
+     * owned it.
+     */
+    const refreshRole = () => {
+      roleFrame = 0;
+      if (!hasPosition) return;
+      if (html.dataset.cursor !== "on") return;
+
+      const outOfBounds =
+        targetX < 0 ||
+        targetY < 0 ||
+        targetX >= window.innerWidth ||
+        targetY >= window.innerHeight;
+
+      if (outOfBounds) {
+        // A window shrink can leave the stored point outside the viewport; a
+        // missing hit is not a reason to keep showing "View".
+        setRole("default");
+        return;
+      }
+
+      if (html.dataset.cursorVisible !== "true") return;
+
+      const node = document.elementFromPoint(targetX, targetY);
+      setRole(node ? roleAt(node) : "default");
+    };
+
+    const scheduleRole = () => {
+      if (roleFrame === 0) roleFrame = requestAnimationFrame(refreshRole);
+    };
+
+    const unsubscribeMenu = subscribeMenu((menuOpen) => {
+      // A modal <dialog> sits in the top layer; showing the cursor popover
+      // again after the menu is open puts the cursor above the panel.
+      if (menuOpen && supportsPopover) {
+        try {
+          layer.hidePopover();
+        } catch {
+          // Not open yet; the show below is still correct.
+        }
+        try {
+          layer.showPopover();
+        } catch {
+          // Popover unsupported despite the method check; native fallback.
+        }
+      }
+
+      if (!supportsPopover) {
+        html.dataset.cursorMenu = menuOpen ? "native" : "false";
+      }
+
+      scheduleRole();
+    });
+
+    // The menu can already be open when this effect mounts (a slow hydration
+    // or a coarse -> fine media change); synchronise instead of waiting for
+    // the next toggle.
+    if (isMenuOpen()) {
+      if (supportsPopover) {
+        try {
+          layer.hidePopover();
+        } catch {
+          // Not shown yet.
+        }
+        try {
+          layer.showPopover();
+        } catch {
+          // Fall through to the native fallback below.
+        }
+      } else {
+        html.dataset.cursorMenu = "native";
+      }
+      scheduleRole();
+    }
+
     const tick = () => {
       frame = 0;
       if (!hasPosition) return;
       if (html.dataset.cursor === "off") return;
+      if (html.dataset.cursorMenu === "native") return;
 
       const ease = reduced.matches ? 1 : 0.24;
       ringX += (targetX - ringX) * ease;
@@ -181,6 +279,8 @@ export default function Cursor() {
     document.addEventListener("pointerdown", onDown, { passive: true });
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("scroll", scheduleRole, { passive: true });
+    window.addEventListener("resize", scheduleRole, { passive: true });
 
     return () => {
       document.removeEventListener("pointermove", onMove);
@@ -188,8 +288,20 @@ export default function Cursor() {
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("scroll", scheduleRole);
+      window.removeEventListener("resize", scheduleRole);
+      unsubscribeMenu();
+      if (supportsPopover) {
+        try {
+          layer.hidePopover();
+        } catch {
+          // Already hidden on teardown.
+        }
+      }
       window.clearTimeout(downTimer);
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(roleFrame);
+      delete html.dataset.cursorMenu;
       delete html.dataset.cursor;
       delete html.dataset.cursorState;
       delete html.dataset.cursorVisible;
@@ -200,11 +312,16 @@ export default function Cursor() {
   if (!enabled) return null;
 
   return (
-    <>
+    <div
+      ref={layerRef}
+      className="cursor-layer"
+      popover="manual"
+      aria-hidden="true"
+    >
       <div ref={dotRef} className="cursor-dot" aria-hidden="true" />
       <div ref={ringRef} className="cursor-ring" aria-hidden="true">
         <span ref={labelRef} className="cursor-label" />
       </div>
-    </>
+    </div>
   );
 }

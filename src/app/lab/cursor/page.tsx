@@ -1,5 +1,4 @@
 import Hero from "@/features/hero/Hero";
-import Cursor from "@/features/cursor/Cursor";
 
 import CursorReadout from "@/features/lab/CursorReadout";
 
@@ -11,8 +10,6 @@ import CursorReadout from "@/features/lab/CursorReadout";
 export default function CursorLabPage() {
   return (
     <>
-      <Cursor />
-
       <main>
         <Hero />
 

@@ -24,10 +24,29 @@
     input[type="range"],
     input[type="checkbox"],
     input[type="radio"],
-    input[type="file"]
+    input[type="file"],
+    input[type="color"]
   ) {
     cursor: none !important;
   }
+}
+
+.cursor-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.cursor-layer:popover-open {
+  display: block;
 }
 
 .cursor-dot,
@@ -137,6 +156,21 @@ html[data-cursor-down="true"] .cursor-dot {
 html[data-cursor="off"] .cursor-dot,
 html[data-cursor="off"] .cursor-ring {
   opacity: 0 !important;
+}
+
+/*
+ * Browsers without the Popover API cannot lift the cursor above a modal
+ * <dialog> (which lives in the top layer). While the menu is open those get the
+ * native pointer instead of an invisible custom one.
+ */
+html[data-cursor-menu="native"] .cursor-dot,
+html[data-cursor-menu="native"] .cursor-ring {
+  opacity: 0 !important;
+}
+
+html[data-cursor="on"][data-cursor-menu="native"],
+html[data-cursor="on"][data-cursor-menu="native"] * {
+  cursor: auto !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
