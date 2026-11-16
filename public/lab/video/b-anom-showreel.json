@@ -1,0 +1,27 @@
+{
+  "target": "anom-creative-showreel",
+  "renders": {
+    "mp4": {
+      "path": "public/lab/video/b-anom-showreel.mp4",
+      "bytes": 4599194,
+      "duration": 10,
+      "width": 1920,
+      "height": 1080,
+      "codec": "h264",
+      "fps": "30/1"
+    },
+    "webm": {
+      "path": "public/lab/video/b-anom-showreel.webm",
+      "bytes": 3120167,
+      "duration": 10,
+      "width": 1920,
+      "height": 1080,
+      "codec": "vp9",
+      "fps": "30/1"
+    }
+  },
+  "fps": 30,
+  "durationInFrames": 300,
+  "width": 1920,
+  "height": 1080
+}

@@ -1,0 +1,39 @@
+{
+  "target": "anom-creative",
+  "frames": {
+    "cover": {
+      "path": "/home/abdelrhman/Developments/2026/portfolio/portfolio/public/lab/stills/anom-creative/cover.webp",
+      "bytes": 339316,
+      "width": 2880,
+      "height": 1800
+    },
+    "sectionA": {
+      "path": "/home/abdelrhman/Developments/2026/portfolio/portfolio/public/lab/stills/anom-creative/sectionA.webp",
+      "bytes": 209844,
+      "width": 2880,
+      "height": 1800
+    },
+    "sectionB": {
+      "path": "/home/abdelrhman/Developments/2026/portfolio/portfolio/public/lab/stills/anom-creative/sectionB.webp",
+      "bytes": 284146,
+      "width": 2880,
+      "height": 1800
+    },
+    "detail": {
+      "path": "/home/abdelrhman/Developments/2026/portfolio/portfolio/public/lab/stills/anom-creative/detail.webp",
+      "bytes": 92002,
+      "width": 1600,
+      "height": 1000
+    },
+    "mobile": {
+      "path": "/home/abdelrhman/Developments/2026/portfolio/portfolio/public/lab/stills/anom-creative/mobile-trio.webp",
+      "bytes": 139342,
+      "width": 1600,
+      "height": 1000,
+      "phone": [
+        416,
+        900
+      ]
+    }
+  }
+}

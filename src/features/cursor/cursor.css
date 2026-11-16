@@ -1,0 +1,147 @@
+/*
+ * The custom cursor. Mounted only when a fine pointer is present; the native
+ * cursor is hidden only after `html[data-cursor="on"]` is set by JS, so a
+ * no-JS visitor keeps the OS pointer.
+ *
+ * Everything is one fixed layer of two nodes, moved with transform. State is
+ * carried on <html> so any component can opt into a cursor role with
+ * `data-cursor="view|play|text|disabled"`.
+ */
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-cursor="on"],
+  html[data-cursor="on"] * {
+    cursor: none !important;
+  }
+
+  /* The one deliberate exception: text entry keeps the OS I-beam. */
+  html[data-cursor="on"] :is(input, textarea, select, [contenteditable="true"]) {
+    cursor: text !important;
+  }
+
+  /* A range/checkbox is a control, not a text field. */
+  html[data-cursor="on"] :is(
+    input[type="range"],
+    input[type="checkbox"],
+    input[type="radio"],
+    input[type="file"]
+  ) {
+    cursor: none !important;
+  }
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0;
+  transition:
+    opacity 160ms linear,
+    width 220ms var(--ease-editorial),
+    height 220ms var(--ease-editorial),
+    border-color 220ms var(--ease-editorial),
+    background-color 220ms var(--ease-editorial);
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-lime);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    0 0 10px rgba(198, 240, 53, 0.45);
+}
+
+.cursor-ring {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-bone);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.cursor-label {
+  font-family: var(--font-label);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  opacity: 0;
+  transition: opacity 120ms linear;
+}
+
+html[data-cursor-visible="true"] .cursor-dot,
+html[data-cursor-visible="true"] .cursor-ring {
+  opacity: 1;
+}
+
+/* link / button */
+html[data-cursor-state="link"] .cursor-ring {
+  width: 46px;
+  height: 46px;
+  border-color: var(--color-lime);
+}
+
+/* project card / video: a filled disc with a word */
+html[data-cursor-state="view"] .cursor-ring,
+html[data-cursor-state="play"] .cursor-ring {
+  width: 64px;
+  height: 64px;
+  border-color: var(--color-lime);
+  background: var(--color-lime);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+html[data-cursor-state="view"] .cursor-label,
+html[data-cursor-state="play"] .cursor-label {
+  opacity: 1;
+}
+
+html[data-cursor-state="view"] .cursor-dot,
+html[data-cursor-state="play"] .cursor-dot,
+html[data-cursor-state="text"] .cursor-dot,
+html[data-cursor-state="text"] .cursor-ring {
+  opacity: 0;
+}
+
+/* disabled control */
+html[data-cursor-state="disabled"] .cursor-ring {
+  width: 24px;
+  height: 24px;
+  border-color: var(--color-warm);
+}
+
+html[data-cursor-state="disabled"] .cursor-dot {
+  opacity: 0.4;
+}
+
+/* press */
+html[data-cursor-down="true"] .cursor-dot {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    0 0 0 7px rgba(198, 240, 53, 0.25);
+}
+
+/* the escape hatch: native cursor, custom nodes gone */
+html[data-cursor="off"] .cursor-dot,
+html[data-cursor="off"] .cursor-ring {
+  opacity: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-dot,
+  .cursor-ring {
+    transition: none;
+  }
+}

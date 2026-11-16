@@ -1,0 +1,17 @@
+{
+  "target": "anom-creative",
+  "video": {
+    "path": "/home/abdelrhman/Developments/2026/portfolio/portfolio/public/lab/video/anom-creative-directed.webm",
+    "bytes": 1904380,
+    "duration": 10.44,
+    "width": 1280,
+    "height": 800,
+    "codec": "vp9",
+    "fps": "25/1"
+  },
+  "poster": {
+    "path": "/home/abdelrhman/Developments/2026/portfolio/portfolio/public/lab/video/anom-creative-poster.webp",
+    "bytes": 247448
+  },
+  "trimmedIntroSeconds": 3.92
+}

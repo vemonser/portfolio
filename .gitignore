@@ -44,3 +44,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# remotion prototype (video/ is its own pnpm workspace)
+/video/node_modules
+/video/out
