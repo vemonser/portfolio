@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/fixtures";
 
 test.describe("project cards (CRZ outside)", () => {
   test("crossfades to a second capture on hover", async ({ page }) => {

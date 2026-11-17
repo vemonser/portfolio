@@ -15,6 +15,8 @@ import type { Social } from "@/content/socials";
 
 import LinkLine from "@/features/ui/LinkLine";
 
+import BurgerIcon from "./BurgerIcon";
+import { burgerMotion } from "./burger-frames";
 import { setMenuOpen } from "./menu-store";
 import type { NavLink } from "./nav";
 
@@ -242,7 +244,10 @@ export default function MenuOverlay({
         onClick={onClose}
         aria-label={labels.close}
       >
-        <span className="nav-close__bars" aria-hidden="true" />
+        <BurgerIcon
+          motion={burgerMotion(phase)}
+          fallback={<span className="nav-close__bars" aria-hidden="true" />}
+        />
       </button>
 
       <div className="nav-panel">

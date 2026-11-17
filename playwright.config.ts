@@ -22,7 +22,10 @@ export default defineConfig({
   },
   webServer: {
     command: `pnpm dev --port ${PORT}`,
-    url: `${baseURL}/ar`,
+    // `/` is the readiness URL: `/ar` is a permanent redirect, which the
+    // readiness probe does not follow. The redirect itself is covered by the
+    // legacy-locale tests.
+    url: `${baseURL}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },

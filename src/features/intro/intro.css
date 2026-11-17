@@ -1,0 +1,103 @@
+/*
+ * The intro is a cover, not a dialog: it never traps focus, never locks the
+ * page and never sits in the top layer. The first interaction dismisses it,
+ * and that same interaction still reaches the page underneath.
+ */
+
+.site-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-ink);
+  pointer-events: none;
+  /* Backstop for a hydration failure: a cover must never become the page. */
+  animation: intro-failsafe 0.01s linear 4s forwards;
+}
+
+html[data-intro="run"] .site-intro[data-state="pending"],
+html[data-intro="run"] .site-intro[data-state="playing"],
+html[data-intro="run"] .site-intro[data-state="leaving"] {
+  display: grid;
+}
+
+.site-intro[data-state="leaving"] {
+  animation:
+    intro-exit 0.55s cubic-bezier(0.7, 0, 0.2, 1) forwards,
+    intro-failsafe 0.01s linear 4s forwards;
+}
+
+.site-intro__inner {
+  display: grid;
+  justify-items: center;
+  gap: clamp(1rem, 3vh, 1.75rem);
+}
+
+.site-intro__mark {
+  display: grid;
+  place-items: center;
+  width: clamp(8rem, 18vw, 11rem);
+  aspect-ratio: 1;
+}
+
+.site-intro__mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The letter is stroke-only; the dot keeps its authored fill. */
+.site-intro__mark svg path[stroke] {
+  fill: none !important;
+}
+
+.site-intro__name {
+  margin: 0;
+  opacity: 0;
+  font-family: var(--font-label);
+  font-size: var(--text-t-12);
+  line-height: 1;
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-fg-subtle);
+}
+
+.site-intro[data-state="playing"] .site-intro__name {
+  animation: intro-name 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s both;
+}
+
+.site-intro[data-state="leaving"] .site-intro__name {
+  opacity: 1;
+}
+
+@keyframes intro-name {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes intro-exit {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes intro-failsafe {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-intro {
+    display: none !important;
+  }
+}

@@ -403,6 +403,40 @@ html.lenis body {
   top: 100%;
 }
 
+/*
+ * The player is a square 72% of the trigger. The authored bars occupy 39% of
+ * the 30-unit composition, so this lands them on the old 28%-of-button mark.
+ * The static fallback fills the button itself and disappears once the player
+ * reports paint, so a slow chunk never leaves an empty target.
+ */
+.lottie-mark {
+  display: grid;
+  place-items: center;
+  width: 72%;
+  aspect-ratio: 1;
+  color: inherit;
+  pointer-events: none;
+}
+
+.lottie-mark__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.lottie-mark__stage,
+.lottie-mark__stage svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lottie-mark__stage svg path {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
 /* No inline links on small screens; the trigger carries navigation there.
    Its visibility is state-driven so it can step aside over running copy. */
 @media (max-width: 767px) {

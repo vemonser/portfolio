@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/fixtures";
 
 const HERO = "#hero";
 const WORDMARK = "[data-hero-wordmark]";

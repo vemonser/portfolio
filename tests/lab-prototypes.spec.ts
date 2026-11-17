@@ -1,4 +1,4 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./support/fixtures";
 
 /*
  * Phase 0 review surfaces. These are prototype routes, but the behaviours they

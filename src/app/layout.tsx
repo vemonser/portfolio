@@ -7,6 +7,8 @@ import ContactChapter from "@/features/contact-cta/ContactChapter";
 import ContactCta from "@/features/contact-cta/ContactCta";
 import Cursor from "@/features/cursor/Cursor";
 import SiteFooter from "@/features/footer/SiteFooter";
+import SiteIntro from "@/features/intro/SiteIntro";
+import { introGateScript } from "@/features/intro/intro-session";
 import SiteHeader from "@/features/navigation/SiteHeader";
 import { buildNavLinks } from "@/features/navigation/nav";
 import SmoothScroll from "@/features/scroll/SmoothScroll";
@@ -69,13 +71,16 @@ export default function RootLayout({
         {/*
           Arms the reveal CSS before the first paint. The React warning about
           script tags is dev-only: this runs during HTML parse on every real
-          load, and no-JS visitors never get the hidden state.
+          load, and no-JS visitors never get the hidden state. The intro gate
+          shares the same parse: it marks the document before the cover below
+          can paint, so a returning visitor never sees a flash of it.
         */}
         <script
           dangerouslySetInnerHTML={{
-            __html: 'document.documentElement.dataset.js = "true"',
+            __html: `document.documentElement.dataset.js = "true";${introGateScript()}`,
           }}
         />
+        <SiteIntro brand={copy.meta.title} />
         <SmoothScroll />
         <Cursor />
         <SiteHeader

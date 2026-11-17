@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Social } from "@/content/socials";
 
+import BurgerIcon from "./BurgerIcon";
 import MenuOverlay from "./MenuOverlay";
 import { buildHeaderLinks, type NavLink } from "./nav";
 
@@ -126,7 +127,10 @@ export default function SiteHeader({
         aria-label={labels.open}
         onClick={() => setOpen(true)}
       >
-        <span className="menu-trigger__bars" aria-hidden="true" />
+        <BurgerIcon
+          motion="rest"
+          fallback={<span className="menu-trigger__bars" aria-hidden="true" />}
+        />
       </button>
 
       <MenuOverlay

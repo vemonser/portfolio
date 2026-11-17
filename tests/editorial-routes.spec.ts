@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/fixtures";
 
 const CONTACT_LINK = 'a[href^="mailto:"], a[href^="tel:"]';
 
