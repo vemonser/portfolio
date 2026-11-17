@@ -133,6 +133,29 @@ for (const [name, codec] of [
   records.push({ criterion: "AC-5", render });
 }
 
+// AC-9 — project film
+for (const [name, codec] of [
+  ["mp4", "h264"],
+  ["webm", "vp9"],
+]) {
+  const film = probe(`public/lab/video/c-anom-project-film.${name}`);
+  if (!film) continue;
+  check(
+    film.width === 1920 && film.height === 1080,
+    `project film ${name} is ${film.width}x${film.height}, expected 1920x1080`,
+  );
+  check(
+    film.codec === codec,
+    `project film ${name} codec is ${film.codec}, expected ${codec}`,
+  );
+  check(
+    Math.abs(film.duration - 14) < 0.5,
+    `project film ${name} duration is ${film.duration}s, expected 14s`,
+  );
+  check(film.bytes < 10 * 1024 * 1024, `project film ${name} is over 10 MB`);
+  records.push({ criterion: "AC-9", film });
+}
+
 // AC-1/AC-6 — review screenshots
 for (const [relative, width, height] of [
   ["public/lab/hero-c/rest-1440.webp", 1440, 900],
@@ -187,6 +210,24 @@ for (const relative of [
     `${relative} is ${shot.width}x${shot.height}, expected 1440x900`,
   );
   records.push({ criterion: "AC-8", shot });
+}
+
+// AC-9 — project film frames
+for (const relative of [
+  "public/lab/film/loading.webp",
+  "public/lab/film/cover.webp",
+  "public/lab/film/detail.webp",
+  "public/lab/film/devices.webp",
+  "public/lab/film/close.webp",
+  "public/lab/video/c-anom-project-film-poster.webp",
+]) {
+  const shot = await image(relative);
+  if (!shot) continue;
+  check(
+    shot.width === 1920 && shot.height === 1080,
+    `${relative} is ${shot.width}x${shot.height}, expected 1920x1080`,
+  );
+  records.push({ criterion: "AC-9", shot });
 }
 
 console.log(JSON.stringify({ ok: errors.length === 0, records, errors }, null, 2));

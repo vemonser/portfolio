@@ -35,6 +35,22 @@ type VideoB = {
   >;
 };
 
+type Film = {
+  durationInFrames: number;
+  sections: string[];
+  renders: Record<
+    "mp4" | "webm",
+    {
+      bytes: number;
+      duration: number;
+      width: number;
+      height: number;
+      codec: string;
+      fps: string;
+    }
+  >;
+};
+
 type Stills = {
   frames: Record<
     "cover" | "sectionA" | "sectionB" | "detail" | "mobile",
@@ -49,6 +65,7 @@ const readJson = <T,>(relative: string): T =>
 
 const videoA = readJson<VideoA>("lab/video/anom-creative.json");
 const videoB = readJson<VideoB>("lab/video/b-anom-showreel.json");
+const film = readJson<Film>("lab/video/c-anom-project-film.json");
 const stills = readJson<Stills>("lab/stills/anom-creative/stills.json");
 
 const kb = (bytes: number) => `${Math.round(bytes / 1024)} KB`;
@@ -76,14 +93,14 @@ export default function LabIndexPage() {
       <section className="px-[var(--inset-edge)] pb-[var(--space-7)] pt-[var(--space-8)]">
         <p className="ui-label m-0">Phase 0 / Review build</p>
         <h1 className="mt-[var(--space-3)] text-display-1 uppercase">
-          Five prototypes
+          Six prototypes
           <br />
           and the numbers.
         </h1>
         <p className="mt-[var(--space-4)] max-w-[var(--measure-body)] text-lede text-fg-muted">
           Hero C, the replacement cursor, the one-way peel, the directed-scroll
-          clip and the Remotion showreel. Nothing here is wired into the live
-          site. The production hero and media are untouched.
+          clip, the showreel and a Remotion project film. Nothing here is wired
+          into the live site. The production hero and media are untouched.
         </p>
       </section>
 
@@ -321,7 +338,63 @@ export default function LabIndexPage() {
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">06 / Stills</p>
+        <p className="ui-label m-0">06 / Project film</p>
+        <h2 className="mt-2 text-display-2 uppercase">Loading → sections</h2>
+        <p className="mt-3 max-w-[60ch] text-body text-fg-muted">
+          A {film.renders.mp4.duration.toFixed(0)} s Remotion cut built from the
+          stills: a loading screen, then hero, statement, archive detail,
+          devices and a close. Slow camera moves, a vertical scroll rail and a
+          lime seam — no screen recording, every frame directed.
+        </p>
+
+        <video
+          className="mt-[var(--space-4)] block w-full max-w-[1100px] bg-black"
+          controls
+          playsInline
+          preload="metadata"
+          poster="/lab/video/c-anom-project-film-poster.webp"
+        >
+          <source src="/lab/video/c-anom-project-film.mp4" type="video/mp4" />
+          <source src="/lab/video/c-anom-project-film.webm" type="video/webm" />
+        </video>
+
+        <p className="mt-3 font-label text-t-12 uppercase tracking-[var(--track)] text-warm">
+          {film.renders.mp4.duration.toFixed(0)} s · {film.renders.mp4.width}×
+          {film.renders.mp4.height} · 30 fps · MP4{" "}
+          {mb(film.renders.mp4.bytes)} / WebM {mb(film.renders.webm.bytes)}
+        </p>
+
+        <div className="mt-[var(--space-4)] grid gap-3 md:grid-cols-3">
+          {[
+            ["loading.webp", "Loading screen"],
+            ["cover.webp", "01 / Hero"],
+            ["devices.webp", "04 / Across devices"],
+          ].map(([file, label]) => (
+            <figure key={file} className="m-0">
+              <img
+                src={`/lab/film/${file}`}
+                alt={`Project film — ${label}`}
+                width={1920}
+                height={1080}
+                loading="lazy"
+                className="block aspect-video w-full object-cover"
+              />
+              <figcaption className="mt-2 font-label text-t-12 uppercase tracking-[var(--track)] text-warm">
+                {label}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <p className="mt-[var(--space-4)] max-w-[60ch] text-t-14 text-fg-muted">
+          This is the owner’s requested direction for the project videos. The
+          raw directed scroll (A) stays the lightweight fallback; C is the
+          authored cut.
+        </p>
+      </section>
+
+      <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
+        <p className="ui-label m-0">07 / Stills</p>
         <h2 className="mt-2 text-display-2 uppercase">Anom, five frames</h2>
         <p className="mt-3 max-w-[60ch] text-body text-fg-muted">
           Reduced motion, fonts and images settled, banners, chat, scrollbar and
@@ -353,7 +426,7 @@ export default function LabIndexPage() {
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">07 / Method</p>
+        <p className="ui-label m-0">08 / Method</p>
         <h2 className="mt-2 text-display-2 uppercase">Numbers</h2>
 
         <div className="mt-[var(--space-4)] max-w-[70ch] font-label text-t-14 uppercase tracking-[var(--track)]">
@@ -364,16 +437,18 @@ export default function LabIndexPage() {
             element; <code>/</code> is 888 ms warm and 1968 ms cold.
           </p>
           <p className="text-warm">
-            Video A is 10.44 s, {mb(videoA.video.bytes)}, VP9 CRF 30, 25 fps
+            Video A is 11.64 s, {mb(videoA.video.bytes)}, VP9 CRF 30, 25 fps
             source. Video B is 10 s, {mb(videoB.renders.mp4.bytes)} MP4 /{" "}
-            {mb(videoB.renders.webm.bytes)} WebM. The in-page block stays on the
-            WebM; the showreel is a separate asset.
+            {mb(videoB.renders.webm.bytes)} WebM. The project film C is 14 s,{" "}
+            {mb(film.renders.mp4.bytes)} MP4 / {mb(film.renders.webm.bytes)} WebM,
+            built from the stills. C is the owner’s requested direction; A stays
+            the lightweight fallback. The in-page block uses the WebM.
           </p>
         </div>
       </section>
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
-        <p className="ui-label m-0">08 / Decisions to make</p>
+        <p className="ui-label m-0">09 / Decisions to make</p>
         <h2 className="mt-2 text-display-2 uppercase">Open questions</h2>
 
         <ol className="mt-[var(--space-4)] grid max-w-[70ch] gap-4 text-body text-fg-muted">
@@ -390,8 +465,9 @@ export default function LabIndexPage() {
             wipe, or skip it?
           </li>
           <li>
-            <strong className="text-bone">Video:</strong> A for the in-page case
-            study, B for the showreel — or swap?
+            <strong className="text-bone">Video:</strong> C project film in the
+            case study (owner’s direction), A as the lightweight fallback — and B
+            stays the showreel?
           </li>
           <li>
             <strong className="text-bone">Escape hatch:</strong> keep the

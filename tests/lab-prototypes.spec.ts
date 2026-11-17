@@ -110,12 +110,12 @@ test.describe("review gallery", () => {
     await page.goto("/lab");
 
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Five prototypes",
+      "Six prototypes",
     );
     await expect(page.locator('a[href="/lab/hero-c"]').first()).toBeVisible();
     await expect(page.locator('a[href="/lab/cursor"]').first()).toBeVisible();
     await expect(page.locator('a[href="/lab/hero-peel"]').first()).toBeVisible();
-    await expect(page.locator("video")).toHaveCount(2);
+    await expect(page.locator("video")).toHaveCount(3);
     await expect(page.locator('img[alt="Hero C at rest"]')).toBeVisible();
     await expect(page.getByText("76 fps", { exact: false })).toBeVisible();
     await expect(page.getByText(/728 ms/).first()).toBeVisible();
