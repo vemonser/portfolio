@@ -339,12 +339,13 @@ export default function LabIndexPage() {
 
       <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-7)]">
         <p className="ui-label m-0">06 / Project film</p>
-        <h2 className="mt-2 text-display-2 uppercase">Loading → sections</h2>
+        <h2 className="mt-2 text-display-2 uppercase">First screen → scroll</h2>
         <p className="mt-3 max-w-[60ch] text-body text-fg-muted">
-          A {film.renders.mp4.duration.toFixed(0)} s Remotion cut built from the
-          stills: a loading screen, then hero, statement, archive detail,
-          devices and a close. Slow camera moves, a vertical scroll rail and a
-          lime seam — no screen recording, every frame directed.
+          A {film.renders.mp4.duration.toFixed(1)} s Remotion cut built from the
+          stills. It opens on the site’s first screen — no loading card, no
+          progress rail — then descends through hero, statement, archive detail
+          and across devices with one continuous animated scroll. Holds, eased
+          moves and a short motion blur; no crossfades, no screen recording.
         </p>
 
         <video
@@ -359,15 +360,15 @@ export default function LabIndexPage() {
         </video>
 
         <p className="mt-3 font-label text-t-12 uppercase tracking-[var(--track)] text-warm">
-          {film.renders.mp4.duration.toFixed(0)} s · {film.renders.mp4.width}×
+          {film.renders.mp4.duration.toFixed(1)} s · {film.renders.mp4.width}×
           {film.renders.mp4.height} · 30 fps · MP4{" "}
           {mb(film.renders.mp4.bytes)} / WebM {mb(film.renders.webm.bytes)}
         </p>
 
         <div className="mt-[var(--space-4)] grid gap-3 md:grid-cols-3">
           {[
-            ["loading.webp", "Loading screen"],
-            ["cover.webp", "01 / Hero"],
+            ["cover.webp", "First screen"],
+            ["scroll.webp", "Animated scroll"],
             ["devices.webp", "04 / Across devices"],
           ].map(([file, label]) => (
             <figure key={file} className="m-0">
@@ -439,7 +440,7 @@ export default function LabIndexPage() {
           <p className="text-warm">
             Video A is 11.64 s, {mb(videoA.video.bytes)}, VP9 CRF 30, 25 fps
             source. Video B is 10 s, {mb(videoB.renders.mp4.bytes)} MP4 /{" "}
-            {mb(videoB.renders.webm.bytes)} WebM. The project film C is 14 s,{" "}
+            {mb(videoB.renders.webm.bytes)} WebM. The project film C is 14.8 s,{" "}
             {mb(film.renders.mp4.bytes)} MP4 / {mb(film.renders.webm.bytes)} WebM,
             built from the stills. C is the owner’s requested direction; A stays
             the lightweight fallback. The in-page block uses the WebM.

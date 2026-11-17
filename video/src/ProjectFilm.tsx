@@ -13,10 +13,11 @@ import { useEffect, useState } from "react";
 /*
  * Project film — a cinematic case study cut entirely in Remotion.
  *
- * It opens on a loading screen for the site, then moves through the captured
- * sections (hero → statement → archive → devices) with slow camera moves,
- * vertical slides and a persistent scroll rail. No screen recording: the
- * composition owns every frame, so the pacing is art-directed.
+ * It opens on the site's first screen (no loading card, no progress bar) and
+ * then moves by one continuous animated scroll through the captured sections:
+ * hero → statement → archive detail → devices → close. The panels are stacked
+ * vertically inside the 16:10 window; the camera is a single scroll offset
+ * with holds at each section and a short motion blur between them. No fades.
  */
 
 const BLACK = "#0b0b0a";
@@ -25,8 +26,8 @@ const LIME = "#c6f035";
 const WARM = "#8a7f72";
 const HAIRLINE = "rgba(245, 241, 232, 0.16)";
 
-const EASE = Easing.bezier(0.7, 0, 0.2, 1);
-const FADE = 12;
+const EASE = Easing.bezier(0.65, 0, 0.2, 1);
+const PANEL = 1000;
 
 const mono: React.CSSProperties = {
   fontFamily: '"JetBrains Mono", ui-monospace, monospace',
@@ -49,54 +50,61 @@ const sans: React.CSSProperties = {
 const PROJECT = {
   name: "Anom Creative",
   url: "anomcreative.com",
-  statement: "Brand systems that think, move and evolve.",
   close: "Brand systems that move.",
-  chapters: [
-    {
-      label: "Hero",
-      image: "projects/anom/cover.webp",
-      scaleFrom: 1.0,
-      scaleTo: 1.045,
-      shiftFrom: 10,
-      shiftTo: -10,
-    },
-    {
-      label: "The anomaly",
-      image: "projects/anom/section-a.webp",
-      scaleFrom: 1.015,
-      scaleTo: 1.055,
-      shiftFrom: 12,
-      shiftTo: -12,
-    },
-    {
-      label: "Archive / detail",
-      image: "projects/anom/detail.webp",
-      scaleFrom: 1.015,
-      scaleTo: 1.055,
-      shiftFrom: 12,
-      shiftTo: -12,
-    },
-    {
-      label: "Across devices",
-      image: "projects/anom/mobile.webp",
-      scaleFrom: 1.01,
-      scaleTo: 1.05,
-      shiftFrom: 10,
-      shiftTo: -8,
-    },
+  panels: [
+    { label: "Hero", image: "projects/anom/cover.webp" },
+    { label: "The anomaly", image: "projects/anom/section-a.webp" },
+    { label: "Archive / detail", image: "projects/anom/detail.webp" },
+    { label: "Across devices", image: "projects/anom/mobile.webp" },
   ],
 } as const;
 
-/** Chapter windows overlap so the cut is a vertical crossfade, not a hard cut. */
-const CHAPTERS = [
-  { start: 48, end: 138 },
-  { start: 126, end: 222 },
-  { start: 210, end: 306 },
-  { start: 294, end: 366 },
+/**
+ * Camera keyframes. Each hold is a segment with from === to; each scroll is a
+ * 24-frame eased move to the next panel. The film ends on the close panel.
+ */
+const CAMERA = [
+  { start: 0, end: 78, from: 0, to: 0 },
+  { start: 78, end: 102, from: 0, to: PANEL },
+  { start: 102, end: 168, from: PANEL, to: PANEL },
+  { start: 168, end: 192, from: PANEL, to: PANEL * 2 },
+  { start: 192, end: 258, from: PANEL * 2, to: PANEL * 2 },
+  { start: 258, end: 282, from: PANEL * 2, to: PANEL * 3 },
+  { start: 282, end: 354, from: PANEL * 3, to: PANEL * 3 },
+  { start: 354, end: 378, from: PANEL * 3, to: PANEL * 4 },
+  { start: 378, end: 444, from: PANEL * 4, to: PANEL * 4 },
 ] as const;
 
-const CLOSE_START = 354;
-const TOTAL = 420;
+const TOTAL = 444;
+const LABELS_END = 354;
+
+const cameraAt = (frame: number) => {
+  for (const segment of CAMERA) {
+    if (frame <= segment.end) {
+      return interpolate(frame, [segment.start, segment.end], [segment.from, segment.to], {
+        easing: EASE,
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      });
+    }
+  }
+  return PANEL * 4;
+};
+
+const blurAt = (frame: number) => {
+  for (const segment of CAMERA) {
+    if (frame <= segment.end) {
+      if (segment.from === segment.to) return 0;
+      const t = interpolate(frame, [segment.start, segment.end], [0, 1], {
+        easing: EASE,
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      });
+      return Math.sin(t * Math.PI) * 2.2;
+    }
+  }
+  return 0;
+};
 
 function useFonts() {
   const [handle] = useState(() => delayRender("Loading the site fonts"));
@@ -142,193 +150,112 @@ const Vignette = () => (
   />
 );
 
-function LoadingScreen() {
-  const frame = useCurrentFrame();
-  if (frame > 56) return null;
-
-  const progress = interpolate(frame, [0, 42], [0, 1], {
-    easing: EASE,
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const fade = interpolate(frame, [44, 56], [1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const lift = interpolate(frame, [0, 42], [18, 0], {
-    easing: EASE,
-    extrapolateRight: "clamp",
-  });
-
+function Panel({
+  image,
+  hideSiteHeader = false,
+}: {
+  image: string;
+  hideSiteHeader?: boolean;
+}) {
   return (
-    <AbsoluteFill style={{ background: BLACK, opacity: fade }}>
-      <div
+    <div
+      style={{
+        position: "relative",
+        width: 1600,
+        height: PANEL,
+        overflow: "hidden",
+      }}
+    >
+      <Img
+        src={staticFile(image)}
         style={{
-          position: "absolute",
-          inset: 0,
-          padding: "72px 96px 64px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
+          display: "block",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
         }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <p style={mono}>Anom Creative / Case study</p>
-          <p style={mono}>2026</p>
-        </div>
-
-        <div style={{ transform: `translateY(${lift}px)` }}>
-          <h1 style={{ ...sans, fontSize: 236, letterSpacing: "-0.055em" }}>
-            anom
-            <span
-              style={{
-                fontSize: "0.2em",
-                verticalAlign: "super",
-                letterSpacing: 0,
-                marginLeft: "0.06em",
-              }}
-            >
-              ®
-            </span>
-          </h1>
-          <p
-            style={{
-              margin: "30px 0 0",
-              maxWidth: 820,
-              fontFamily: '"Inter", sans-serif',
-              fontSize: 42,
-              lineHeight: 1.25,
-              letterSpacing: "-0.02em",
-              color: "rgba(245, 241, 232, 0.72)",
-            }}
-          >
-            {PROJECT.statement}
-          </p>
-        </div>
-
-        <div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: 14,
-            }}
-          >
-            <p style={{ ...mono, color: BONE }}>Loading the case study</p>
-            <p style={{ ...mono, color: BONE }}>
-              {Math.round(progress * 100)}%
-            </p>
-          </div>
-          <div style={{ height: 4, background: "rgba(245,241,232,0.12)" }}>
-            <div
-              style={{
-                height: "100%",
-                width: `${progress * 100}%`,
-                background: LIME,
-                boxShadow: "0 0 24px rgba(198,240,53,0.35)",
-              }}
-            />
-          </div>
-        </div>
-      </div>
-      <Vignette />
-    </AbsoluteFill>
+      />
+      {hideSiteHeader ? (
+        <div
+          style={{
+            position: "absolute",
+            inset: "0 0 auto 0",
+            height: 66,
+            background:
+              "linear-gradient(180deg, #0b0b0a 0%, #0b0b0a 52px, rgba(11,11,10,0) 66px)",
+          }}
+        />
+      ) : null}
+    </div>
   );
 }
 
-type ChapterProps = {
-  image: string;
-  start: number;
-  end: number;
-  scaleFrom: number;
-  scaleTo: number;
-  shiftFrom: number;
-  shiftTo: number;
-};
-
-function Chapter({
-  image,
-  start,
-  end,
-  scaleFrom,
-  scaleTo,
-  shiftFrom,
-  shiftTo,
-}: ChapterProps) {
+function ClosePanel() {
   const frame = useCurrentFrame();
-  if (frame < start || frame > end) return null;
-
-  const enter = interpolate(frame, [start, start + FADE], [0, 1], {
+  const rule = interpolate(frame, [386, 410], [0, 1], {
     easing: EASE,
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const exit = interpolate(frame, [end - FADE, end], [1, 0], {
-    easing: EASE,
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const opacity = Math.min(enter, exit);
-
-  const t = interpolate(frame, [start, end], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const scale = scaleFrom + (scaleTo - scaleFrom) * t;
-  const shift = shiftFrom + (shiftTo - shiftFrom) * t;
-  const enterShift = (1 - enter) * 44;
-  const exitShift = (1 - exit) * -44;
 
   return (
-    <AbsoluteFill style={{ background: BLACK, opacity }}>
-      <div
-        style={{
-          position: "absolute",
-          left: 160,
-          top: 40,
-          width: 1600,
-          height: 1000,
-          overflow: "hidden",
-          outline: "1px solid rgba(245, 241, 232, 0.12)",
-          outlineOffset: -1,
-        }}
-      >
-        <Img
-          src={staticFile(image)}
+    <div
+      style={{
+        width: 1600,
+        height: PANEL,
+        background: BLACK,
+        padding: "80px 96px 64px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <p style={mono}>{PROJECT.name}</p>
+        <p style={mono}>2026</p>
+      </div>
+
+      <div>
+        <p style={{ ...mono, color: BONE, marginBottom: 26 }}>
+          Case study — end
+        </p>
+        <h2 style={{ ...sans, fontSize: 156 }}>{PROJECT.close}</h2>
+        <div
           style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            transform: `scale(${scale}) translateY(${shift + enterShift + exitShift}px)`,
+            height: 5,
+            width: rule * 320,
+            background: LIME,
+            marginTop: 42,
           }}
         />
       </div>
-    </AbsoluteFill>
+
+      <div>
+        <div style={{ height: 1, background: HAIRLINE, marginBottom: 24 }} />
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <p style={{ ...mono, color: BONE }}>{PROJECT.url}</p>
+          <p style={{ ...mono }}>Brand systems / Film / Digital</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
-/**
- * One label set for the whole film. During the image crossfade the incoming
- * chapter owns the label, so two chapters can never print "01" and "02" on top
- * of each other.
- */
-function FilmLabels() {
+function FilmLabels({ camera }: { camera: number }) {
   const frame = useCurrentFrame();
-  if (frame < 48 || frame > 366) return null;
+  if (frame > LABELS_END) return null;
 
-  let activeIndex = 0;
-  for (let i = 0; i < CHAPTERS.length; i += 1) {
-    if (frame >= CHAPTERS[i].start) activeIndex = i;
-  }
-  const active = CHAPTERS[activeIndex];
-  const chapter = PROJECT.chapters[activeIndex];
+  const active = Math.min(
+    PROJECT.panels.length - 1,
+    Math.round(camera / PANEL),
+  );
+  const chapter = PROJECT.panels[active];
 
-  const enter = interpolate(frame, [active.start, active.start + 10], [0, 1], {
-    easing: EASE,
+  const enter = interpolate(frame, [0, 10], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const outro = interpolate(frame, [354, 366], [1, 0], {
+  const outro = interpolate(frame, [344, LABELS_END], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -347,7 +274,7 @@ function FilmLabels() {
         }}
       >
         <p style={{ ...mono, color: BONE }}>
-          {String(activeIndex + 1).padStart(2, "0")} / {chapter.label}
+          {String(active + 1).padStart(2, "0")} / {chapter.label}
         </p>
         <p style={{ ...mono, color: BONE }}>{PROJECT.url}</p>
       </div>
@@ -363,114 +290,17 @@ function FilmLabels() {
         }}
       >
         <p style={{ ...mono }}>{PROJECT.name} — case study</p>
-        <p style={{ ...mono }}>
-          {String(activeIndex + 1).padStart(2, "0")} / 04
-        </p>
+        <p style={{ ...mono }}>2026</p>
       </div>
     </div>
-  );
-}
-
-function ScrollRail() {
-  const frame = useCurrentFrame();
-  if (frame < 48 || frame > 366) return null;
-
-  const progress = interpolate(frame, [48, 366], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        right: 80,
-        top: 170,
-        width: 1,
-        height: 720,
-        background: "rgba(245,241,232,0.16)",
-      }}
-    >
-      <div
-        style={{
-          width: 3,
-          marginLeft: -1,
-          height: 720 * progress,
-          background: LIME,
-          boxShadow: "0 0 18px rgba(198,240,53,0.35)",
-        }}
-      />
-    </div>
-  );
-}
-
-function CloseCard() {
-  const frame = useCurrentFrame();
-  if (frame < CLOSE_START) return null;
-
-  const enter = interpolate(frame, [CLOSE_START, CLOSE_START + FADE], [0, 1], {
-    easing: EASE,
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const rule = interpolate(
-    frame,
-    [CLOSE_START + 8, CLOSE_START + 30],
-    [0, 1],
-    {
-      easing: EASE,
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
-  );
-
-  return (
-    <AbsoluteFill style={{ background: BLACK, opacity: enter }}>
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          padding: "72px 96px 64px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <p style={mono}>Anom Creative</p>
-          <p style={mono}>2026</p>
-        </div>
-
-        <div>
-          <p style={{ ...mono, color: BONE, marginBottom: 26 }}>
-            Case study — end
-          </p>
-          <h2 style={{ ...sans, fontSize: 168 }}>{PROJECT.close}</h2>
-          <div
-            style={{
-              height: 5,
-              width: rule * 320,
-              background: LIME,
-              marginTop: 44,
-            }}
-          />
-        </div>
-
-        <div>
-          <div style={{ height: 1, background: HAIRLINE, marginBottom: 24 }} />
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <p style={{ ...mono, color: BONE }}>{PROJECT.url}</p>
-            <p style={{ ...mono }}>Brand systems / Film / Digital</p>
-          </div>
-        </div>
-      </div>
-      <Vignette />
-    </AbsoluteFill>
   );
 }
 
 export const ProjectFilm = () => {
   useFonts();
+  const frame = useCurrentFrame();
+  const camera = cameraAt(frame);
+  const blur = blurAt(frame);
 
   return (
     <AbsoluteFill
@@ -483,23 +313,36 @@ export const ProjectFilm = () => {
     >
       <FontFaces />
 
-      {PROJECT.chapters.map((chapter, index) => (
-        <Chapter
-          key={chapter.label}
-          image={chapter.image}
-          start={CHAPTERS[index].start}
-          end={CHAPTERS[index].end}
-          scaleFrom={chapter.scaleFrom}
-          scaleTo={chapter.scaleTo}
-          shiftFrom={chapter.shiftFrom}
-          shiftTo={chapter.shiftTo}
-        />
-      ))}
+      <div
+        style={{
+          position: "absolute",
+          left: 160,
+          top: 40,
+          width: 1600,
+          height: PANEL,
+          overflow: "hidden",
+          outline: "1px solid rgba(245, 241, 232, 0.12)",
+          outlineOffset: -1,
+        }}
+      >
+        <div
+          style={{
+            transform: `translateY(${-camera}px)`,
+            filter: blur > 0.05 ? `blur(${blur}px)` : undefined,
+          }}
+        >
+          {PROJECT.panels.map((panel, index) => (
+            <Panel
+              key={panel.image}
+              image={panel.image}
+              hideSiteHeader={index === 1}
+            />
+          ))}
+          <ClosePanel />
+        </div>
+      </div>
 
-      <ScrollRail />
-      <FilmLabels />
-      <CloseCard />
-      <LoadingScreen />
+      <FilmLabels camera={camera} />
       <Vignette />
     </AbsoluteFill>
   );

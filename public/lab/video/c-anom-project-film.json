@@ -2,11 +2,12 @@
   "target": "anom-creative-project-film",
   "composition": "ProjectFilmAnom",
   "fps": 30,
-  "durationInFrames": 420,
+  "durationInFrames": 444,
   "width": 1920,
   "height": 1080,
+  "opening": "site-first-screen",
+  "transition": "animated-scroll",
   "sections": [
-    "loading",
     "hero",
     "statement",
     "archive detail",
@@ -16,8 +17,8 @@
   "renders": {
     "mp4": {
       "path": "public/lab/video/c-anom-project-film.mp4",
-      "bytes": 7186712,
-      "duration": 14,
+      "bytes": 4289624,
+      "duration": 14.8,
       "width": 1920,
       "height": 1080,
       "codec": "h264",
@@ -25,8 +26,8 @@
     },
     "webm": {
       "path": "public/lab/video/c-anom-project-film.webm",
-      "bytes": 6900274,
-      "duration": 14,
+      "bytes": 2007587,
+      "duration": 14.8,
       "width": 1920,
       "height": 1080,
       "codec": "vp9",

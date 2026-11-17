@@ -149,8 +149,8 @@ for (const [name, codec] of [
     `project film ${name} codec is ${film.codec}, expected ${codec}`,
   );
   check(
-    Math.abs(film.duration - 14) < 0.5,
-    `project film ${name} duration is ${film.duration}s, expected 14s`,
+    Math.abs(film.duration - 14.8) < 0.5,
+    `project film ${name} duration is ${film.duration}s, expected 14.8s`,
   );
   check(film.bytes < 10 * 1024 * 1024, `project film ${name} is over 10 MB`);
   records.push({ criterion: "AC-9", film });
@@ -214,8 +214,8 @@ for (const relative of [
 
 // AC-9 — project film frames
 for (const relative of [
-  "public/lab/film/loading.webp",
   "public/lab/film/cover.webp",
+  "public/lab/film/scroll.webp",
   "public/lab/film/detail.webp",
   "public/lab/film/devices.webp",
   "public/lab/film/close.webp",
