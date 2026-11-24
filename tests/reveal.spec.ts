@@ -58,6 +58,23 @@ rawTest.describe("reveal gate", () => {
     await page.goto("/work");
 
     const title = page.locator("h1").first();
+
+    // While the loader is up the word is already split and parked one line
+    // below its mask. The mask is a real block, so the text is clipped by
+    // geometry — not by opacity.
+    const word = title.locator(".tr-word").first();
+    const mask = title.locator(".tr-word-mask").first();
+    await expect(word).toHaveCount(1);
+    expect(await mask.evaluate((el) => getComputedStyle(el).display)).toBe(
+      "inline-block",
+    );
+    expect(
+      await word.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42),
+    ).toBeGreaterThan(40);
+    expect(await title.evaluate((el) => getComputedStyle(el).opacity)).toBe(
+      "1",
+    );
+
     await expect(title).toHaveAttribute("data-revealed", "true", {
       timeout: 20_000,
     });
@@ -123,6 +140,17 @@ test.describe("text reveal", () => {
 
     const article = page.locator(".prose-blog");
     await expect(article).toHaveAttribute("data-reveal", "ready");
+
+    // Prose lines are blocks inside block masks, so the clip is geometric.
+    const firstMask = article.locator("p .tr-line-mask").first();
+    const firstLine = article.locator("p .tr-line").first();
+    await expect(firstLine).toHaveCount(1);
+    expect(
+      await firstMask.evaluate((el) => getComputedStyle(el).display),
+    ).toBe("block");
+    expect(
+      await firstMask.evaluate((el) => getComputedStyle(el).overflow),
+    ).toBe("clip");
 
     // The first paragraph is above the fold and reveals without scrolling.
     const first = article.locator("p").first();

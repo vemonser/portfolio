@@ -40,9 +40,12 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
 - Text: SplitText with masks. Prose splits by line, display type by word; units
   start at `yPercent: 110` and rise to `0` (0.9 s, 70 ms line / 30 ms word
   stagger). `autoSplit` re-splits on font load and resize.
-- The block is hidden by CSS until the split exists and becomes visible only
-  when the gate opens, so there is no unsplit flash and the loader leaves an
-  empty beat before the first line moves.
+- The mask is a real block (`display: block` for lines, `inline-block` for
+  words) with `overflow: clip`; the text inside is the same display and is
+  parked one line below with `translateY(110%)`. There is no opacity anywhere:
+  the mask keeps its height, so the empty line is the "before" state. The gate
+  only controls when the rise starts, which leaves the empty beat after the
+  loader.
 - `aria: "none"` keeps the split nodes as the accessible text. `"auto"` would
   mirror the string into an `aria-label` on the wrapper and duplicate labels.
 - Prose is split after hydration in a layout effect; the article is hidden

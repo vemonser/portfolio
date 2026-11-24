@@ -16,8 +16,11 @@ type Options = {
   stagger?: number;
 };
 
-const DURATION = 0.9;
-const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
+// The same rise as the loading screen's letter entrance and the route
+// curtain's label: one duration, one curve, so every masked arrival reads as
+// the same gesture.
+const DURATION = 1.1;
+const EASE = "expo.out";
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -25,9 +28,13 @@ function prefersReducedMotion(): boolean {
 
 /**
  * Splits one element into masked lines or words and reveals them from below
- * once it reaches the viewport. The text is only made visible when the split is
- * ready, so a slow font or a slow hydration can never show an unsplit block
- * that then jumps.
+ * once it reaches the viewport.
+ *
+ * The mask is the block that clips (`overflow: clip`); the text inside is a
+ * block for lines and an inline-block for words. It is parked one line below
+ * the mask with `translateY(110%)` and rises to 0. No opacity is involved: the
+ * mask keeps its height, so the empty line is the "before" state and a slow
+ * font or hydration can never leave a blank hole.
  *
  * Returns a cleanup function. `autoSplit` re-splits on font load and resize;
  * the observer and tween are rebuilt around the new nodes each time.
@@ -66,6 +73,14 @@ export function setupTextReveal(
   element.dataset.textReveal = "";
 
   const step = (stagger ?? (split === "words" ? 30 : 70)) / 1000;
+  // SplitText only sets a display when the wrapper tag is not a span, so the
+  // spans this component uses are given theirs explicitly. Without it the
+  // words are inline: transforms do not apply and `overflow: clip` does not
+  // clip, so the reveal silently does nothing.
+  const unitDisplay = split === "words" ? "inline-block" : "block";
+  const applyDisplay = (nodes: ArrayLike<HTMLElement>) => {
+    for (const node of Array.from(nodes)) node.style.display = unitDisplay;
+  };
   let revealed = false;
   let observer: IntersectionObserver | null = null;
   let tween: gsap.core.Tween | null = null;
@@ -77,9 +92,10 @@ export function setupTextReveal(
 
     whenRevealGateOpen().then(() => {
       if (!element.isConnected) return;
-      // The block becomes visible only now: its units are still parked below
-      // the mask, so the reader sees the empty space the loader left behind,
-      // then the rise — never an unsplit block and never a fade.
+      // The units are still parked below the mask; the mask has kept the
+      // height, so the reader sees the empty line the loader left behind and
+      // then the rise. `data-prepared` is a marker for tests, not a visibility
+      // switch.
       element.dataset.prepared = "true";
       tween = gsap.to(targets, {
         yPercent: 0,
@@ -95,6 +111,7 @@ export function setupTextReveal(
   };
 
   const prepare = (targets: HTMLElement[]) => {
+    applyDisplay(targets);
     observer?.disconnect();
     observer = null;
     tween?.kill();
@@ -144,6 +161,7 @@ export function setupTextReveal(
       wordsClass: "tr-word",
       autoSplit: true,
       onSplit(self) {
+        applyDisplay(self.masks as unknown as HTMLElement[]);
         prepare((split === "words" ? self.words : self.lines) as HTMLElement[]);
       },
     });

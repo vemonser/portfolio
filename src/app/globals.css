@@ -964,17 +964,30 @@ html[data-js="true"] .image-reveal__overlay {
   display: block;
 }
 
-/* Text reveal — hidden until SplitText has prepared its masks, so an unsplit
-   block never flashes. The masks keep their own height; only the text inside is
-   parked below the clip. */
-html[data-js="true"] :is(.text-reveal, [data-text-reveal]):not([data-prepared="true"]) {
-  opacity: 0;
+/* Text reveal — the mask is a real block, so `overflow: clip` has something to
+   clip. The text inside is a block (lines) or an inline-block (words) that
+   starts one line below the mask and rises to 0. No opacity anywhere: the mask
+   keeps its height, so the empty line is the "before" state. */
+html[data-js="true"] .tr-line,
+html[data-js="true"] .tr-line-mask {
+  display: block;
 }
 
-/* Prose is split after hydration; the article stays invisible until every
-   block has its masks, so an unsplit paragraph never paints and then jumps. */
-html[data-js="true"] .prose-blog[data-reveal="pending"] {
-  opacity: 0;
+html[data-js="true"] .tr-word,
+html[data-js="true"] .tr-word-mask {
+  display: inline-block;
+}
+
+html[data-js="true"] .tr-line-mask {
+  padding-block: 0.11em;
+  margin-block: -0.11em;
+}
+
+html[data-js="true"] .tr-word-mask {
+  padding-block: 0.08em;
+  padding-inline: 0.03em;
+  margin-block: -0.08em;
+  margin-inline: -0.03em;
 }
 
 /* The evidence capture (and any tool that freezes the page) drops the JS flag
@@ -990,25 +1003,9 @@ html[data-js="false"] [data-media] {
   transform: none !important;
 }
 
-html[data-js="true"] .tr-line-mask {
-  padding-block: 0.11em;
-  margin-block: -0.11em;
-}
-
-html[data-js="true"] .tr-word-mask {
-  padding-block: 0.08em;
-  padding-inline: 0.03em;
-  margin-block: -0.08em;
-  margin-inline: -0.03em;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .image-reveal__overlay {
     display: none !important;
-  }
-
-  html[data-js="true"] .text-reveal:not([data-prepared="true"]) {
-    opacity: 1;
   }
 }
 

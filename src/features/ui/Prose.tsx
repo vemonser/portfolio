@@ -53,8 +53,8 @@ function collectTextBlocks(root: HTMLElement): HTMLElement[] {
  *
  * The prose blocks reveal themselves from below a mask, one line at a time,
  * through the same gate as every other reveal. The split happens in a layout
- * effect, before the browser paints, and the article is hidden by CSS until the
- * split is in place: a reader never sees an unsplit block that then jumps.
+ * effect, before the browser paints, so the masks are already in place when the
+ * page first appears: a reader never sees an unsplit block that then jumps.
  */
 export default function Prose({ children, className }: Props) {
   const ref = useRef<HTMLElement>(null);

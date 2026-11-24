@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 
 import { setupTextReveal, type TextSplit } from "@/features/motion/text-reveal";
 
@@ -22,10 +22,10 @@ const WORD_TAGS = new Set(["h1", "h2", "h3"]);
 /**
  * Reveals its text from below a mask the first time it reaches the viewport.
  *
- * The element is hidden by CSS until the split is ready (`.text-reveal`), so a
- * slow hydration never paints an unsplit block that then jumps. The gate in
- * `reveal-gate` keeps every reveal parked under the loader and the route
- * curtain, and adds the empty beat before the rise.
+ * The split happens in a layout effect, before the browser paints, so the
+ * empty mask is the first thing the reader sees rather than an unsplit block.
+ * The gate in `reveal-gate` keeps the rise parked under the loader and the
+ * route curtain, and adds the empty beat before it.
  */
 export default function TextReveal({
   children,
@@ -45,7 +45,7 @@ export default function TextReveal({
       ? String(children)
       : null;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = ref.current;
     if (!node) return;
 
