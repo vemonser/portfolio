@@ -163,18 +163,18 @@ html.lenis body {
 
   /* Project media drift and cursor lab variants. */
   --parallax-scale: 1.08;
-  --cursor-dot-size: 6px;
-  --cursor-ring-size: 26px;
-  --cursor-focus-size: 44px;
-  --cursor-caret-width: 4px;
-  --cursor-caret-height: 18px;
-  --cursor-link-size: 10px;
-  --cursor-external-size: 14px;
-  --cursor-arrow-size: 22px;
-  --cursor-icon-size: 12px;
-  --cursor-ring-focus-scale: 1.7;
-  --cursor-arrow-link-scale: 1.15;
-  --cursor-arrow-focus-scale: 1.6;
+  --cursor-dot-size: 10px;
+  --cursor-orbit-ring: 30px;
+  --cursor-orbit-focus: 48px;
+  --cursor-orbit-focus-scale: 1.6;
+  --cursor-lime-ring: 44px;
+  --cursor-editorial-dot: 12px;
+  --cursor-editorial-ring: 36px;
+  --cursor-editorial-focus: 52px;
+  --cursor-editorial-focus-scale: 1.444;
+  --cursor-hover-arrow: 16px;
+  --cursor-default-arrow: 22px;
+  --cursor-outline: 2px;
   --cursor-follow-duration: 0.18s;
   --cursor-follow-ease: cubic-bezier(0.7, 0, 0.2, 1);
 

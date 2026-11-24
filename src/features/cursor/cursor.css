@@ -3,10 +3,10 @@
  * cursor is hidden only after `html[data-cursor="on"]` is set by JS, so a
  * no-JS visitor keeps the OS pointer.
  *
- * Production defaults to a dot at rest and an arrow on interactive hover. The
- * lab sets `data-cursor-variant="ring|morph|arrow"` on <html> so the three
- * candidates can be compared live without a reload. State is carried on
- * <html>; role changes never force a React render.
+ * Production is a dot at rest and an arrow on interactive hover. The lab sets
+ * `data-cursor-variant="orbit|lime|editorial"` on <html> to compare three
+ * portfolio-ready treatments live. Every lab variant follows the same rule:
+ * the dot is replaced by one arrow treatment, never layered with it.
  */
 
 @media (hover: hover) and (pointer: fine) {
@@ -73,32 +73,37 @@
 }
 
 .cursor-ring {
+  --ring-size: var(--cursor-orbit-ring);
   --ring-scale: 1;
 
   display: none;
 }
 
+/* Difference blend is the reliable visibility treatment: bone becomes black
+   on white, white on black, and stays legible over photography. */
 .cursor-dot__disc {
+  --dot-size: var(--cursor-dot-size);
+
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--cursor-dot-size);
-  height: var(--cursor-dot-size);
-  margin: calc(var(--cursor-dot-size) / -2) 0 0 calc(var(--cursor-dot-size) / -2);
+  width: var(--dot-size);
+  height: var(--dot-size);
+  margin: calc(var(--dot-size) / -2) 0 0 calc(var(--dot-size) / -2);
+  border: 0 solid var(--color-ink);
   border-radius: 999px;
-  background: transparent;
+  background: var(--color-bone);
+  mix-blend-mode: difference;
   scale: calc(var(--cursor-scale) * var(--cursor-press));
-  -webkit-backdrop-filter: invert(1);
-  backdrop-filter: invert(1);
   transition: scale 180ms var(--cursor-follow-ease);
 }
 
 .cursor-ring__inner {
   position: relative;
   display: block;
-  width: var(--cursor-ring-size);
-  height: var(--cursor-ring-size);
-  margin: calc(var(--cursor-ring-size) / -2) 0 0 calc(var(--cursor-ring-size) / -2);
+  width: var(--ring-size);
+  height: var(--ring-size);
+  margin: calc(var(--ring-size) / -2) 0 0 calc(var(--ring-size) / -2);
   border: 1px solid var(--color-bone);
   border-radius: 999px;
   mix-blend-mode: difference;
@@ -106,41 +111,17 @@
   transition: scale 180ms var(--cursor-follow-ease);
 }
 
-.cursor-ring__arrow,
-.cursor-morph__arrow,
-.cursor-morph__play {
+.cursor-ring__arrow {
   display: none;
   position: absolute;
   inset: 0;
-  width: var(--cursor-icon-size);
-  height: var(--cursor-icon-size);
+  width: var(--cursor-hover-arrow);
+  height: var(--cursor-hover-arrow);
   margin: auto;
   color: var(--color-bone);
 }
 
-.cursor-morph {
-  --morph-scale: 0.4;
-
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--cursor-arrow-size);
-  height: var(--cursor-arrow-size);
-  margin: calc(var(--cursor-arrow-size) / -2) 0 0
-    calc(var(--cursor-arrow-size) / -2);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-bone);
-  mix-blend-mode: difference;
-  scale: calc(var(--morph-scale) * var(--cursor-press));
-  opacity: 0;
-  transition:
-    scale 180ms var(--cursor-follow-ease),
-    rotate 180ms var(--cursor-follow-ease),
-    opacity 160ms linear;
-}
-
+/* Production-only arrow swap. Lab variants keep this hidden. */
 .cursor-arrow {
   --arrow-scale: 1;
 
@@ -148,10 +129,10 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--cursor-arrow-size);
-  height: var(--cursor-arrow-size);
-  margin: calc(var(--cursor-arrow-size) / -2) 0 0
-    calc(var(--cursor-arrow-size) / -2);
+  width: var(--cursor-default-arrow);
+  height: var(--cursor-default-arrow);
+  margin: calc(var(--cursor-default-arrow) / -2) 0 0
+    calc(var(--cursor-default-arrow) / -2);
   color: var(--color-bone);
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
   scale: calc(var(--arrow-scale) * var(--cursor-press));
@@ -167,14 +148,67 @@
   stroke: var(--color-bone);
 }
 
-/* At rest every variant is the same dot. Interactive roles hide the dot and
-   reveal exactly one arrow treatment — never an arrow with a dot on top. */
-html[data-cursor-variant="ring"] .cursor-ring,
-html[data-cursor-variant="morph"] .cursor-morph,
-html[data-cursor-variant="arrow"] .cursor-arrow {
-  display: none !important;
+/* Orbit: a 10px difference dot and a 30px trailing ring at rest. */
+html[data-cursor-variant="orbit"] .cursor-ring {
+  display: block;
 }
 
+html[data-cursor-variant="orbit"] .cursor-dot__disc {
+  --dot-size: var(--cursor-dot-size);
+  background: var(--color-bone);
+  mix-blend-mode: difference;
+}
+
+/* Lime Target: a lime dot with an ink keyline; the ring exists only on hover. */
+html[data-cursor-variant="lime"] .cursor-ring {
+  --ring-size: var(--cursor-lime-ring);
+
+  display: none;
+}
+
+html[data-cursor-variant="lime"] .cursor-dot__disc {
+  --dot-size: var(--cursor-dot-size);
+  border-width: var(--cursor-outline);
+  background: var(--color-lime);
+  mix-blend-mode: normal;
+}
+
+html[data-cursor-variant="lime"] .cursor-ring__inner {
+  border: var(--cursor-outline) solid var(--color-lime);
+  box-shadow: 0 0 0 var(--cursor-outline) var(--color-ink);
+  mix-blend-mode: normal;
+}
+
+html[data-cursor-variant="lime"] .cursor-ring__arrow {
+  color: var(--color-ink);
+}
+
+/* Editorial Double: a 12px bone dot with an ink keyline and a 36px double ring. */
+html[data-cursor-variant="editorial"] .cursor-ring {
+  --ring-size: var(--cursor-editorial-ring);
+
+  display: block;
+}
+
+html[data-cursor-variant="editorial"] .cursor-dot__disc {
+  --dot-size: var(--cursor-editorial-dot);
+  border-width: var(--cursor-outline);
+  background: var(--color-bone);
+  mix-blend-mode: normal;
+}
+
+html[data-cursor-variant="editorial"] .cursor-ring__inner {
+  border: var(--cursor-outline) solid var(--color-bone);
+  box-shadow: 0 0 0 var(--cursor-outline) var(--color-ink);
+  mix-blend-mode: normal;
+}
+
+html[data-cursor-variant="editorial"] .cursor-ring__arrow {
+  color: var(--color-bone);
+  filter: drop-shadow(0 0 1px var(--color-ink));
+}
+
+/* Every interactive role hides the resting dot. */
 html:is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
@@ -186,7 +220,19 @@ html:is(
   display: none !important;
 }
 
-html[data-cursor-variant="ring"]:is(
+/* Orbit and Editorial open their ring; Lime brings its ring into existence. */
+html[data-cursor-variant="orbit"]:is(
+    [data-cursor-state="link"],
+    [data-cursor-state="hello"],
+    [data-cursor-state="visit"],
+    [data-cursor-state="view"],
+    [data-cursor-state="play"]
+  )
+  .cursor-ring {
+  --ring-scale: var(--cursor-orbit-focus-scale);
+}
+
+html[data-cursor-variant="lime"]:is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
@@ -197,25 +243,33 @@ html[data-cursor-variant="ring"]:is(
   display: block !important;
 }
 
-html[data-cursor-variant="morph"]:is(
+html[data-cursor-variant="editorial"]:is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
     [data-cursor-state="view"],
     [data-cursor-state="play"]
   )
-  .cursor-morph {
-  display: block !important;
+  .cursor-ring {
+  --ring-scale: var(--cursor-editorial-focus-scale);
 }
 
-html[data-cursor-variant="arrow"]:is(
+html:is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
     [data-cursor-state="view"],
     [data-cursor-state="play"]
   )
-  .cursor-arrow,
+  .cursor-ring__arrow {
+  display: block;
+}
+
+/* Production default: the dot is replaced by the standalone arrow. */
+html[data-cursor-variant] .cursor-arrow {
+  display: none !important;
+}
+
 html:not([data-cursor-variant]):is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
@@ -227,108 +281,22 @@ html:not([data-cursor-variant]):is(
   display: block !important;
 }
 
-html[data-cursor-visible="true"] .cursor-dot {
+html[data-cursor-visible="true"] .cursor-dot,
+html[data-cursor-visible="true"] .cursor-ring {
   opacity: 1;
 }
 
-html[data-cursor-visible="true"][data-cursor-variant="ring"] .cursor-ring {
-  opacity: 1;
-}
-
-/* Dot roles. */
-html[data-cursor-state="link"] .cursor-dot {
-  --cursor-scale: 1.75;
-}
-
-html[data-cursor-state="hello"] .cursor-dot,
-html[data-cursor-state="visit"] .cursor-dot {
-  --cursor-scale: 1.9;
-}
-
-html[data-cursor-state="view"] .cursor-dot,
-html[data-cursor-state="play"] .cursor-dot {
-  --cursor-scale: 2.6;
-}
-
-html[data-cursor-state="disabled"] .cursor-dot {
-  --cursor-scale: 1.25;
-}
-
-/* Ring roles: the ring contracts on links and opens around project/media. */
-html[data-cursor-state="link"] .cursor-ring {
-  --ring-scale: 0.7;
-}
-
-html[data-cursor-state="hello"] .cursor-ring,
-html[data-cursor-state="visit"] .cursor-ring {
-  --ring-scale: 0.85;
-}
-
-html[data-cursor-state="view"] .cursor-ring,
-html[data-cursor-state="play"] .cursor-ring {
-  --ring-scale: var(--cursor-ring-focus-scale);
-}
-
-html[data-cursor-state="link"] .cursor-ring__arrow,
-html[data-cursor-state="view"] .cursor-ring__arrow,
-html[data-cursor-state="play"] .cursor-ring__arrow,
-html[data-cursor-state="hello"] .cursor-ring__arrow,
-html[data-cursor-state="visit"] .cursor-ring__arrow {
-  display: block;
-}
-
-/* Morph roles: the resting dot gives way to one arrow shape. */
-html[data-cursor-variant="morph"]:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-morph {
-  --morph-scale: 1;
-  opacity: 1;
-}
-
-html[data-cursor-variant="morph"]:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"]
-  )
-  .cursor-morph {
-  --morph-scale: 0.85;
-}
-
-html[data-cursor-variant="morph"]:is(
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-morph {
-  --morph-scale: 1.15;
-}
-
-html[data-cursor-variant="morph"]:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-morph__arrow {
-  display: block;
-}
-
-/* Arrow roles. */
+/* Production arrow roles. */
 html[data-cursor-state="link"] .cursor-arrow,
 html[data-cursor-state="hello"] .cursor-arrow,
 html[data-cursor-state="visit"] .cursor-arrow {
-  --arrow-scale: var(--cursor-arrow-link-scale);
+  --arrow-scale: 1.15;
   rotate: 45deg;
 }
 
 html[data-cursor-state="view"] .cursor-arrow,
 html[data-cursor-state="play"] .cursor-arrow {
-  --arrow-scale: var(--cursor-arrow-focus-scale);
+  --arrow-scale: 1.6;
   rotate: 0deg;
 }
 
@@ -338,18 +306,9 @@ html[data-cursor-state="text"] .cursor-ring {
   opacity: 0 !important;
 }
 
-/* Disabled is visibly inert, but only while the pointer is actually present. */
+/* Disabled is visibly inert, but only while the pointer is present. */
 html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-dot,
 html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-ring {
-  opacity: 0.4;
-}
-
-html[data-cursor-state="disabled"] .cursor-morph {
-  --morph-scale: 0.8;
-  opacity: 0.4;
-}
-
-html[data-cursor-state="disabled"] .cursor-arrow {
   opacity: 0.4;
 }
 
@@ -365,11 +324,8 @@ html[data-cursor="off"] .cursor-ring {
   opacity: 0 !important;
 }
 
-/*
- * Browsers without the Popover API cannot lift the cursor above a modal
- * <dialog> (which lives in the top layer). While the menu is open those get the
- * native pointer instead of an invisible custom one.
- */
+/* Browsers without the Popover API fall back to the native pointer while the
+   modal menu is open, because a dialog lives in the top layer. */
 html[data-cursor-menu="native"] .cursor-dot,
 html[data-cursor-menu="native"] .cursor-ring {
   opacity: 0 !important;
@@ -380,25 +336,11 @@ html[data-cursor="on"][data-cursor-menu="native"] * {
   cursor: auto !important;
 }
 
-/* Older engines without backdrop-filter still get visible marks. */
-@supports not ((backdrop-filter: invert(1)) or (-webkit-backdrop-filter: invert(1))) {
-  .cursor-dot__disc {
-    background: var(--color-bone);
-    mix-blend-mode: difference;
-  }
-
-  .cursor-ring__inner {
-    border-color: var(--color-bone);
-    mix-blend-mode: difference;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .cursor-dot,
   .cursor-ring,
   .cursor-dot__disc,
   .cursor-ring__inner,
-  .cursor-morph,
   .cursor-arrow {
     transition: none;
   }

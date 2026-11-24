@@ -12,12 +12,16 @@ const REDUCED = "(prefers-reduced-motion: reduce)";
 
 type CursorRole = "default" | "link" | "view" | "play" | "hello" | "visit" | "text" | "disabled";
 
+function hasRing(value: string | undefined): boolean {
+  return value === "orbit" || value === "lime" || value === "editorial";
+}
+
 /**
  * A custom cursor that replaces the native one on fine pointers.
  *
  * The dot is the resting state. Interactive roles hide it and reveal exactly
- * one arrow treatment; the ring variant adds a soft trailing outline. The
- * native pointer disappears only after this component mounts and sets
+ * one arrow treatment; the ring-based variants add a soft trailing outline.
+ * The native pointer disappears only after this component mounts and sets
  * `html[data-cursor="on"]`; a no-JS visitor keeps the OS cursor. Touch devices
  * never mount it. Every role is opt-in through
  * `data-cursor="view|play|text|disabled"` or a normal link/button.
@@ -95,7 +99,7 @@ export default function Cursor() {
     // Switching back to the ring in the lab must put it under the current
     // pointer immediately, not at the last place it had while hidden.
     const syncRing = () => {
-      if (html.dataset.cursorVariant === "ring" && hasPosition) {
+      if (hasRing(html.dataset.cursorVariant) && hasPosition) {
         gsap.set(ring, { x: targetX, y: targetY });
       }
     };
@@ -294,7 +298,7 @@ export default function Cursor() {
       show();
       if (!reduced.matches) magnetize(targetX, targetY);
       gsap.set(dot, { x: targetX, y: targetY });
-      if (html.dataset.cursorVariant === "ring") {
+      if (hasRing(html.dataset.cursorVariant)) {
         moveRingX(targetX);
         moveRingY(targetY);
       }
@@ -375,28 +379,6 @@ export default function Cursor() {
     >
       <div ref={dotRef} className="cursor-dot" aria-hidden="true">
         <span className="cursor-dot__disc" />
-        <span className="cursor-morph">
-          <svg
-            className="cursor-morph__arrow"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            focusable="false"
-          >
-            <path d="M5 19 19 5M9 5h10v10" />
-          </svg>
-          <svg
-            className="cursor-morph__play"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            focusable="false"
-          >
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </span>
         <svg
           className="cursor-arrow"
           viewBox="0 0 24 24"

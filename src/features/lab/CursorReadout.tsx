@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 const VARIANTS = [
-  { id: "ring", label: "Dot + ring" },
-  { id: "morph", label: "Morph" },
-  { id: "arrow", label: "Arrow" },
+  { id: "orbit", label: "Orbit" },
+  { id: "lime", label: "Lime Target" },
+  { id: "editorial", label: "Editorial Double" },
 ] as const;
 
 type CursorVariant = (typeof VARIANTS)[number]["id"];
@@ -19,11 +19,11 @@ export default function CursorReadout() {
   const [state, setState] = useState("default");
   const [visible, setVisible] = useState(false);
   const [custom, setCustom] = useState(true);
-  const [variant, setVariant] = useState<CursorVariant>("ring");
+  const [variant, setVariant] = useState<CursorVariant>("orbit");
 
   useEffect(() => {
     const html = document.documentElement;
-    html.dataset.cursorVariant = "ring";
+    html.dataset.cursorVariant = "orbit";
 
     const read = () => {
       setState(html.dataset.cursorState ?? "default");
@@ -31,7 +31,11 @@ export default function CursorReadout() {
       setCustom(html.dataset.cursor !== "off");
       const next = html.dataset.cursorVariant;
       setVariant(
-        next === "morph" || next === "arrow" || next === "ring" ? next : "ring",
+        next === "lime" ||
+          next === "editorial" ||
+          next === "orbit"
+          ? next
+          : "orbit",
       );
     };
 

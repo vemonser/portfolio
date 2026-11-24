@@ -292,23 +292,27 @@ test.describe("Hero Peel lab", () => {
 });
 
 test.describe("cursor variants lab", () => {
-  test("offers all three variants and starts on dot + ring", async ({ page }) => {
+  test("offers the three refined variants and starts on Orbit", async ({
+    page,
+  }) => {
     await page.goto("/lab/cursor");
 
     const group = page.getByRole("group", { name: "Cursor variant" });
     await expect(group).toBeVisible();
+    await expect(group.getByRole("button", { name: "Orbit" })).toBeVisible();
     await expect(
-      group.getByRole("button", { name: "Dot + ring" }),
+      group.getByRole("button", { name: "Lime Target" }),
     ).toBeVisible();
-    await expect(group.getByRole("button", { name: "Morph" })).toBeVisible();
-    await expect(group.getByRole("button", { name: "Arrow" })).toBeVisible();
+    await expect(
+      group.getByRole("button", { name: "Editorial Double" }),
+    ).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute(
       "data-cursor-variant",
-      "ring",
+      "orbit",
     );
   });
 
-  test("shows a dot at rest and only the hover visual on interactive roles", async ({
+  test("keeps a visible dot at rest and one arrow treatment on hover", async ({
     page,
   }) => {
     await page.goto("/lab/cursor");
@@ -321,106 +325,134 @@ test.describe("cursor variants lab", () => {
 
     const disc = page.locator(".cursor-dot__disc");
     const ring = page.locator(".cursor-ring__inner");
-    const morph = page.locator(".cursor-morph");
-    const arrow = page.locator(".cursor-arrow");
+    const ringArrow = page.locator(".cursor-ring__arrow");
+    const productionArrow = page.locator(".cursor-arrow");
 
-    // Ring variant: dot at rest, arrow-in-ring on hover, never both.
+    // Orbit: 10px difference-blended dot + 30px trailing ring at rest.
     await setRole("default");
     await expect(disc).toBeVisible();
-    await expect(ring).toBeHidden();
-    await expect(morph).toBeHidden();
-    await expect(arrow).toBeHidden();
+    await expect(ring).toBeVisible();
+    expect(await disc.evaluate((el) => getComputedStyle(el).width)).toBe(
+      "10px",
+    );
+    expect(
+      await disc.evaluate((el) => getComputedStyle(el).mixBlendMode),
+    ).toBe("difference");
     await setRole("view");
     await expect(disc).toBeHidden();
     await expect(ring).toBeVisible();
-    await expect(morph).toBeHidden();
-    await expect(arrow).toBeHidden();
+    await expect(ringArrow).toBeVisible();
+    await expect
+      .poll(() => ring.evaluate((el) => el.getBoundingClientRect().width))
+      .toBeCloseTo(48, 0);
 
-    // Morph variant: the dot gives way to the arrow shape.
-    await page.locator('[data-cursor-variant-option="morph"]').click();
+    // Lime Target: lime dot with an ink keyline; no ring until hover.
+    await page.locator('[data-cursor-variant-option="lime"]').click();
     await setRole("default");
     await expect(disc).toBeVisible();
-    await expect(morph).toBeHidden();
+    await expect(ring).toBeHidden();
+    expect(
+      await disc.evaluate((el) => getComputedStyle(el).backgroundColor),
+    ).toBe("rgb(198, 240, 53)");
+    expect(
+      await disc.evaluate((el) => getComputedStyle(el).borderTopColor),
+    ).toBe("rgb(23, 22, 20)");
     await setRole("view");
     await expect(disc).toBeHidden();
-    await expect(morph).toBeVisible();
-    await expect(page.locator(".cursor-morph__arrow")).toBeVisible();
+    await expect(ring).toBeVisible();
+    await expect(ringArrow).toBeVisible();
+    await expect
+      .poll(() => ring.evaluate((el) => el.getBoundingClientRect().width))
+      .toBeCloseTo(44, 0);
 
-    // Arrow variant: a clean dot-to-arrow swap.
-    await page.locator('[data-cursor-variant-option="arrow"]').click();
+    // Editorial Double: 12px bone dot with an ink keyline + 36px ring.
+    await page.locator('[data-cursor-variant-option="editorial"]').click();
     await setRole("default");
     await expect(disc).toBeVisible();
-    await expect(arrow).toBeHidden();
+    await expect(ring).toBeVisible();
+    expect(await disc.evaluate((el) => getComputedStyle(el).width)).toBe(
+      "12px",
+    );
+    expect(
+      await disc.evaluate((el) => getComputedStyle(el).borderTopColor),
+    ).toBe("rgb(23, 22, 20)");
     await setRole("view");
     await expect(disc).toBeHidden();
-    await expect(arrow).toBeVisible();
+    await expect(ring).toBeVisible();
+    await expect(ringArrow).toBeVisible();
+    await expect
+      .poll(() => ring.evaluate((el) => el.getBoundingClientRect().width))
+      .toBeCloseTo(52, 0);
+
+    // The production arrow swap is not layered underneath a lab variant.
+    await expect(productionArrow).toBeHidden();
   });
 
-  test("switches live between ring, morph, and arrow", async ({ page }) => {
+  test("switches live and keeps the ring under the pointer", async ({ page }) => {
     await page.goto("/lab/cursor");
     await page.mouse.move(420, 320);
 
-    await page.locator('[data-cursor-variant-option="morph"]').click();
+    await page.locator('[data-cursor-variant-option="lime"]').click();
     await expect(page.locator("html")).toHaveAttribute(
       "data-cursor-variant",
-      "morph",
-    );
-    await expect(page.locator(".cursor-morph")).toBeVisible();
-    await expect(page.locator(".cursor-ring__inner")).toBeHidden();
-    await expect(page.locator(".cursor-arrow")).toBeHidden();
-
-    await page.locator('[data-cursor-variant-option="arrow"]').click();
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-cursor-variant",
-      "arrow",
-    );
-    await expect(page.locator(".cursor-arrow")).toBeVisible();
-    await expect(page.locator(".cursor-morph")).toBeHidden();
-    await expect(page.locator(".cursor-ring__inner")).toBeHidden();
-
-    const ringOption = page.locator('[data-cursor-variant-option="ring"]');
-    await ringOption.click();
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-cursor-variant",
-      "ring",
+      "lime",
     );
     await expect(page.locator(".cursor-ring__inner")).toBeVisible();
-    await expect(page.locator(".cursor-morph")).toBeHidden();
-    await expect(page.locator(".cursor-arrow")).toBeHidden();
 
-    const [ringBox, optionBox] = await Promise.all([
-      page.locator(".cursor-ring").boundingBox(),
-      ringOption.boundingBox(),
-    ]);
-    expect(ringBox).not.toBeNull();
-    expect(optionBox).not.toBeNull();
-    expect(
-      Math.abs(
-        ringBox!.x - (optionBox!.x + optionBox!.width / 2),
-      ),
-    ).toBeLessThan(3);
+    await page.locator('[data-cursor-variant-option="editorial"]').click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "editorial",
+    );
+    await expect(page.locator(".cursor-ring__inner")).toBeVisible();
+
+    const orbitOption = page.locator('[data-cursor-variant-option="orbit"]');
+    await orbitOption.click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
+    await expect(page.locator(".cursor-ring__inner")).toBeVisible();
+
+    await expect
+      .poll(async () => {
+        const [ringBox, optionBox] = await Promise.all([
+          page.locator(".cursor-ring").boundingBox(),
+          orbitOption.boundingBox(),
+        ]);
+        expect(ringBox).not.toBeNull();
+        expect(optionBox).not.toBeNull();
+        return Math.abs(
+          ringBox!.x - (optionBox!.x + optionBox!.width / 2),
+        );
+      })
+      .toBeLessThan(3);
   });
 
   test("supports keyboard selection", async ({ page }) => {
     await page.goto("/lab/cursor");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
 
-    const morph = page.locator('[data-cursor-variant-option="morph"]');
-    await morph.focus();
+    const lime = page.locator('[data-cursor-variant-option="lime"]');
+    await lime.focus();
     await page.keyboard.press("Enter");
 
     await expect(page.locator("html")).toHaveAttribute(
       "data-cursor-variant",
-      "morph",
+      "lime",
     );
-    await expect(morph).toHaveAttribute("aria-pressed", "true");
+    await expect(lime).toHaveAttribute("aria-pressed", "true");
   });
 
   test("does not carry the lab choice into production", async ({ page }) => {
     await page.goto("/lab/cursor");
-    await page.locator('[data-cursor-variant-option="arrow"]').click();
+    await page.locator('[data-cursor-variant-option="editorial"]').click();
     await expect(page.locator("html")).toHaveAttribute(
       "data-cursor-variant",
-      "arrow",
+      "editorial",
     );
 
     await page.locator("header .site-header__brand").click();
@@ -460,7 +492,7 @@ test.describe("custom cursor", () => {
           .locator(".cursor-ring__inner")
           .evaluate((element) => getComputedStyle(element).scale),
       )
-      .toBe("1.7");
+      .toBe("1.6");
 
     const play = page.locator('[data-cursor="play"]');
     await play.scrollIntoViewIfNeeded();
@@ -557,6 +589,16 @@ test.describe("custom cursor", () => {
       "default",
     );
     await expect(page.locator(".cursor-dot__disc")).toBeVisible();
+    expect(
+      await page
+        .locator(".cursor-dot__disc")
+        .evaluate((element) => getComputedStyle(element).width),
+    ).toBe("10px");
+    expect(
+      await page
+        .locator(".cursor-dot__disc")
+        .evaluate((element) => getComputedStyle(element).mixBlendMode),
+    ).toBe("difference");
     await expect(page.locator(".cursor-arrow")).toBeHidden();
 
     const card = page.locator('[data-compression-target="project"]').first();
