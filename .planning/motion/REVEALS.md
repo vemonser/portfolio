@@ -50,9 +50,14 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
   mirror the string into an `aria-label` on the wrapper and duplicate labels.
 - Prose is split after hydration in a layout effect; the article is hidden
   until every block has its masks.
-- Cursor: one 8 px disc, `backdrop-filter: invert(1)` (bone fallback), 14 px on
-  links, ~21 px on `view`/`play`, no ring, no labels. GSAP moves the outer node;
-  the inner disc owns `scale`, so the two transforms never fight.
+- Cursor: a 6 px inverting dot at rest; interactive roles hide the dot and
+  reveal one arrow treatment. The lab compares three variants (dot + trailing
+  ring, morph, arrow swap) without labels; production uses the arrow swap until
+  a variant is chosen. Text entry keeps the native I-beam.
+- Project media: cards overscan their fixed frame (`scale(1.08)`) and drift
+  `yPercent: -4 → 4` with scroll (`scrub: 0.6`). Scale and travel live on
+  separate nodes so GSAP cannot erase the overscan. Reduced motion rests at
+  `scale(1)` with no transform.
 
 ## Acceptance criteria
 
@@ -69,10 +74,15 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
   copy is visible with no masks and no cover.
 - AC-06 — Given no JavaScript, when a page loads, then the cover is absent and
   the copy is visible.
-- AC-07 — Given a fine pointer, when it moves, then one inverting dot follows
-  it, scales on links and project cards, and the native pointer stays hidden.
+- AC-07 — Given a fine pointer, when it rests, then one inverting dot follows
+  it; when it enters a link or project card, the dot is replaced by one arrow
+  treatment (never both). The lab can switch the treatment live.
 - AC-08 — Given a text field, when it is hovered, then the dot hides and the OS
   I-beam is used.
+- AC-09 — Given a project card, when it crosses the viewport, then its capture
+  drifts inside the fixed frame; reduced motion keeps it static.
+- AC-10 — Given a case study with a live URL, then both Visit site actions use
+  the shared masked text reveal.
 
 ## Requirement-to-test coverage
 
@@ -86,3 +96,5 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
 | AC-06 | `tests/reveal.spec.ts` no-JS | COVERED |
 | AC-07 | `tests/lab-prototypes.spec.ts` cursor | COVERED |
 | AC-08 | `tests/lab-prototypes.spec.ts` text role | COVERED |
+| AC-09 | `tests/work-media.spec.ts` project image parallax | COVERED |
+| AC-10 | `tests/work-media.spec.ts` visit-site actions | COVERED |

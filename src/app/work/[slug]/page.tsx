@@ -106,7 +106,9 @@ export default async function ProjectPage({ params }: Props) {
                     external
                     className="inline-flex min-h-11 items-center gap-[var(--space-1)]"
                   >
-                    {copy.project.visit}
+                    <TextReveal as="span" split="words">
+                      {copy.project.visit}
+                    </TextReveal>
                     <span aria-hidden="true">↗</span>
                   </LinkLine>
                 ) : (
@@ -177,7 +179,9 @@ export default async function ProjectPage({ params }: Props) {
               external
               className="inline-flex min-h-11 items-center text-lede"
             >
-              {copy.project.visit}
+              <TextReveal as="span" split="words">
+                {copy.project.visit}
+              </TextReveal>
               <span aria-hidden="true" className="ms-2">
                 ↗
               </span>

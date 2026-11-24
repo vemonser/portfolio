@@ -291,6 +291,146 @@ test.describe("Hero Peel lab", () => {
   });
 });
 
+test.describe("cursor variants lab", () => {
+  test("offers all three variants and starts on dot + ring", async ({ page }) => {
+    await page.goto("/lab/cursor");
+
+    const group = page.getByRole("group", { name: "Cursor variant" });
+    await expect(group).toBeVisible();
+    await expect(
+      group.getByRole("button", { name: "Dot + ring" }),
+    ).toBeVisible();
+    await expect(group.getByRole("button", { name: "Morph" })).toBeVisible();
+    await expect(group.getByRole("button", { name: "Arrow" })).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "ring",
+    );
+  });
+
+  test("shows a dot at rest and only the hover visual on interactive roles", async ({
+    page,
+  }) => {
+    await page.goto("/lab/cursor");
+
+    const setRole = (role: "default" | "view") =>
+      page.evaluate((next) => {
+        document.documentElement.dataset.cursorVisible = "true";
+        document.documentElement.dataset.cursorState = next;
+      }, role);
+
+    const disc = page.locator(".cursor-dot__disc");
+    const ring = page.locator(".cursor-ring__inner");
+    const morph = page.locator(".cursor-morph");
+    const arrow = page.locator(".cursor-arrow");
+
+    // Ring variant: dot at rest, arrow-in-ring on hover, never both.
+    await setRole("default");
+    await expect(disc).toBeVisible();
+    await expect(ring).toBeHidden();
+    await expect(morph).toBeHidden();
+    await expect(arrow).toBeHidden();
+    await setRole("view");
+    await expect(disc).toBeHidden();
+    await expect(ring).toBeVisible();
+    await expect(morph).toBeHidden();
+    await expect(arrow).toBeHidden();
+
+    // Morph variant: the dot gives way to the arrow shape.
+    await page.locator('[data-cursor-variant-option="morph"]').click();
+    await setRole("default");
+    await expect(disc).toBeVisible();
+    await expect(morph).toBeHidden();
+    await setRole("view");
+    await expect(disc).toBeHidden();
+    await expect(morph).toBeVisible();
+    await expect(page.locator(".cursor-morph__arrow")).toBeVisible();
+
+    // Arrow variant: a clean dot-to-arrow swap.
+    await page.locator('[data-cursor-variant-option="arrow"]').click();
+    await setRole("default");
+    await expect(disc).toBeVisible();
+    await expect(arrow).toBeHidden();
+    await setRole("view");
+    await expect(disc).toBeHidden();
+    await expect(arrow).toBeVisible();
+  });
+
+  test("switches live between ring, morph, and arrow", async ({ page }) => {
+    await page.goto("/lab/cursor");
+    await page.mouse.move(420, 320);
+
+    await page.locator('[data-cursor-variant-option="morph"]').click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "morph",
+    );
+    await expect(page.locator(".cursor-morph")).toBeVisible();
+    await expect(page.locator(".cursor-ring__inner")).toBeHidden();
+    await expect(page.locator(".cursor-arrow")).toBeHidden();
+
+    await page.locator('[data-cursor-variant-option="arrow"]').click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "arrow",
+    );
+    await expect(page.locator(".cursor-arrow")).toBeVisible();
+    await expect(page.locator(".cursor-morph")).toBeHidden();
+    await expect(page.locator(".cursor-ring__inner")).toBeHidden();
+
+    const ringOption = page.locator('[data-cursor-variant-option="ring"]');
+    await ringOption.click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "ring",
+    );
+    await expect(page.locator(".cursor-ring__inner")).toBeVisible();
+    await expect(page.locator(".cursor-morph")).toBeHidden();
+    await expect(page.locator(".cursor-arrow")).toBeHidden();
+
+    const [ringBox, optionBox] = await Promise.all([
+      page.locator(".cursor-ring").boundingBox(),
+      ringOption.boundingBox(),
+    ]);
+    expect(ringBox).not.toBeNull();
+    expect(optionBox).not.toBeNull();
+    expect(
+      Math.abs(
+        ringBox!.x - (optionBox!.x + optionBox!.width / 2),
+      ),
+    ).toBeLessThan(3);
+  });
+
+  test("supports keyboard selection", async ({ page }) => {
+    await page.goto("/lab/cursor");
+
+    const morph = page.locator('[data-cursor-variant-option="morph"]');
+    await morph.focus();
+    await page.keyboard.press("Enter");
+
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "morph",
+    );
+    await expect(morph).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("does not carry the lab choice into production", async ({ page }) => {
+    await page.goto("/lab/cursor");
+    await page.locator('[data-cursor-variant-option="arrow"]').click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "arrow",
+    );
+
+    await page.locator("header .site-header__brand").click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-cursor-variant",
+    );
+  });
+});
+
 test.describe("custom cursor", () => {
   test("replaces the native cursor and maps every role", async ({ page }) => {
     await page.goto("/lab/cursor");
@@ -303,30 +443,32 @@ test.describe("custom cursor", () => {
     await link.scrollIntoViewIfNeeded();
     await link.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "link");
+    await expect(page.locator(".cursor-dot__disc")).toBeHidden();
+    await expect(page.locator(".cursor-ring__inner")).toBeVisible();
+    await expect(page.locator(".cursor-ring__arrow")).toBeVisible();
 
     const view = page.locator('[data-cursor="view"]').first();
     await view.scrollIntoViewIfNeeded();
     await view.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "view");
+    await expect(page.locator(".cursor-dot__disc")).toBeHidden();
+    await expect(page.locator(".cursor-ring__inner")).toBeVisible();
+    await expect(page.locator(".cursor-ring__arrow")).toBeVisible();
     await expect
       .poll(() =>
         page
-          .locator(".cursor-dot__disc")
+          .locator(".cursor-ring__inner")
           .evaluate((element) => getComputedStyle(element).scale),
       )
-      .toBe("2.6");
+      .toBe("1.7");
 
     const play = page.locator('[data-cursor="play"]');
     await play.scrollIntoViewIfNeeded();
     await play.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "play");
-    await expect
-      .poll(() =>
-        page
-          .locator(".cursor-dot__disc")
-          .evaluate((element) => getComputedStyle(element).scale),
-      )
-      .toBe("2.6");
+    await expect(page.locator(".cursor-dot__disc")).toBeHidden();
+    await expect(page.locator(".cursor-ring__inner")).toBeVisible();
+    await expect(page.locator(".cursor-ring__arrow")).toBeVisible();
 
     const textField = page.locator("input[type='text']");
     await textField.scrollIntoViewIfNeeded();
@@ -350,14 +492,14 @@ test.describe("custom cursor", () => {
     const html = page.locator("html");
     await expect(html).toHaveAttribute("data-cursor", "on");
 
-    await page.locator("aside button").click();
+    await page.getByRole("button", { name: "Use system cursor" }).click();
     await expect(html).toHaveAttribute("data-cursor", "off");
     expect(
       await page.evaluate(() => getComputedStyle(document.body).cursor),
     ).toBe("auto");
 
     // Toggling back must restore the custom layer and the hidden OS pointer.
-    await page.locator("aside button").click();
+    await page.getByRole("button", { name: "Use custom cursor" }).click();
     await expect(html).toHaveAttribute("data-cursor", "on");
     expect(
       await page.evaluate(() => getComputedStyle(document.body).cursor),
@@ -409,6 +551,14 @@ test.describe("custom cursor", () => {
       await page.evaluate(() => getComputedStyle(document.body).cursor),
     ).toBe("none");
 
+    await page.mouse.move(720, 450);
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-state",
+      "default",
+    );
+    await expect(page.locator(".cursor-dot__disc")).toBeVisible();
+    await expect(page.locator(".cursor-arrow")).toBeHidden();
+
     const card = page.locator('[data-compression-target="project"]').first();
     await card.scrollIntoViewIfNeeded();
     await card.hover();
@@ -416,6 +566,8 @@ test.describe("custom cursor", () => {
       "data-cursor-state",
       "view",
     );
+    await expect(page.locator(".cursor-dot__disc")).toBeHidden();
+    await expect(page.locator(".cursor-arrow")).toBeVisible();
   });
 
   test("clears a stale role when the window shrinks", async ({ page }) => {
@@ -435,7 +587,11 @@ test.describe("custom cursor", () => {
 
   test("survives a client navigation", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Work" }).first().click();
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await page
+      .locator("header")
+      .getByRole("link", { name: "Work" })
+      .click();
 
     await expect(page).toHaveURL(/\/work$/);
     await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");

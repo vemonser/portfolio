@@ -161,6 +161,23 @@ html.lenis body {
   --dur-entrance: 1050ms;
   --ease-editorial: cubic-bezier(0.7, 0, 0.2, 1);
 
+  /* Project media drift and cursor lab variants. */
+  --parallax-scale: 1.08;
+  --cursor-dot-size: 6px;
+  --cursor-ring-size: 26px;
+  --cursor-focus-size: 44px;
+  --cursor-caret-width: 4px;
+  --cursor-caret-height: 18px;
+  --cursor-link-size: 10px;
+  --cursor-external-size: 14px;
+  --cursor-arrow-size: 22px;
+  --cursor-icon-size: 12px;
+  --cursor-ring-focus-scale: 1.7;
+  --cursor-arrow-link-scale: 1.15;
+  --cursor-arrow-focus-scale: 1.6;
+  --cursor-follow-duration: 0.18s;
+  --cursor-follow-ease: cubic-bezier(0.7, 0, 0.2, 1);
+
   --inset-edge: var(--gutter);
   --inset-chapter: var(--section-pad);
   --inset-chapter-lg: var(--section-pad);
@@ -882,7 +899,7 @@ html.lenis body {
 .back-to-top {
   position: fixed;
   inset-block-end: var(--space-5);
-  inset-inline-start: var(--space-5);
+  inset-inline-end: var(--space-5);
   z-index: 60;
   display: inline-grid;
   place-items: center;
@@ -1412,6 +1429,10 @@ html[data-js="false"] [data-media] {
   /* The scroll lag is motion, not information. */
   .hero-wordmark {
     transform: none !important;
+  }
+
+  [data-parallax] {
+    scale: 1 !important;
   }
 }
 

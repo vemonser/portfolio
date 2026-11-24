@@ -15,20 +15,22 @@ type CursorRole = "default" | "link" | "view" | "play" | "hello" | "visit" | "te
 /**
  * A custom cursor that replaces the native one on fine pointers.
  *
- * The native pointer disappears only after this component mounts and sets
+ * The dot is the resting state. Interactive roles hide it and reveal exactly
+ * one arrow treatment; the ring variant adds a soft trailing outline. The
+ * native pointer disappears only after this component mounts and sets
  * `html[data-cursor="on"]`; a no-JS visitor keeps the OS cursor. Touch devices
- * never mount it. One dot tracks the pointer exactly — no React state per
- * pointermove — and every role is opt-in through
+ * never mount it. Every role is opt-in through
  * `data-cursor="view|play|text|disabled"` or a normal link/button.
  *
  * The dot inverts whatever sits behind it, so it stays legible on the black
- * page, a light capture and the lime accent without ever painting a filled disc
- * over the content underneath. Text entry is the one exception: the dot hides
- * and the control gets `cursor: text`, so the OS I-beam is exact.
+ * page, a light capture and the lime accent. Text entry is the one exception:
+ * the custom nodes hide and the control gets `cursor: text`, so the OS I-beam
+ * is exact.
  */
 export default function Cursor() {
   const layerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
   const [enabled, setEnabled] = useState(false);
 
   // The nodes are not rendered at all on touch/coarse pointers or without JS.
@@ -44,8 +46,9 @@ export default function Cursor() {
     if (!enabled) return;
 
     const dot = dotRef.current;
+    const ring = ringRef.current;
     const layer = layerRef.current;
-    if (!dot || !layer) return;
+    if (!dot || !ring || !layer) return;
 
     const html = document.documentElement;
     const reduced = window.matchMedia(REDUCED);
@@ -74,11 +77,33 @@ export default function Cursor() {
     let downTimer = 0;
 
     /*
-     * One dot, moved exactly with the pointer. GSAP writes the transform on the
-     * compositor; size and colour state live in CSS so a role change never
-     * forces a React render.
+     * The dot tracks the pointer exactly. The ring is a sibling with the same
+     * origin but a soft quickTo lag, so the two never fight over one transform.
+     * Size, shape and colour state live in CSS and never force a React render.
      */
-    gsap.set(dot, { xPercent: -50, yPercent: -50 });
+    gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
+    gsap.set([dot, ring], { x: targetX, y: targetY });
+    const moveRingX = gsap.quickTo(ring, "x", {
+      duration: reduced.matches ? 0 : 0.18,
+      ease: "power3.out",
+    });
+    const moveRingY = gsap.quickTo(ring, "y", {
+      duration: reduced.matches ? 0 : 0.18,
+      ease: "power3.out",
+    });
+
+    // Switching back to the ring in the lab must put it under the current
+    // pointer immediately, not at the last place it had while hidden.
+    const syncRing = () => {
+      if (html.dataset.cursorVariant === "ring" && hasPosition) {
+        gsap.set(ring, { x: targetX, y: targetY });
+      }
+    };
+    const variantObserver = new MutationObserver(syncRing);
+    variantObserver.observe(html, {
+      attributes: true,
+      attributeFilter: ["data-cursor-variant"],
+    });
 
     const setRole = (next: CursorRole) => {
       if (next === role) return;
@@ -263,12 +288,16 @@ export default function Cursor() {
       targetX = event.clientX;
       targetY = event.clientY;
       if (!hasPosition) {
-        gsap.set(dot, { x: targetX, y: targetY });
+        gsap.set([dot, ring], { x: targetX, y: targetY });
         hasPosition = true;
       }
       show();
       if (!reduced.matches) magnetize(targetX, targetY);
       gsap.set(dot, { x: targetX, y: targetY });
+      if (html.dataset.cursorVariant === "ring") {
+        moveRingX(targetX);
+        moveRingY(targetY);
+      }
     };
 
     const onOver = (event: PointerEvent) => {
@@ -314,6 +343,7 @@ export default function Cursor() {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("scroll", scheduleRole);
       window.removeEventListener("resize", scheduleRole);
+      variantObserver.disconnect();
       unsubscribeMenu();
       releaseMagnets();
       if (supportsPopover) {
@@ -325,7 +355,7 @@ export default function Cursor() {
       }
       window.clearTimeout(downTimer);
       cancelAnimationFrame(roleFrame);
-      gsap.killTweensOf(dot);
+      gsap.killTweensOf([dot, ring]);
       delete html.dataset.cursorMenu;
       delete html.dataset.cursor;
       delete html.dataset.cursorState;
@@ -345,6 +375,56 @@ export default function Cursor() {
     >
       <div ref={dotRef} className="cursor-dot" aria-hidden="true">
         <span className="cursor-dot__disc" />
+        <span className="cursor-morph">
+          <svg
+            className="cursor-morph__arrow"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            focusable="false"
+          >
+            <path d="M5 19 19 5M9 5h10v10" />
+          </svg>
+          <svg
+            className="cursor-morph__play"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            focusable="false"
+          >
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </span>
+        <svg
+          className="cursor-arrow"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          focusable="false"
+        >
+          <path d="M5 19 19 5M9 5h10v10" />
+        </svg>
+      </div>
+      <div ref={ringRef} className="cursor-ring" aria-hidden="true">
+        <span className="cursor-ring__inner">
+          <svg
+            className="cursor-ring__arrow"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            focusable="false"
+          >
+            <path d="M5 19 19 5M9 5h10v10" />
+          </svg>
+        </span>
       </div>
     </div>
   );

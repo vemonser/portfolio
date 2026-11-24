@@ -58,6 +58,24 @@ test.describe("case study (Dennis inside)", () => {
     await expect(pill).toHaveAttribute("target", "_blank");
   });
 
+  test("reveals both visit-site actions with the page copy", async ({
+    page,
+  }) => {
+    await page.goto(`/work/${SLUG}`);
+
+    const links = page.getByRole("link", { name: /visit site/i });
+    await expect(links).toHaveCount(2);
+    await expect(links.nth(0).locator(".text-reveal")).toHaveCount(1);
+    await expect(links.nth(1).locator(".text-reveal")).toHaveCount(1);
+
+    await links.nth(1).scrollIntoViewIfNeeded();
+    await expect(links.nth(1).locator(".text-reveal")).toHaveAttribute(
+      "data-revealed",
+      "true",
+      { timeout: 15_000 },
+    );
+  });
+
   test("video is muted, looping, and plays only in viewport", async ({ page }) => {
     await page.goto(`/work/${SLUG}`);
 
@@ -190,6 +208,63 @@ test.describe("image reveal", () => {
         recording[i - 1].cover + 0.02,
       );
     }
+  });
+});
+
+test.describe("project image parallax", () => {
+  test("moves the capture inside a fixed frame while scrolling", async ({
+    page,
+  }) => {
+    await page.goto("/work");
+
+    const card = page.locator("a[data-project]").first();
+    const parallax = card.locator("[data-parallax]");
+    const motion = card.locator("[data-parallax-motion]");
+
+    await expect(parallax).toHaveCount(1);
+    await expect(motion).toHaveCount(1);
+
+    // Overscan is what lets the image drift without exposing a frame edge.
+    const scale = await parallax.evaluate((el) => {
+      const value = getComputedStyle(el).scale;
+      return value === "none" ? 1 : Number.parseFloat(value);
+    });
+    expect(scale).toBeGreaterThan(1.05);
+
+    await card.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    const before = await motion.evaluate(
+      (el) => new DOMMatrix(getComputedStyle(el).transform).m42,
+    );
+
+    await page.evaluate(() => window.scrollBy(0, 280));
+    await page.waitForTimeout(700);
+    const after = await motion.evaluate(
+      (el) => new DOMMatrix(getComputedStyle(el).transform).m42,
+    );
+
+    expect(Math.abs(after - before)).toBeGreaterThan(2);
+  });
+
+  test.describe("reduced motion", () => {
+    test.use({ reducedMotion: "reduce" });
+
+    test("keeps the capture static", async ({ page }) => {
+      await page.goto("/work");
+
+      const card = page.locator("a[data-project]").first();
+      const parallax = card.locator("[data-parallax]");
+      const motion = card.locator("[data-parallax-motion]");
+
+      await expect(parallax).toHaveCount(1);
+      await expect(motion).toHaveCount(1);
+      expect(await parallax.evaluate((el) => getComputedStyle(el).scale)).toBe(
+        "1",
+      );
+      expect(
+        await motion.evaluate((el) => getComputedStyle(el).transform),
+      ).toBe("none");
+    });
   });
 });
 

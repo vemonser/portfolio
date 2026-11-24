@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Project } from "@/content/projects/types";
 import EditorialMedia from "@/features/ui/EditorialMedia";
 import ImageReveal from "@/features/ui/ImageReveal";
+import Parallax from "@/features/ui/Parallax";
 import TextReveal from "@/features/ui/TextReveal";
 
 import { COVER_ASPECT } from "./cover";
@@ -32,13 +33,19 @@ export default function ProjectCard({ project, index, href }: Props) {
         frameClassName={COVER_ASPECT}
         className="relative block"
       >
-        <EditorialMedia
-          project={project}
-          index={index}
-          priority={index === 0}
-          hoverSrc={project.imageHover}
-          className="block transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] will-change-transform group-hover:scale-[1.03] group-focus-visible:scale-[1.03]"
-        />
+        <Parallax
+          className="absolute inset-0"
+          scale="var(--parallax-scale)"
+          travel={4}
+        >
+          <EditorialMedia
+            project={project}
+            index={index}
+            priority={index === 0}
+            hoverSrc={project.imageHover}
+            className="block transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] will-change-transform group-hover:scale-[1.03] group-focus-visible:scale-[1.03]"
+          />
+        </Parallax>
       </ImageReveal>
 
       <div className="flex flex-col gap-[var(--space-1)] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
