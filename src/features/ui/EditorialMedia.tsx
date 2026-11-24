@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 
 import type { Project } from "@/content/projects/types";
+import { projectThumbnails } from "@/content/projects/thumbnails.generated";
 
 import { formatNumber } from "./editorial";
 
@@ -47,19 +48,24 @@ export default function EditorialMedia({
   priority = false,
   hoverSrc,
 }: Props) {
-  if (project.image) {
+  const thumbnail = projectThumbnails[project.slug];
+  const src = thumbnail?.src ?? project.image;
+
+  if (src) {
     return (
       <span
         aria-hidden="true"
         className={`editorial-media editorial-media--image ${className ?? ""}`}
       >
         <Image
-          src={project.image}
+          src={src}
           alt=""
           fill
           loading={priority ? "eager" : "lazy"}
-          sizes="(min-width: 1024px) 60vw, 100vw"
+          sizes="(min-width: 768px) 50vw, 100vw"
           quality={90}
+          placeholder={thumbnail ? "blur" : "empty"}
+          blurDataURL={thumbnail?.blurDataURL}
           className="object-cover object-top opacity-100 transition-opacity duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:opacity-0 group-focus-visible:opacity-0"
         />
         {hoverSrc ? (
@@ -69,7 +75,7 @@ export default function EditorialMedia({
             fill
             loading="lazy"
             fetchPriority="low"
-            sizes="(min-width: 1024px) 40vw, 90vw"
+            sizes="(min-width: 768px) 50vw, 100vw"
             quality={90}
             className="absolute inset-0 object-cover object-top opacity-0 will-change-opacity transition-opacity duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:opacity-100 group-focus-visible:opacity-100"
           />

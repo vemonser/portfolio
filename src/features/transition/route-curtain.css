@@ -1,0 +1,62 @@
+.route-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: none;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  color: var(--color-white);
+  /* Popover resets: the UA stylesheet gives [popover] a border/padding/margin
+     and a canvas background, none of which belong on a full-screen curtain. */
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+.route-curtain[data-active="true"] {
+  display: block;
+}
+
+.route-curtain__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.route-curtain__path {
+  vector-effect: non-scaling-stroke;
+}
+
+.route-curtain__label-box {
+  position: absolute;
+  left: clamp(1.25rem, 4vw, 4rem);
+  bottom: clamp(1.25rem, 4vw, 4rem);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.route-curtain__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  will-change: transform;
+  transform: translateY(110%);
+  /* The label is parked during the cover, rises onto the covered screen, then
+     leaves upward before the surface retracts. JS writes the transform. */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-curtain {
+    display: none !important;
+  }
+}

@@ -1,14 +1,16 @@
 import { copy } from "@/content/copy";
 import ContactForm from "@/features/contact/ContactForm";
 import ChapterLabel from "@/features/ui/ChapterLabel";
-import LinkLine from "@/features/ui/LinkLine";
+import CopyLink from "@/features/ui/CopyLink";
 import PageFrame from "@/features/ui/PageFrame";
-import Reveal from "@/features/ui/Reveal";
+import DirectionalTransition from "@/features/transition/DirectionalTransition";
+import TextReveal from "@/features/ui/TextReveal";
 import {
   bodyMeasure,
   chapterFrame,
   displayStatement,
 } from "@/features/ui/styles";
+import PageTitle from "@/features/motion/PageTitle";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -21,61 +23,74 @@ export default function ContactPage() {
   const { contact } = copy;
 
   return (
+    <DirectionalTransition>
     <PageFrame
-      className={`${chapterFrame} pb-[calc(var(--inset-chapter)+4rem)] pt-[clamp(8rem,22vh,14rem)]`}
+      className={`${chapterFrame} section-pad`}
     >
-      <Reveal className="chapter-open">
+      <div className="chapter-open">
         <ChapterLabel index={4}>{contact.label}</ChapterLabel>
 
-        <h1 className={`${displayStatement} mt-[var(--space-3)]`}>
-          {contact.title}
-        </h1>
+        <PageTitle>
+          <TextReveal as="h1" className={`${displayStatement} mt-[var(--space-3)]`}>
+            {contact.title}
+          </TextReveal>
+        </PageTitle>
 
-        <p
+        <TextReveal
+          as="p"
           className={`${bodyMeasure} mt-[var(--space-3)] text-lede`}
         >
           {contact.lede}
-        </p>
-      </Reveal>
+        </TextReveal>
+      </div>
 
-      <div className="mt-[var(--space-8)] grid items-start gap-[var(--space-7)] lg:grid-cols-12 lg:gap-x-[var(--space-5)]">
-        <Reveal className="lg:col-span-4">
-          <p className="ui-label m-0">{contact.detailsLabel}</p>
+      <div className="grid-12 mt-[var(--space-6)] items-start">
+        <div className="lg:col-span-4">
+          <TextReveal as="p" className="ui-label m-0" split="words">
+            {contact.detailsLabel}
+          </TextReveal>
 
           <dl className="m-0 mt-[var(--space-4)] flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-col gap-[0.4rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
-              <dt className="ui-label">{contact.emailLabel}</dt>
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">{contact.emailLabel}</TextReveal>
+              </dt>
               <dd className="m-0 break-words text-lede [overflow-wrap:anywhere]">
-                <LinkLine
+                <CopyLink
                   href={`mailto:${contact.email}`}
                   className="inline-flex min-h-11 scroll-mt-[8rem] items-center"
+                  reveal
                 >
                   {contact.email}
-                </LinkLine>
+                </CopyLink>
               </dd>
             </div>
 
             <div className="flex flex-col gap-[0.4rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
-              <dt className="ui-label">{contact.phoneLabel}</dt>
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">{contact.phoneLabel}</TextReveal>
+              </dt>
               <dd
                 className="m-0 text-lede"
                 dir="ltr"
               >
-                <LinkLine
+                <CopyLink
                   href={contact.phoneHref}
                   className="inline-flex min-h-11 scroll-mt-[8rem] items-center"
+                  reveal
                 >
                   {contact.phone}
-                </LinkLine>
+                </CopyLink>
               </dd>
             </div>
           </dl>
-        </Reveal>
+        </div>
 
-        <Reveal delay={100} className="lg:col-span-7 lg:col-start-6">
+        <div className="lg:col-span-7 lg:col-start-6">
           <ContactForm to={contact.email} labels={contact.form} />
-        </Reveal>
+        </div>
       </div>
     </PageFrame>
+    </DirectionalTransition>
   );
 }

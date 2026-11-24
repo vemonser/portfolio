@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 
+import { ArrowUpRight } from "@/features/ui/Arrow";
 import Field from "@/features/ui/Field";
 import StatusMessage from "@/features/ui/StatusMessage";
 import { roundButton } from "@/features/ui/styles";
@@ -187,7 +188,7 @@ export default function ContactForm({
       data-contact-form
       data-contact-endpoint={endpoint}
       aria-busy={submitting || undefined}
-      className="grid max-w-[40rem] gap-[var(--space-3)]"
+      className="grid w-full gap-[var(--space-3)]"
       onSubmit={onSubmit}
       noValidate
     >
@@ -263,10 +264,12 @@ export default function ContactForm({
       <div className="mt-[var(--space-1)] flex flex-wrap items-center gap-[var(--space-4)]">
         <button
           type="submit"
+          data-magnetic
           disabled={submitting}
           className={`${roundButton} cursor-pointer border-0 disabled:cursor-wait disabled:opacity-70`}
         >
-          {submitting ? labels.sending : labels.send}
+          <span>{submitting ? labels.sending : labels.send}</span>
+          <ArrowUpRight className="transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:translate-x-1 group-hover:-translate-y-1" />
         </button>
 
         <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm">

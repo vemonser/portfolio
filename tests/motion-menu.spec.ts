@@ -44,12 +44,33 @@ test.describe("Lottie menu mark", () => {
     );
     await expect(close.locator("svg")).toBeVisible();
 
+    // The closing phase lasts about as long as the exit transition (~850ms).
+    // On a loaded machine the dialog can be closed again before the next
+    // assertion polls, so record every mark state instead of racing it.
+    await page.evaluate(() => {
+      const mark = document.querySelector(
+        "dialog#site-menu .nav-close [data-motion]",
+      );
+      const log: string[] = [];
+      (window as unknown as { __markLog?: string[] }).__markLog = log;
+      if (!mark) return;
+      log.push(mark.getAttribute("data-motion") ?? "");
+      new MutationObserver(() => {
+        log.push(mark.getAttribute("data-motion") ?? "");
+      }).observe(mark, { attributes: true, attributeFilter: ["data-motion"] });
+    });
+
     await page.keyboard.press("Escape");
-    await expect(dialog).toHaveAttribute("data-state", "closing");
-    await expect(close.locator("[data-motion]")).toHaveAttribute(
-      "data-motion",
-      "close",
-    );
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (window as unknown as { __markLog?: string[] }).__markLog?.includes(
+              "close",
+            ) ?? false,
+        ),
+      )
+      .toBe(true);
 
     await expect(dialog).toHaveAttribute("data-state", "closed", {
       timeout: 5_000,

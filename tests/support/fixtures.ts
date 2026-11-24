@@ -1,25 +1,22 @@
-import { test as base } from "@playwright/test";
-
-import { INTRO_KEY } from "../../src/features/intro/intro-session";
+import { test as base, expect } from "@playwright/test";
 
 /**
- * The intro is a once-per-session decoration. Existing specs should not pay
- * for it or screenshot it, so they start with the key already set. The intro's
- * own spec imports the untouched `@playwright/test` test instead.
+ * Most behavioural tests are not about the first-load plate. The loader plays
+ * on every document now, so this fixture opts out of it with the gate's test
+ * key; the loader has its own spec and deliberately uses the raw Playwright
+ * test so it exercises the real path.
  */
 export const test = base.extend({
   page: async ({ page }, run) => {
-    await page.addInitScript((key) => {
+    await page.addInitScript(() => {
       try {
-        window.sessionStorage.setItem(key, "1");
+        sessionStorage.setItem("pf-loader-off", "1");
       } catch {
-        // The navigation under test does not depend on the intro gate.
+        // Private mode: the gate would skip anyway.
       }
-    }, INTRO_KEY);
-
+    });
     await run(page);
   },
 });
 
-export { expect } from "@playwright/test";
-export type { Locator, Page } from "@playwright/test";
+export { expect };

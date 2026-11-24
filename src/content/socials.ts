@@ -19,9 +19,9 @@ export type Social = {
 };
 
 export const socials: Social[] = [
-  { key: "github", label: "GitHub", href: "" },
+  { key: "github", label: "GitHub", href: "https://github.com/vemonser/" },
   { key: "x", label: "X", href: "" },
-  { key: "linkedin", label: "LinkedIn", href: "" },
+  { key: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/abdelrhman-samy-366260201/" },
   { key: "instagram", label: "Instagram", href: "" },
   { key: "whatsapp", label: "WhatsApp", href: "" },
 ];

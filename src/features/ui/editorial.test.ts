@@ -11,8 +11,8 @@ describe("editorialType", () => {
   it("locks the composition values", () => {
     expect(editorialType()).toEqual({
       ratio: 1.25,
-      displayMax: "8.5rem",
-      bodyMeasure: "68ch",
+      displayMax: "7.5rem",
+      bodyMeasure: "60ch",
     });
   });
 });
@@ -37,12 +37,12 @@ describe("formatNumber", () => {
 describe("editorialSpace", () => {
   it("returns only values from the approved scale", () => {
     expect(editorialSpace(0)).toBe("0.5rem");
-    expect(editorialSpace(2)).toBe("1rem");
-    expect(editorialSpace(8)).toBe("10rem");
+    expect(editorialSpace(1)).toBe("1rem");
+    expect(editorialSpace(5)).toBe("10rem");
   });
 
   it("throws on a step outside the scale", () => {
-    expect(() => editorialSpace(9)).toThrow();
+    expect(() => editorialSpace(6)).toThrow();
     expect(() => editorialSpace(-1)).toThrow();
     expect(() => editorialSpace(1.5)).toThrow();
   });

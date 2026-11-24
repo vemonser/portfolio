@@ -3,7 +3,7 @@
  * open the same way, so the classes live in one place instead of drifting.
  */
 export const roundButton =
-  "inline-grid aspect-square w-[clamp(9rem,13vw,11.5rem)] place-items-center content-center gap-[0.45rem] rounded-full bg-lime p-5 text-center font-label text-t-14 uppercase leading-[1.3] tracking-[var(--track)] text-ink no-underline transition-[transform,background-color] duration-[450ms] ease-[cubic-bezier(0.7,0,0.2,1)] hover:scale-[1.045] hover:bg-lime/85 active:scale-[0.97]";
+  "group inline-grid aspect-square w-40 place-items-center content-center gap-2 rounded-full bg-lime p-6 text-center font-label text-label uppercase tracking-[var(--track)] text-ink no-underline transition-[transform,background-color] duration-[var(--dur-slow)] ease-[var(--ease-editorial)] hover:scale-[1.03] hover:bg-lime/85 active:scale-[0.98]";
 
 /*
  * Editorial chapter vocabulary. These strings describe structure only.
@@ -24,6 +24,6 @@ export const displayArticle = `${displayBase} text-statement`;
 export const displayCta = `${displayBase} text-display-2`;
 export const displaySection = `${displayBase} text-display-3 uppercase`;
 
-export const chapterFrame = "px-[var(--inset-edge)]";
+export const chapterFrame = "page-shell";
 
 export const bodyMeasure = "max-w-[var(--measure-body)] text-fg-muted";

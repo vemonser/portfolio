@@ -11,7 +11,17 @@ export type ProjectSection = {
 export type ProjectMediaBlock =
   | { kind: "browser"; src: string; alt: string; caption?: string }
   | { kind: "phones"; srcs: string[]; alts: string[]; caption?: string }
-  | { kind: "video"; src: string; poster: string; caption?: string };
+  | {
+      kind: "video";
+      src: string;
+      poster: string;
+      /** Intrinsic size, when the recording is not the 16:10 capture ratio. */
+      width?: number;
+      height?: number;
+      /** Pin the block and scale it up while the page scrolls. Desktop only. */
+      pinned?: boolean;
+      caption?: string;
+    };
 
 export type Project = {
   slug: string;

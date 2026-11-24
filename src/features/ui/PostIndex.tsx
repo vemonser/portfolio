@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { BlogPost } from "@/content/blog/posts";
 import { formatPostDate } from "@/features/blog/format";
 
+import TextReveal from "./TextReveal";
 import { formatNumber } from "./editorial";
-import Reveal from "./Reveal";
 
 type Props = {
   posts: BlogPost[];
@@ -22,16 +22,19 @@ type Props = {
 export default function PostIndex({ posts, empty }: Props) {
   if (posts.length === 0) {
     return (
-      <p className="m-0 max-w-[46ch] text-lede leading-[1.7] text-fg-muted">
+      <TextReveal
+        as="p"
+        className="m-0 max-w-[46ch] text-lede leading-[1.7] text-fg-muted"
+      >
         {empty}
-      </p>
+      </TextReveal>
     );
   }
 
   return (
     <ol className="m-0 list-none border-t border-[var(--line-hairline)] p-0">
       {posts.map((post, index) => (
-        <Reveal as="li" key={post.slug} delay={index * 60}>
+        <li key={post.slug}>
           <div className="group relative grid gap-[var(--space-2)] border-b border-[var(--line-hairline)] py-[var(--space-4)] md:grid-cols-[7rem_minmax(0,1fr)] md:gap-x-[var(--space-5)]">
             <div className="flex items-baseline gap-[var(--space-2)] font-label text-t-14 uppercase tracking-[var(--track)] text-warm md:flex-col md:items-start">
               <span className="text-warm">
@@ -47,17 +50,23 @@ export default function PostIndex({ posts, empty }: Props) {
                 <Link
                   href={`/blog/${post.slug}`}
                   className="font-display text-display-3 font-semibold text-bone no-underline transition-colors duration-[var(--dur-base)] after:absolute after:inset-0 after:content-[''] group-hover:text-lime group-focus-within:text-lime"
+                  transitionTypes={["nav-forward"]}
                 >
-                  {post.title}
+                  <TextReveal as="span" split="words">
+                    {post.title}
+                  </TextReveal>
                 </Link>
               </h2>
 
-              <p className="m-0 max-w-[54ch] text-body leading-[1.7] text-fg-muted">
+              <TextReveal
+                as="p"
+                className="m-0 max-w-[54ch] text-body leading-[1.7] text-fg-muted"
+              >
                 {post.excerpt}
-              </p>
+              </TextReveal>
             </div>
           </div>
-        </Reveal>
+        </li>
       ))}
     </ol>
   );

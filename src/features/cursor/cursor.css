@@ -3,8 +3,10 @@
  * cursor is hidden only after `html[data-cursor="on"]` is set by JS, so a
  * no-JS visitor keeps the OS pointer.
  *
- * Everything is one fixed layer of two nodes, moved with transform. State is
- * carried on <html> so any component can opt into a cursor role with
+ * One dot, moved with transform. It inverts the pixels behind it, so the same
+ * node is legible on the black page, a light capture and the lime accent
+ * without ever painting a disc over the content. State is carried on <html> so
+ * any component can opt into a cursor role with
  * `data-cursor="view|play|text|disabled"`.
  */
 
@@ -49,112 +51,86 @@
   display: block;
 }
 
-.cursor-dot,
-.cursor-ring {
+.cursor-dot {
+  --cursor-scale: 1;
+  --cursor-press: 1;
+
   position: fixed;
   top: 0;
   left: 0;
   z-index: 9999;
+  width: 0;
+  height: 0;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms linear;
   will-change: transform;
-  opacity: 0;
-  transition:
-    opacity 160ms linear,
-    width 220ms var(--ease-editorial),
-    height 220ms var(--ease-editorial),
-    border-color 220ms var(--ease-editorial),
-    background-color 220ms var(--ease-editorial);
 }
 
-.cursor-dot {
-  width: 6px;
-  height: 6px;
+/* The disc carries the size and the inversion; the outer node is the one GSAP
+   moves, so the two transforms never fight over the same element. */
+.cursor-dot__disc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
   border-radius: 999px;
-  background: var(--color-lime);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.7),
-    0 0 10px rgba(198, 240, 53, 0.45);
+  background: transparent;
+  scale: calc(var(--cursor-scale) * var(--cursor-press));
+  -webkit-backdrop-filter: invert(1);
+  backdrop-filter: invert(1);
+  transition: scale 180ms var(--ease-editorial);
 }
 
-.cursor-ring {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--color-bone);
-  border-radius: 999px;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.55),
-    0 2px 10px rgba(0, 0, 0, 0.35);
+/* Older engines without backdrop-filter still get a visible dot. */
+@supports not ((backdrop-filter: invert(1)) or (-webkit-backdrop-filter: invert(1))) {
+  .cursor-dot__disc {
+    background: var(--color-bone);
+    mix-blend-mode: difference;
+  }
 }
 
-.cursor-label {
-  font-family: var(--font-label);
-  font-size: 0.6rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-  opacity: 0;
-  transition: opacity 120ms linear;
-}
-
-html[data-cursor-visible="true"] .cursor-dot,
-html[data-cursor-visible="true"] .cursor-ring {
+html[data-cursor-visible="true"] .cursor-dot {
   opacity: 1;
 }
 
 /* link / button */
-html[data-cursor-state="link"] .cursor-ring {
-  width: 46px;
-  height: 46px;
-  border-color: var(--color-lime);
+html[data-cursor-state="link"] .cursor-dot {
+  --cursor-scale: 1.75;
 }
 
-/* project card / video: a filled disc with a word */
-html[data-cursor-state="view"] .cursor-ring,
-html[data-cursor-state="play"] .cursor-ring {
-  width: 64px;
-  height: 64px;
-  border-color: var(--color-lime);
-  background: var(--color-lime);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.35),
-    0 8px 24px rgba(0, 0, 0, 0.35);
+/* mailto / external */
+html[data-cursor-state="hello"] .cursor-dot,
+html[data-cursor-state="visit"] .cursor-dot {
+  --cursor-scale: 1.9;
 }
 
-html[data-cursor-state="view"] .cursor-label,
-html[data-cursor-state="play"] .cursor-label {
-  opacity: 1;
-}
-
+/* project card / video */
 html[data-cursor-state="view"] .cursor-dot,
-html[data-cursor-state="play"] .cursor-dot,
-html[data-cursor-state="text"] .cursor-dot,
-html[data-cursor-state="text"] .cursor-ring {
-  opacity: 0;
+html[data-cursor-state="play"] .cursor-dot {
+  --cursor-scale: 2.6;
 }
 
 /* disabled control */
-html[data-cursor-state="disabled"] .cursor-ring {
-  width: 24px;
-  height: 24px;
-  border-color: var(--color-warm);
+html[data-cursor-state="disabled"] .cursor-dot {
+  --cursor-scale: 1.25;
+  opacity: 0.4;
 }
 
-html[data-cursor-state="disabled"] .cursor-dot {
-  opacity: 0.4;
+/* text entry: the OS I-beam takes over */
+html[data-cursor-state="text"] .cursor-dot {
+  opacity: 0;
 }
 
 /* press */
 html[data-cursor-down="true"] .cursor-dot {
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.7),
-    0 0 0 7px rgba(198, 240, 53, 0.25);
+  --cursor-press: 0.75;
 }
 
-/* the escape hatch: native cursor, custom nodes gone */
-html[data-cursor="off"] .cursor-dot,
-html[data-cursor="off"] .cursor-ring {
+/* the escape hatch: native cursor, custom dot gone */
+html[data-cursor="off"] .cursor-dot {
   opacity: 0 !important;
 }
 
@@ -163,8 +139,7 @@ html[data-cursor="off"] .cursor-ring {
  * <dialog> (which lives in the top layer). While the menu is open those get the
  * native pointer instead of an invisible custom one.
  */
-html[data-cursor-menu="native"] .cursor-dot,
-html[data-cursor-menu="native"] .cursor-ring {
+html[data-cursor-menu="native"] .cursor-dot {
   opacity: 0 !important;
 }
 
@@ -175,7 +150,7 @@ html[data-cursor="on"][data-cursor-menu="native"] * {
 
 @media (prefers-reduced-motion: reduce) {
   .cursor-dot,
-  .cursor-ring {
+  .cursor-dot__disc {
     transition: none;
   }
 }

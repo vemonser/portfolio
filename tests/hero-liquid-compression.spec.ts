@@ -1,128 +1,140 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "./support/fixtures";
 
 const HERO = "#hero";
-const WORDMARK = "[data-hero-wordmark]";
-const CARD = '[data-compression-target="project"]';
-const ACTIVE = `${HERO}[data-compression-active="true"]`;
+const CANVAS = `${HERO} canvas.hero-scene`;
 
-const WIDTHS = [360, 390, 768, 1024, 1280, 1440, 1920];
-
-/** The scene is lazy: give it the first frame before asserting on its state. */
-async function openHero(page: import("@playwright/test").Page, path: string) {
-  await page.goto(path);
-  await page.locator(HERO).waitFor();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const stage = document.querySelector("[data-scene-state]");
-        return stage?.getAttribute("data-scene-state") ?? "missing";
-      }),
-    )
-    .not.toBe("idle");
+async function ready(page: Page) {
+  await page.goto("/");
+  await expect(page.locator(CANVAS)).toBeVisible();
+  await page.waitForTimeout(1200);
 }
 
-test.describe("liquid compression", () => {
-  test("keeps the canvas inside the hero", async ({ page }) => {
-    await openHero(page, "/");
+test.describe("home hero", () => {
+  test("renders one canvas with the three-line headline", async ({ page }) => {
+    await ready(page);
 
-    await expect(page.locator(`${HERO} canvas`)).toHaveCount(1);
-    const insideHero = await page
-      .locator("canvas")
-      .evaluate((node) => node.closest("#hero") !== null);
-    expect(insideHero).toBe(true);
-  });
+    await expect(page.locator(CANVAS)).toHaveCount(1);
+    await expect(page.locator(`${HERO} h1`)).toBeVisible();
 
-  test("compresses on title hover and releases on leave", async ({ page }) => {
-    await openHero(page, "/");
+    const lines = page.locator(".hero-home__line");
+    await expect(lines).toHaveCount(3);
 
-    await page.locator(WORDMARK).hover();
-    await expect(page.locator(ACTIVE)).toHaveCount(1);
-    await expect(page.locator(HERO)).toHaveAttribute(
-      "data-compression-kind",
-      "title",
+    const boxes = await lines.evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          x: rect.x,
+          top: rect.top,
+          bottom: rect.bottom,
+          height: rect.height,
+        };
+      }),
     );
 
-    await page.mouse.move(4, 4);
-    await expect(page.locator(ACTIVE)).toHaveCount(0);
+    // One left edge for all three lines.
+    for (const box of boxes) {
+      expect(Math.abs(box.x - boxes[0].x)).toBeLessThanOrEqual(1);
+    }
+
+    // No line touches the next: the block's own leading keeps a gap.
+    expect(boxes[1].top).toBeGreaterThanOrEqual(boxes[0].bottom);
+    expect(boxes[2].top).toBeGreaterThanOrEqual(boxes[1].bottom);
   });
 
-  test("compresses around a visible project target", async ({ page }) => {
-    await openHero(page, "/");
+  test("keeps the note in its own right-hand column", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await ready(page);
 
-    const card = page.locator(CARD).first();
-    await card.scrollIntoViewIfNeeded();
-    await card.hover();
+    const headline = await page.locator(`${HERO} h1`).boundingBox();
+    const note = await page.locator(".hero-home__note").boundingBox();
+    expect(headline).not.toBeNull();
+    expect(note).not.toBeNull();
 
-    await expect(page.locator(ACTIVE)).toHaveCount(1);
-    await expect(page.locator(HERO)).toHaveAttribute(
-      "data-compression-kind",
-      "project",
+    expect(note!.x).toBeGreaterThanOrEqual(headline!.x + headline!.width);
+    expect(note!.y).toBeGreaterThanOrEqual(headline!.y);
+    expect(note!.y + note!.height).toBeLessThanOrEqual(900);
+  });
+
+  test("anchors the meta row to the bottom of the first screen", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await ready(page);
+
+    const meta = await page.locator(".hero-home__meta").boundingBox();
+    expect(meta).not.toBeNull();
+    expect(meta!.y + meta!.height).toBeGreaterThan(844);
+    expect(meta!.y + meta!.height).toBeLessThanOrEqual(900);
+
+    await expect(page.locator(".hero-home__meta")).toContainText("Cairo");
+    await expect(page.locator(".hero-home__meta")).toContainText(
+      "Available for work",
     );
-  });
-});
-
-test.describe("fallbacks", () => {
-  test.use({ reducedMotion: "reduce" });
-
-  test("reduced motion never activates pointer compression", async ({ page }) => {
-    await openHero(page, "/");
-
-    await page.locator(WORDMARK).hover();
-    await page.waitForTimeout(250);
-
-    await expect(page.locator(ACTIVE)).toHaveCount(0);
-    await expect(page.locator(`${HERO} canvas`)).toHaveCount(1);
-  });
-});
-
-test.describe("coarse pointer", () => {
-  test.use({
-    isMobile: true,
-    hasTouch: true,
-    viewport: { width: 390, height: 844 },
+    await expect(page.locator(".hero-home__scroll")).toContainText("Scroll");
   });
 
-  test("does not activate pointer compression", async ({ page }) => {
-    await openHero(page, "/");
+  test("caps the render scale and pauses off screen", async ({ page }) => {
+    await ready(page);
 
-    await page.locator(WORDMARK).hover({ force: true });
-    await page.waitForTimeout(250);
+    const scale = await page.evaluate(() => {
+      const canvas = document.querySelector<HTMLCanvasElement>(
+        "#hero canvas.hero-scene",
+      );
+      if (!canvas) return 0;
+      return canvas.width / canvas.clientWidth;
+    });
+    expect(scale).toBeLessThanOrEqual(2);
 
-    await expect
-      .poll(() =>
-        page.evaluate(
-          () =>
-            window.matchMedia("(hover: hover) and (pointer: fine)").matches,
-        ),
-      )
-      .toBe(false);
-    await expect(page.locator(ACTIVE)).toHaveCount(0);
+    await expect(page.locator(CANVAS)).toHaveAttribute("data-running", "1");
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.locator(CANVAS)).toHaveAttribute("data-running", "0");
   });
 
-  test("opening the menu pauses the scene", async ({ page }) => {
-    await openHero(page, "/");
+  test.describe("reduced motion", () => {
+    test.use({ reducedMotion: "reduce" });
 
-    await page.locator(".menu-trigger").click();
-    await expect(page.locator("[data-scene-state]")).toHaveAttribute(
-      "data-scene-state",
-      "paused",
-    );
+    test("freezes the scene and hides the trail", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator(CANVAS)).toHaveAttribute(
+        "data-motion",
+        "frozen",
+      );
+      await expect(page.locator(CANVAS)).toHaveAttribute("data-running", "0");
+    });
+  });
+
+  test.describe("touch pointer", () => {
+    test.use({
+      isMobile: true,
+      hasTouch: true,
+      viewport: { width: 390, height: 844 },
+    });
+
+    test("uses idle noise only, with no custom cursor", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator(CANVAS)).toHaveAttribute(
+        "data-motion",
+        "live",
+      );
+      await expect(page.locator(".cursor-layer")).toHaveCount(0);
+    });
   });
 });
 
 test.describe("responsive integrity", () => {
-  test("no horizontal overflow at any required width", async ({ page }) => {
-    for (const width of WIDTHS) {
+  for (const width of [320, 360, 390, 768, 1024, 1280, 1440, 1920]) {
+    test(`no horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
-      await openHero(page, "/");
+      await page.goto("/");
+      await expect(page.locator(CANVAS)).toBeVisible();
 
       const overflow = await page.evaluate(
         () =>
           document.documentElement.scrollWidth -
           document.documentElement.clientWidth,
       );
-
       expect(overflow, `overflow at ${width}px`).toBeLessThanOrEqual(1);
-    }
-  });
+    });
+  }
 });

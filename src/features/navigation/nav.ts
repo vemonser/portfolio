@@ -1,3 +1,5 @@
+import { SHOW_BLOG } from "@/content/features";
+
 export type NavKey = "home" | "work" | "blog" | "about" | "contact";
 
 export type NavLink = {
@@ -17,10 +19,16 @@ const ROUTES: ReadonlyArray<{ key: NavKey; path: string }> = [
 ];
 
 export function buildNavLinks(labels: Record<NavKey, string>): NavLink[] {
-  return ROUTES.map(({ key, path }) => ({ key, href: path, label: labels[key] }));
+  return ROUTES.filter(({ key }) => key !== "blog" || SHOW_BLOG).map(
+    ({ key, path }) => ({ key, href: path, label: labels[key] }),
+  );
 }
 
 /** The destinations the header shows inline; home is the brand instead. */
 export function buildHeaderLinks(links: NavLink[]): NavLink[] {
-  return links.filter((link) => link.key !== "home");
+  // Contact is the header CTA, not a text link: two doors to the same page
+  // would make the active state ambiguous.
+  return links.filter(
+    (link) => link.key !== "home" && link.key !== "contact",
+  );
 }

@@ -6,9 +6,11 @@ import ChapterLabel from "@/features/ui/ChapterLabel";
 import LinkLine from "@/features/ui/LinkLine";
 import NextProject from "@/features/ui/NextProject";
 import PageFrame from "@/features/ui/PageFrame";
-import Reveal from "@/features/ui/Reveal";
+import DirectionalTransition from "@/features/transition/DirectionalTransition";
+import TextReveal from "@/features/ui/TextReveal";
 import { formatNumber } from "@/features/ui/editorial";
 import { chapterFrame, displayTitle } from "@/features/ui/styles";
+import PageTitle from "@/features/motion/PageTitle";
 import { pageMetadata } from "@/lib/seo";
 import MediaBlock from "@/features/work/MediaBlock";
 
@@ -45,109 +47,126 @@ export default async function ProjectPage({ params }: Props) {
     : project.year;
 
   return (
+    <DirectionalTransition>
     <PageFrame
-      className={`${chapterFrame} pb-[var(--inset-chapter)] pt-[clamp(8rem,20vh,13rem)]`}
+      className={`${chapterFrame} section-pad`}
     >
       <article>
-        <header className="chapter-open">
+        <header>
+          <div className="chapter-open">
           <ChapterLabel index={1}>{copy.project.caseStudy}</ChapterLabel>
 
-          <h1 className={`${displayTitle} mt-[var(--space-2)]`}>
-            {project.title}
-          </h1>
+          <PageTitle>
+            <TextReveal as="h1" className={`${displayTitle} mt-[var(--space-2)]`}>
+              {project.title}
+            </TextReveal>
+          </PageTitle>
 
-          <p className="m-0 mt-[var(--space-3)] max-w-[44ch] text-lede leading-[1.6] text-warm">
+          <TextReveal as="p" className="m-0 mt-[var(--space-3)] max-w-[44ch] text-lede leading-[1.6] text-warm">
             {project.tagline}
-          </p>
+          </TextReveal>
 
-          <dl
-            className={`m-0 mt-[var(--space-5)] grid gap-[var(--space-3)] border-y border-[var(--line-hairline)] py-[var(--space-3)] ${
-              project.stack.length > 0 ? "sm:grid-cols-3" : "sm:grid-cols-2"
-            }`}
-          >
-            <div className="flex flex-col gap-[0.35rem]">
-              <dt className="ui-label">{copy.project.role}</dt>
-              <dd className="m-0 text-t-16">{project.role}</dd>
+          </div>
+
+          <dl className="mt-[var(--space-5)] grid grid-cols-2 gap-x-[var(--space-3)] gap-y-[var(--space-4)] border-y border-[var(--line-hairline)] py-[var(--space-3)] md:grid-cols-4">
+            <div className="flex flex-col gap-[var(--space-1)]">
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">{copy.project.role}</TextReveal>
+              </dt>
+              <dd className="m-0">
+                <TextReveal as="span" split="words">{project.role}</TextReveal>
+              </dd>
             </div>
-            <div className="flex flex-col gap-[0.35rem]">
-              <dt className="ui-label">{copy.project.year}</dt>
-              <dd className="m-0 text-t-16">{yearLabel}</dd>
+            <div className="flex flex-col gap-[var(--space-1)]">
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">{copy.project.year}</TextReveal>
+              </dt>
+              <dd className="m-0">
+                <TextReveal as="span" split="words">{yearLabel}</TextReveal>
+              </dd>
             </div>
-            {project.stack.length > 0 ? (
-              <div className="flex flex-col gap-[0.35rem]">
-                <dt className="ui-label">{copy.project.stack}</dt>
-                <dd className="m-0 text-start text-t-16" dir="ltr">
-                  {project.stack.join(" · ")}
-                </dd>
-              </div>
-            ) : null}
+            <div className="flex flex-col gap-[var(--space-1)]">
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">{copy.project.stack}</TextReveal>
+              </dt>
+              <dd className="m-0" dir="ltr">
+                <TextReveal as="span" split="words">
+                  {project.stack.length > 0 ? project.stack.join(" · ") : "—"}
+                </TextReveal>
+              </dd>
+            </div>
+            <div className="flex flex-col gap-[var(--space-1)]">
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">Link</TextReveal>
+              </dt>
+              <dd className="m-0 min-h-11">
+                {project.url ? (
+                  <LinkLine
+                    href={project.url}
+                    external
+                    className="inline-flex min-h-11 items-center gap-[var(--space-1)]"
+                  >
+                    {copy.project.visit}
+                    <span aria-hidden="true">↗</span>
+                  </LinkLine>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
           </dl>
 
-          {project.url ? (
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-[var(--space-4)] inline-flex min-h-11 items-center gap-[var(--space-1)] rounded-full border border-[var(--line-strong)] px-[var(--space-4)] font-label text-t-14 uppercase tracking-[var(--track)] text-bone no-underline transition-colors duration-[var(--dur-base)] hover:border-lime hover:bg-lime hover:text-ink"
-            >
-              {copy.project.visit}
-              <span aria-hidden="true">↗</span>
-            </a>
-          ) : null}
         </header>
 
         {project.media[0] ? (
-          <Reveal delay={80}>
-            <div className="-mx-[var(--inset-edge)] mt-[var(--space-6)]">
-              <MediaBlock
-                block={project.media[0]}
-                title={project.title}
-                url={project.url}
-                priority
-                bleed
-              />
-            </div>
-          </Reveal>
+          <div className="mt-[var(--space-6)]">
+            <MediaBlock
+              block={project.media[0]}
+              title={project.title}
+              url={project.url}
+              priority
+              bleed
+            />
+          </div>
         ) : null}
 
         <div className="mt-[var(--space-8)] grid gap-[var(--space-6)]">
           {project.sections.map((section, index) => (
-            <Reveal
-              as="section"
+            <section
               key={section.heading}
-              className="max-w-[58ch]"
+              className="max-w-[var(--measure-body)]"
             >
               <span className="font-label text-t-14 tracking-[var(--track)] text-warm">
                 {formatNumber(index + 1, { pad: 2 })}
               </span>
 
-              <h2 className="mb-[0.9rem] mt-[var(--space-2)] font-display text-display-3 font-semibold">
+              <TextReveal as="h2" className="mb-[0.9rem] mt-[var(--space-2)] font-display text-display-3 font-semibold">
                 {section.heading}
-              </h2>
+              </TextReveal>
 
-              <p className="m-0 text-body leading-[1.8] text-fg-muted">
+              <TextReveal as="p" className="m-0 text-body leading-[1.8] text-fg-muted">
                 {section.body}
-              </p>
-            </Reveal>
+              </TextReveal>
+            </section>
           ))}
         </div>
 
         {project.media.length > 1 ? (
-          <div className="mt-[var(--space-7)] grid grid-cols-[minmax(0,1fr)] gap-[var(--space-7)]">
+          <div className="mt-[var(--space-6)] grid grid-cols-[minmax(0,1fr)] gap-[var(--space-6)]">
             {project.media.slice(1).map((block, i) => (
-              <Reveal key={`${block.kind}-${i}`} delay={60}>
+              <div key={`${block.kind}-${i}`}>
                 <MediaBlock
                   block={block}
                   title={project.title}
                   url={project.url}
                 />
-              </Reveal>
+              </div>
             ))}
           </div>
         ) : null}
 
         {/*
-          The header pill scrolls away on a long case study, so the live site is
+          The meta row scrolls away on a long case study, so the live site is
           repeated once at the end as a real action — not the 14px orphan the
           audit found.
         */}
@@ -171,5 +190,6 @@ export default async function ProjectPage({ params }: Props) {
         <NextProject project={next} label={copy.project.next} />
       </div>
     </PageFrame>
+    </DirectionalTransition>
   );
 }

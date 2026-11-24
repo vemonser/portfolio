@@ -1,6 +1,8 @@
 import Image from "next/image";
 
 import type { ProjectMediaBlock } from "@/content/projects/types";
+import ImageReveal from "@/features/ui/ImageReveal";
+import TextReveal from "@/features/ui/TextReveal";
 import Parallax from "@/features/ui/Parallax";
 
 import BrowserFrame from "./BrowserFrame";
@@ -15,8 +17,8 @@ type Props = {
   url?: string;
   priority?: boolean;
   /**
-   * The case-study hero is full-bleed; the rest of the stream sits in one
-   * frame (max 80rem) so captures are never upscaled past their source.
+   * The case-study hero runs to the viewport edges; every other block uses the
+   * one content width. Both are 16:10.
    */
   bleed?: boolean;
   className?: string;
@@ -31,18 +33,21 @@ function Caption({ children }: { children?: string }) {
   if (!children) return null;
 
   return (
-    <figcaption className="mt-[var(--space-1)] max-w-[58ch] text-t-14 leading-[1.6] text-warm">
-      {children}
+    <figcaption className="mt-[var(--space-1)] max-w-[60ch] text-small leading-[1.6] text-warm">
+      <TextReveal as="span" className="block">
+        {children}
+      </TextReveal>
     </figcaption>
   );
 }
 
 /**
- * One block of the case-study stream. Presentation follows the block kind:
- * browser captures sit in chrome, the recording plays inside the same chrome,
- * and the phone trio stands on its own. Every block uses one cover ratio so a
- * capture is never cropped by its frame; the recording is capped at its own
- * source width so it is never upscaled.
+ * One block of the case-study stream.
+ *
+ * There are two widths, and only two: the hero is full-bleed, everything else
+ * shares the page's content container. Browser captures and recordings use the
+ * same 16:10 frame and the same overflow clip, so a mockup can never spill past
+ * its chrome or crop differently from its neighbours.
  */
 export default function MediaBlock({
   block,
@@ -52,56 +57,48 @@ export default function MediaBlock({
   bleed = false,
   className,
 }: Props) {
-  const width = bleed ? "" : "mx-auto w-full max-w-[80rem]";
+  const width = bleed ? "case-media--bleed" : "case-media--contained";
 
   if (block.kind === "phones") {
     return (
-      <figure className={`m-0 ${className ?? ""}`}>
-        <div className={width}>
-          <PhoneTrio srcs={block.srcs} alts={block.alts} />
-        </div>
-        <Caption>{block.caption}</Caption>
-      </figure>
-    );
-  }
-
-  if (block.kind === "video") {
-    return (
-      <figure className={`m-0 ${className ?? ""}`}>
-        <div className="mx-auto w-full max-w-[80rem]">
-          <BrowserFrame address={hostname(url)}>
-            <ProjectVideo
-              src={block.src}
-              poster={block.poster}
-              label={`${title} — scroll-through recording`}
-              className={`block ${COVER_ASPECT} w-full`}
-            />
-          </BrowserFrame>
-        </div>
+      <figure className={`${width} ${className ?? ""}`}>
+        <PhoneTrio srcs={block.srcs} alts={block.alts} />
         <Caption>{block.caption}</Caption>
       </figure>
     );
   }
 
   return (
-    <figure className={`m-0 ${className ?? ""}`}>
-      <div className={width}>
-        <BrowserFrame address={hostname(url)}>
-          <Parallax>
-            <span className={`relative block ${COVER_ASPECT}`}>
-              <Image
-                src={block.src}
-                alt={block.alt}
-                fill
-                loading={priority ? "eager" : "lazy"}
-                quality={90}
-                sizes="100vw"
-                className="object-cover object-top"
-              />
-            </span>
-          </Parallax>
-        </BrowserFrame>
-      </div>
+    <figure className={`${width} ${className ?? ""}`}>
+      <BrowserFrame address={hostname(url)}>
+        <span className={`relative block overflow-hidden ${COVER_ASPECT}`}>
+          {block.kind === "video" ? (
+            <ProjectVideo
+              src={block.src}
+              poster={block.poster}
+              label={`${title} — scroll-through recording`}
+              className="absolute inset-0 block h-full w-full object-cover"
+            />
+          ) : (
+            <ImageReveal
+              frameClassName={COVER_ASPECT}
+              className="relative block"
+            >
+              <Parallax className="absolute inset-0">
+                <Image
+                  src={block.src}
+                  alt={block.alt}
+                  fill
+                  loading={priority ? "eager" : "lazy"}
+                  quality={90}
+                  sizes="100vw"
+                  className="object-cover object-top"
+                />
+              </Parallax>
+            </ImageReveal>
+          )}
+        </span>
+      </BrowserFrame>
       <Caption>{block.caption}</Caption>
     </figure>
   );

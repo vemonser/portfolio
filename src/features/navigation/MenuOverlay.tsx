@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import gsap from "gsap";
 import {
   useEffect,
   useRef,
@@ -21,6 +22,9 @@ import { setMenuOpen } from "./menu-store";
 import type { NavLink } from "./nav";
 
 type Phase = "closed" | "entering" | "open" | "closing";
+
+/* The reference menu's curve, measured on dennissnellenberg.com. */
+const NAV_EASE = gsap.parseEase("cubic-bezier(0.7, 0, 0.2, 1)") ?? "power4.inOut";
 
 type Props = {
   open: boolean;
@@ -66,11 +70,44 @@ export default function MenuOverlay({
     const dialog = dialogRef.current;
     if (!dialog) return;
 
+    const panel = dialog.querySelector<HTMLElement>(".nav-panel");
+    const lip = dialog.querySelector<HTMLElement>(".nav-lip");
+    const items = Array.from(
+      dialog.querySelectorAll<HTMLElement>(".nav-item"),
+    );
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (open) {
       if (!dialog.open) {
         setPhase("entering");
         dialog.showModal();
         closeRef.current?.focus();
+      }
+
+      // GSAP drives the panel slide, the curved lip collapse, and the item
+      // stagger (same engine as the page loader and route transition).
+      if (!reduced) {
+        if (panel) {
+          gsap.to(panel, {
+            xPercent: 0,
+            x: 0,
+            duration: 0.8,
+            ease: NAV_EASE,
+          });
+        }
+        if (lip) {
+          gsap.to(lip, { width: 0, duration: 0.85, ease: NAV_EASE });
+        }
+        if (items.length) {
+          gsap.to(items, {
+            x: 0,
+            duration: 0.8,
+            stagger: 0.03,
+            ease: NAV_EASE,
+          });
+        }
       }
 
       // One frame with the closed styles applied is what gives the browser a
@@ -84,31 +121,10 @@ export default function MenuOverlay({
 
     setPhase("closing");
 
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const panel = dialog.querySelector<HTMLElement>(".nav-panel");
-    const lip = dialog.querySelector<HTMLElement>(".nav-lip");
-
-    let finished = false;
-    let fallbackTimer = 0;
-    // The lip's width is the longest transition in the exit (850ms). Waiting
-    // for it, rather than a timer, keeps the window exact if a duration
-    // changes; the fallback covers an interrupted transition.
     const finish = () => {
-      if (finished) return;
-      finished = true;
-      if (fallbackTimer) window.clearTimeout(fallbackTimer);
-
       dialog.close();
       setPhase("closed");
       returnFocusRef.current?.focus({ preventScroll: true });
-    };
-
-    const onEnd = (event: TransitionEvent) => {
-      if (event.target === lip && event.propertyName === "width") {
-        finish();
-      }
     };
 
     if (reduced) {
@@ -116,22 +132,37 @@ export default function MenuOverlay({
       return;
     }
 
-    dialog.addEventListener("transitionend", onEnd);
-
-    // Fallback derived from the real durations: if a transition never fires
-    // (interrupted, or zero-length), the dialog still closes.
-    const longest = (value: string) =>
-      Math.max(...value.split(",").map((part) => parseFloat(part) || 0));
-    const durationMs =
-      Math.max(
-        longest(getComputedStyle(lip ?? dialog).transitionDuration),
-        longest(getComputedStyle(panel ?? dialog).transitionDuration),
-      ) * 1000;
-    fallbackTimer = window.setTimeout(finish, durationMs + 400);
+    const tl = gsap.timeline({ onComplete: finish });
+    if (panel) {
+      tl.to(
+        panel,
+        {
+          xPercent: 100,
+          x: () => window.innerWidth * 0.09,
+          duration: 0.8,
+          ease: NAV_EASE,
+        },
+        0,
+      );
+    }
+    if (lip) {
+      tl.to(lip, { width: "6vw", duration: 0.85, ease: NAV_EASE }, 0);
+    }
+    if (items.length) {
+      tl.to(
+        items,
+        {
+          x: () => window.innerWidth * 0.15,
+          duration: 0.8,
+          stagger: 0.03,
+          ease: NAV_EASE,
+        },
+        0,
+      );
+    }
 
     return () => {
-      dialog.removeEventListener("transitionend", onEnd);
-      window.clearTimeout(fallbackTimer);
+      tl.kill();
     };
   }, [open, returnFocusRef]);
 
@@ -269,6 +300,7 @@ export default function MenuOverlay({
                       onClick={onClose}
                       aria-current={active ? "page" : undefined}
                       data-active={active ? "true" : "false"}
+                      transitionTypes={["nav-forward"]}
                     >
                       {link.label}
                     </Link>

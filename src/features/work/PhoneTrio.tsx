@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import ImageReveal from "@/features/ui/ImageReveal";
+
 type Props = {
   srcs: string[];
   alts: string[];
@@ -31,14 +33,20 @@ export default function PhoneTrio({ srcs, alts, className }: Props) {
             className="absolute left-1/2 top-[0.5rem] z-[1] h-[0.9rem] w-[3.6rem] -translate-x-1/2 rounded-full bg-[var(--color-black)]"
           />
           <span className="absolute inset-[0.28rem] block overflow-hidden rounded-[2.3rem] bg-black">
-            <Image
-              src={src}
-              alt={alts[i]}
-              fill
-              quality={90}
-              sizes="(min-width: 1024px) 22vw, 32vw"
-              className="object-cover object-top"
-            />
+            <ImageReveal
+              className="absolute inset-0"
+              frameClassName="h-full w-full"
+              scaleFrom={1.08}
+            >
+              <Image
+                src={src}
+                alt={alts[i]}
+                fill
+                quality={90}
+                sizes="(min-width: 1024px) 22vw, 32vw"
+                className="object-cover object-top"
+              />
+            </ImageReveal>
           </span>
         </div>
       ))}

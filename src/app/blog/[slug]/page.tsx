@@ -6,9 +6,11 @@ import { formatPostDate } from "@/features/blog/format";
 import ChapterLabel from "@/features/ui/ChapterLabel";
 import LinkLine from "@/features/ui/LinkLine";
 import PageFrame from "@/features/ui/PageFrame";
+import DirectionalTransition from "@/features/transition/DirectionalTransition";
 import Prose from "@/features/ui/Prose";
-import Reveal from "@/features/ui/Reveal";
+import TextReveal from "@/features/ui/TextReveal";
 import { chapterFrame, displayArticle } from "@/features/ui/styles";
+import PageTitle from "@/features/motion/PageTitle";
 import { pageMetadata } from "@/lib/seo";
 
 type Props = {
@@ -41,27 +43,37 @@ export default async function BlogPostPage({ params }: Props) {
   const { Content } = post;
 
   return (
+    <DirectionalTransition>
     <PageFrame
-      className={`${chapterFrame} pb-[var(--inset-chapter)] pt-[clamp(8rem,22vh,14rem)]`}
+      className={`${chapterFrame} section-pad`}
     >
       <div className="max-w-[var(--measure-body)]">
         <div className="chapter-open">
-          <Reveal className="flex flex-col gap-[var(--space-3)]">
+          <div className="flex flex-col gap-[var(--space-3)]">
             <ChapterLabel index={2}>{copy.blogPage.label}</ChapterLabel>
 
-            <h1 className={`${displayArticle}`}>{post.title}</h1>
+            <PageTitle>
+              <TextReveal as="h1" className={`${displayArticle}`}>
+                {post.title}
+              </TextReveal>
+            </PageTitle>
 
             <time
               className="font-label text-t-14 uppercase tracking-[var(--track)] text-warm"
               dateTime={post.date}
             >
-              {formatPostDate(post.date)}
+              <TextReveal as="span" split="words">
+                {formatPostDate(post.date)}
+              </TextReveal>
             </time>
 
-            <p className="m-0 max-w-[52ch] text-lede text-fg-muted">
+            <TextReveal
+              as="p"
+              className="m-0 max-w-[52ch] text-lede text-fg-muted"
+            >
               {post.excerpt}
-            </p>
-          </Reveal>
+            </TextReveal>
+          </div>
         </div>
 
         <Prose className="mt-[var(--space-5)]">
@@ -69,11 +81,16 @@ export default async function BlogPostPage({ params }: Props) {
         </Prose>
 
         <div className="mt-[var(--space-4)] border-t border-[var(--line-hairline)] pt-[var(--space-3)]">
-          <LinkLine href="/blog" className="inline-flex min-h-11 items-center">
+          <LinkLine
+            href="/blog"
+            className="inline-flex min-h-11 items-center"
+            transitionType="nav-back"
+          >
             {copy.blogPost.back}
           </LinkLine>
         </div>
       </div>
     </PageFrame>
+    </DirectionalTransition>
   );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import TextReveal from "./TextReveal";
 import { formatNumber } from "./editorial";
 
 type Props = {
@@ -27,7 +28,9 @@ export default function ChapterLabel({ index, children }: Props) {
           <span className="chapter-label__rule" aria-hidden="true" />
         </>
       ) : null}
-      <span>{children}</span>
+      <TextReveal as="span" split="words">
+        {children}
+      </TextReveal>
     </p>
   );
 }

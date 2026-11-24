@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-11-19T02:33:07.921Z",
+  "projects": {
+    "anom-creative": {
+      "slug": "anom-creative",
+      "name": "Anom Creative",
+      "accent": "#b4472a",
+      "routes": {
+        "home": {
+          "path": "/",
+          "label": "Home",
+          "url": "https://anomcreative.com/",
+          "displayUrl": "anomcreative.com",
+          "desktop": {
+            "png": "captures/anom-creative/home.desktop.png",
+            "image": "captures/anom-creative/home.desktop.jpg",
+            "cssWidth": 1440,
+            "cssHeight": 9907,
+            "intrinsicWidth": 2880,
+            "intrinsicHeight": 19814,
+            "viewportHeight": 900,
+            "dpr": 2,
+            "stops": [
+              0,
+              900,
+              2518,
+              4000,
+              5519,
+              9007
+            ],
+            "override": true,
+            "mode": "fullpage",
+            "capturedAt": "2026-11-19T02:31:41.079Z"
+          },
+          "mobile": {
+            "png": "captures/anom-creative/home.mobile.png",
+            "image": "captures/anom-creative/home.mobile.jpg",
+            "cssWidth": 390,
+            "cssHeight": 8080,
+            "intrinsicWidth": 1170,
+            "intrinsicHeight": 24240,
+            "viewportHeight": 844,
+            "dpr": 3,
+            "stops": [
+              0,
+              844,
+              2353,
+              3407,
+              4092,
+              5568,
+              6900
+            ],
+            "override": true,
+            "mode": "stitched",
+            "capturedAt": "2026-11-19T02:32:00.149Z"
+          },
+          "scroll": {
+            "src": "scrolling/anom-creative-home.mp4",
+            "width": 1600,
+            "height": 948,
+            "duration": 21.933333,
+            "frames": 486,
+            "fps": 30,
+            "capturedAt": "2026-11-19T02:32:55.222Z"
+          }
+        },
+        "about": {
+          "path": "/about/",
+          "label": "About",
+          "url": "https://anomcreative.com/about/",
+          "displayUrl": "anomcreative.com/about",
+          "desktop": {
+            "png": "captures/anom-creative/about.desktop.png",
+            "image": "captures/anom-creative/about.desktop.jpg",
+            "cssWidth": 1440,
+            "cssHeight": 4309,
+            "intrinsicWidth": 2880,
+            "intrinsicHeight": 8618,
+            "viewportHeight": 900,
+            "dpr": 2,
+            "stops": [
+              0,
+              720,
+              1075,
+              2036,
+              2819,
+              3409
+            ],
+            "override": false,
+            "mode": "fullpage",
+            "capturedAt": "2026-11-19T02:33:01.521Z"
+          },
+          "mobile": {
+            "png": "captures/anom-creative/about.mobile.png",
+            "image": "captures/anom-creative/about.mobile.jpg",
+            "cssWidth": 390,
+            "cssHeight": 4687,
+            "intrinsicWidth": 1170,
+            "intrinsicHeight": 14061,
+            "viewportHeight": 844,
+            "dpr": 3,
+            "stops": [
+              0,
+              675,
+              1010,
+              1784,
+              2598,
+              3843
+            ],
+            "override": false,
+            "mode": "fullpage",
+            "capturedAt": "2026-11-19T02:33:07.916Z"
+          }
+        }
+      }
+    }
+  }
+}

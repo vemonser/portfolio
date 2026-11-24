@@ -1,0 +1,581 @@
+/*
+ * Chris Kalafatis hero, rebuilt against the live page.
+ *
+ * Two ideas carry the whole thing:
+ *   1. The dark field is the page's own background, not a card over it. That
+ *      is what lets the loader hand the screen over: the field arrives over a
+ *      bone plate with a curved leading edge, and the white type appears as it
+ *      clears — never clipped, never masked.
+ *   2. Every measurement is a ratio of one variable, --hero-size, so the
+ *      composition keeps its proportions at any width.
+ */
+
+.hero-chris,
+.ld {
+  --hero-size: clamp(2.6rem, 8.65vw, 11.6rem);
+}
+
+.hero-chris {
+  --hero-lift: 4svh;
+
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: clip;
+  background-color: var(--color-black);
+  color: var(--color-bone);
+}
+
+/* --------------------------------------------------------------------------
+ * The plate and the field
+ * -------------------------------------------------------------------------- */
+
+/*
+ * Bone, not white: the page the loader opens on is the site's paper. It sits
+ * under the canvas, so the field's transparent first frame is what the
+ * visitor reads as the plate.
+ */
+.hero-chris__paper {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: transparent;
+}
+
+html[data-hero-loader="run"] .hero-chris__paper {
+  background: var(--color-bone);
+}
+
+.hero-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero-chris__stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+}
+
+/* --------------------------------------------------------------------------
+ * Headline
+ * -------------------------------------------------------------------------- */
+
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--hero-size);
+  font-weight: 550;
+  font-kerning: none;
+  line-height: 0.8;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  transform: translateY(calc(-1 * var(--hero-lift)));
+}
+
+.hero-line-block {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Line one leans left, line three leans right; the middle line is the axis. */
+.hero-line-block[data-line="1"] {
+  transform: translateX(-0.92em);
+}
+
+.hero-line-block[data-line="3"] {
+  transform: translateX(1.08em);
+}
+
+.hero-line {
+  position: relative;
+  display: block;
+  height: 0.8em;
+  overflow: hidden;
+}
+
+.hero-line__row {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: flex;
+  white-space: nowrap;
+}
+
+/*
+ * Both rows start below the line's clip band, so the line reads as empty
+ * until the reveal lifts the visible row into it. The duplicate "from" row
+ * stays parked — it exists only so the markup matches the reference.
+ */
+.hero-line__row--from {
+  transform: translateY(101%);
+}
+
+.hero-line__row--to {
+  position: relative;
+  transform: translateY(101%);
+}
+
+.hero-line__char {
+  display: inline-block;
+}
+
+@keyframes hero-line-in {
+  from {
+    transform: translateY(101%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* One line at a time, top to bottom. */
+html[data-hero-phase="reveal"] .hero-line__row--to {
+  animation: hero-line-in 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+html[data-hero-phase="reveal"] .hero-line-block[data-line="2"] .hero-line__row--to {
+  animation-delay: 0.1s;
+}
+
+html[data-hero-phase="reveal"] .hero-line-block[data-line="3"] .hero-line__row--to {
+  animation-delay: 0.2s;
+}
+
+/* --------------------------------------------------------------------------
+ * Note — it hangs off the end of the third line, not beside the headline
+ * -------------------------------------------------------------------------- */
+
+/*
+ * The note is a flex sibling of the third line, not an overlay: that is what
+ * makes the line's box include it, so centring the block keeps the pair on the
+ * page and the note always starts just past the last letter.
+ */
+.hero-note {
+  flex: none;
+  width: calc(var(--hero-size) * 2.45);
+  margin: calc(var(--hero-size) * 0.067) 0 0 calc(var(--hero-size) * 0.2);
+  font-family: var(--font-display);
+  font-size: calc(var(--hero-size) * 0.1167);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  text-indent: 0;
+  color: var(--color-bone);
+}
+
+/*
+ * The indent is the first line's alone. `text-indent` cannot do it here: every
+ * line is its own block, and an inherited indent shifts them all by the same
+ * amount, which reads as no indent at all. Moving the first line's clip box
+ * keeps the shift out of layout, so the line can never wrap because of it.
+ */
+.hero-note__line:first-child {
+  transform: translateX(2.85em);
+}
+
+.hero-note__line {
+  display: block;
+  overflow: hidden;
+  height: 1em;
+}
+
+/* The visual note is aria-hidden; this is the readable copy. */
+.hero-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hero-note__inner {
+  display: block;
+  transform: translateY(110%);
+}
+
+@keyframes hero-note-in {
+  from {
+    transform: translateY(110%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+html[data-hero-phase="reveal"] .hero-note__inner {
+  animation: hero-note-in 1.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(2000ms + var(--i) * 55ms);
+}
+
+/* --------------------------------------------------------------------------
+ * Circle — magnetic, two rings, no fill
+ * -------------------------------------------------------------------------- */
+
+.hero-circle {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: calc(
+    50% - var(--hero-lift) + var(--hero-size) * 1.675
+  );
+  display: grid;
+  place-items: center;
+  width: calc(var(--hero-size) * 0.833);
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-lime);
+  cursor: pointer;
+  transform: translateX(-50%);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-circle:focus-visible {
+  outline: 1px solid var(--color-lime);
+  outline-offset: 8px;
+}
+
+.hero-circle__shift {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  will-change: transform;
+}
+
+.hero-circle__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-circle__ring--inner {
+  will-change: transform;
+}
+
+.hero-circle__arrow {
+  position: absolute;
+  display: block;
+  width: 29%;
+  height: 36%;
+  color: var(--color-lime);
+  will-change: transform;
+}
+
+.hero-circle__arrow svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The control is lime, so it cannot sit on the plate: the ring and the
+ * arrow only exist once the field has taken that part of the screen. */
+html[data-hero-loader="run"]:not([data-hero-phase="done"]) .hero-circle,
+html[data-page-loader="run"] .hero-circle {
+  opacity: 0;
+}
+
+html[data-hero-phase="reveal"] .hero-circle {
+  animation: hero-trigger-in 0.45s ease 0.2s both;
+}
+
+/* --------------------------------------------------------------------------
+ * Loader
+ * -------------------------------------------------------------------------- */
+
+.ld {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--nav-inset);
+  font-family: var(--font-display);
+  color: var(--color-ink);
+}
+
+html[data-hero-loader="skip"] .ld {
+  display: none;
+}
+
+.ld__name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  /*
+   * One line at the hero's size, but never wider than the margins: the name is
+   * ~10.4em at this weight, and the extra 1.4em is the gap the two halves need
+   * to read as a name rather than one word. The smaller of the two wins.
+   */
+  font-size: min(
+    var(--hero-size),
+    calc((100vw - 2 * var(--nav-inset)) / 11.8)
+  );
+  font-weight: 550;
+  line-height: 0.8;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.ld[data-ready="true"] .ld__name {
+  opacity: 1;
+}
+
+.ld__half {
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.ld__run {
+  display: flex;
+  will-change: transform;
+}
+
+.ld__run--start {
+  transform-origin: left center;
+}
+
+.ld__run--end {
+  transform-origin: right center;
+}
+
+.ld__char {
+  display: inline-block;
+}
+
+.ld__hold {
+  display: inline-block;
+}
+
+.ld__count {
+  position: absolute;
+  inset-block-end: var(--nav-inset);
+  inset-inline-end: var(--nav-inset);
+  margin: 0;
+  font-size: calc(var(--hero-size) * 0.833);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  will-change: transform;
+}
+
+/* --------------------------------------------------------------------------
+ * Header — it belongs to the revealed page, so it arrives with the field
+ * -------------------------------------------------------------------------- */
+
+html[data-hero-loader="run"] .site-header,
+html[data-page-loader="run"] .site-header {
+  opacity: 0;
+  transform: translateY(-110%);
+}
+
+/* A keyframe, not a transition: the rule and the values change in the same
+ * style pass, and a transition declared at that moment is not reliable. It
+ * starts late on purpose — the header belongs to the revealed page, so it
+ * arrives after the field has taken the top of the screen. */
+html[data-hero-phase="reveal"] .site-header {
+  animation: hero-header-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.8s both;
+}
+
+@keyframes hero-header-in {
+  from {
+    opacity: 0;
+    transform: translateY(-110%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html[data-hero-phase="done"] .site-header {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* The mobile menu trigger is fixed and shares the loader's layer, so it is
+ * part of the same entrance rather than something that leaks onto the plate. */
+html[data-hero-loader="run"] .menu-trigger,
+html[data-page-loader="run"] .menu-trigger {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html[data-hero-phase="reveal"] .menu-trigger {
+  animation: hero-trigger-in 0.6s ease 1.9s both;
+  pointer-events: auto;
+}
+
+html[data-hero-phase="done"] .menu-trigger {
+  animation: none;
+  opacity: 1;
+}
+
+/* The custom cursor has no meaning on the plate, and the plate is still up
+ * through the reveal. */
+html[data-hero-loader="run"]:not([data-hero-phase="done"]) .cursor-layer {
+  opacity: 0 !important;
+}
+
+@keyframes hero-trigger-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The nav keeps the site's lime underline; only the colour shifts. */
+body:has(.hero-chris) .site-header__link:hover,
+body:has(.hero-chris) .site-header__brand:hover {
+  color: var(--color-lime);
+}
+
+/* Keep review captures clean; the dev indicator is not part of the design. */
+body:has(.hero-chris) nextjs-portal {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+ * Tablet and phone — a real composition, not the desktop shrunk
+ * -------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hero-chris,
+  .ld {
+    --hero-size: clamp(2.35rem, 10.8vw, 4.6rem);
+  }
+
+  .hero-chris {
+    --hero-lift: 0svh;
+  }
+
+  .hero-chris__stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    min-height: 100svh;
+    padding: 6.5rem 1.25rem 3rem;
+  }
+
+  .hero-title {
+    transform: none;
+  }
+
+  .hero-note {
+    width: auto;
+    max-width: 86vw;
+    margin: 1.1rem 0 0;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    text-indent: 0;
+  }
+
+  /* The stack is centred on a phone; the shot at the first line is a desktop
+     measure and would push the note past the margin here. */
+  .hero-note__line:first-child {
+    transform: none;
+  }
+
+  /* Stack the pair instead of running them side by side. */
+  .hero-line-block[data-line="3"] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-note__line {
+    height: auto;
+    overflow: visible;
+  }
+
+  .hero-note__inner {
+    transform: none;
+  }
+
+  .hero-circle {
+    position: relative;
+    inset-inline-start: auto;
+    inset-block-start: auto;
+    transform: none;
+  }
+
+  .ld {
+    align-items: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-chris,
+  .ld {
+    --hero-size: clamp(2.3rem, 10.4vw, 3.2rem);
+  }
+
+  .hero-chris__stage {
+    padding: 6rem 1rem 2.5rem;
+    gap: 1.6rem;
+  }
+
+  .hero-note {
+    font-size: 0.66rem;
+    line-height: 1.45;
+  }
+
+  .ld__count {
+    font-size: calc(var(--hero-size) * 0.62);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-note__inner,
+  .hero-line__row--to {
+    animation: none !important;
+  }
+
+  .hero-line__row--to {
+    transform: translateY(0);
+  }
+
+  .hero-note__inner {
+    transform: none;
+  }
+
+  .site-header {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

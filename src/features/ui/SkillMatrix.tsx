@@ -1,4 +1,5 @@
 import { displaySection } from "./styles";
+import TextReveal from "./TextReveal";
 import { formatNumber } from "./editorial";
 
 type SkillGroup = { title: string; body: string };
@@ -21,9 +22,9 @@ export default function SkillMatrix({ groups, label }: Props) {
       className="border-t border-[var(--line-hairline)] pt-[var(--space-3)]"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
-        <h2 id="capabilities-title" className={displaySection}>
+        <TextReveal id="capabilities-title" as="h2" className={displaySection}>
           {label}
-        </h2>
+        </TextReveal>
       </div>
 
       <ul className="m-0 mt-[var(--space-5)] grid list-none gap-0 p-0 md:grid-cols-2 md:gap-x-[var(--space-6)]">
@@ -37,13 +38,15 @@ export default function SkillMatrix({ groups, label }: Props) {
                 {formatNumber(index + 1, { pad: 2 })}
               </span>
               <h3 className="m-0 font-display text-title font-semibold">
-                {group.title}
+                <TextReveal as="span" split="words">
+                  {group.title}
+                </TextReveal>
               </h3>
             </div>
 
-            <p className="m-0 mt-[var(--space-1)] max-w-[42ch] leading-[1.7] text-fg-muted">
+            <TextReveal as="p" className="m-0 mt-[var(--space-1)] max-w-[42ch] leading-[1.7] text-fg-muted">
               {group.body}
-            </p>
+            </TextReveal>
           </li>
         ))}
       </ul>

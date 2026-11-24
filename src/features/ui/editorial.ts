@@ -17,8 +17,8 @@ export type EditorialType = {
 
 const TYPE: EditorialType = {
   ratio: 1.25,
-  displayMax: "8.5rem",
-  bodyMeasure: "68ch",
+  displayMax: "7.5rem",
+  bodyMeasure: "60ch",
 };
 
 export function editorialType(): EditorialType {
@@ -32,13 +32,10 @@ export function editorialType(): EditorialType {
  */
 const SPACE = [
   "0.5rem",
-  "0.75rem",
   "1rem",
   "1.5rem",
-  "2rem",
   "3rem",
-  "4.5rem",
-  "7rem",
+  "6rem",
   "10rem",
 ] as const;
 

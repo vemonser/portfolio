@@ -1,0 +1,485 @@
+/*
+ * Title card — the lab prototype that replaces the specimen plate.
+ *
+ * A cinematic field, the name at poster scale, a real opening count, and one
+ * line of facts. No canvas, no framed sample, no metadata grid. The serif is
+ * used only for the watermark; the site's Inter/JetBrains system still carries
+ * everything that is read.
+ */
+
+.title-card {
+  --title-name: clamp(2.5rem, 10.5vw, 10rem);
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100svh;
+  padding: clamp(6.5rem, 12vh, 9rem) var(--nav-inset) var(--inset-edge);
+  overflow: clip;
+  background-color: var(--color-black);
+  color: var(--color-bone);
+}
+
+/* The atmosphere is light, not a gradient wallpaper: one warm source high on
+   the right, one forest-toned pool low on the left. */
+.title-card__glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      85% 70% at 74% 12%,
+      rgb(245 241 232 / 0.085),
+      transparent 62%
+    ),
+    radial-gradient(
+      58% 68% at 14% 94%,
+      rgb(47 74 60 / 0.2),
+      transparent 68%
+    );
+}
+
+/* A single light pass during the opening, then gone. */
+.title-card__glow::after {
+  content: "";
+  position: absolute;
+  inset: -30% -20%;
+  background: radial-gradient(
+    32% 58% at 50% 50%,
+    rgb(245 241 232 / 0.16),
+    transparent 70%
+  );
+  opacity: 0;
+  mix-blend-mode: screen;
+  transform: translateX(-42%) rotate(10deg);
+  animation: title-sweep 1500ms var(--ease-editorial) 120ms both;
+}
+
+/* The mark, borrowed from greymac's monogram but set in the site's own
+   monochrome. It is a watermark, not a logo lockup. */
+.title-card__watermark {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: -0.12em;
+  z-index: 0;
+  transform: translateY(-50%);
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-size: clamp(16rem, 40vw, 46rem);
+  font-weight: 400;
+  line-height: 0.62;
+  letter-spacing: -0.09em;
+  color: rgb(245 241 232 / 0.035);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  animation: title-watermark 1200ms var(--ease-editorial) 80ms both;
+}
+
+/* --------------------------------------------------------------------------
+ * Top line + counter
+ * -------------------------------------------------------------------------- */
+
+.title-card__top {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-block-end: var(--space-1);
+}
+
+.title-card__top::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 1px;
+  background: var(--line-hairline);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: title-rule 850ms var(--ease-editorial) both;
+}
+
+.title-card__eyebrow {
+  margin: 0;
+  font-family: var(--font-label);
+  font-size: var(--text-t-12);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-warm);
+}
+
+.title-card__eyebrow--end {
+  color: var(--color-fg-subtle);
+}
+
+.title-card__counter-wrap {
+  position: absolute;
+  inset-block-start: calc(clamp(6.5rem, 12vh, 9rem) + 2.75rem);
+  inset-inline-end: var(--nav-inset);
+  z-index: 2;
+  text-align: end;
+  opacity: 0;
+  animation:
+    title-fade 520ms var(--ease-editorial) 180ms both,
+    title-counter-out 450ms var(--ease-editorial) 1900ms both;
+}
+
+.title-card__counter-label {
+  display: block;
+  margin-block-end: 0.35rem;
+  font-family: var(--font-label);
+  font-size: 0.625rem;
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-warm);
+}
+
+.title-card__counter {
+  display: block;
+  font-family: var(--font-label);
+  font-size: clamp(2.25rem, 4vw, 3.75rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-bone);
+}
+
+/* --------------------------------------------------------------------------
+ * Body
+ * -------------------------------------------------------------------------- */
+
+.title-card__body {
+  z-index: 1;
+  align-self: center;
+  max-width: min(100%, 72rem);
+  padding-block: var(--space-5);
+}
+
+.title-card__role {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-label);
+  font-size: var(--text-t-12);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-warm);
+  opacity: 0;
+  animation: title-fade 520ms var(--ease-editorial) 160ms both;
+}
+
+.title-card__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--title-name);
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+.title-card__name span {
+  display: block;
+  overflow: hidden;
+  padding-block-end: 0.07em;
+  margin-block-end: -0.07em;
+  white-space: nowrap;
+}
+
+.title-card__name i {
+  display: block;
+  font-style: normal;
+  transform: translateY(0.1em);
+  animation: title-rise 700ms var(--ease-editorial) both;
+}
+
+.title-card__name span:nth-child(2) i {
+  transform: translateY(0.28em);
+  animation-delay: 70ms;
+}
+
+.title-card__statement {
+  max-width: 36ch;
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-lede);
+  line-height: var(--text-lede--line-height, 1.6);
+  color: var(--color-fg-muted);
+  text-wrap: pretty;
+  opacity: 0;
+  animation: title-fade 520ms var(--ease-editorial) 300ms both;
+}
+
+/* --------------------------------------------------------------------------
+ * Bottom
+ * -------------------------------------------------------------------------- */
+
+.title-card__bottom {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block-start: var(--space-2);
+}
+
+.title-card__bottom::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 1px;
+  background: var(--line-hairline);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: title-rule 900ms var(--ease-editorial) 360ms both;
+}
+
+.title-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  font-family: var(--font-label);
+  font-size: var(--text-t-12);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-warm);
+  opacity: 0;
+  animation: title-fade 520ms var(--ease-editorial) 430ms both;
+}
+
+.title-card__meta > span:first-child,
+.title-card__time,
+.title-card__status {
+  color: var(--color-bone);
+}
+
+.title-card__sep {
+  color: rgb(245 241 232 / 0.25);
+}
+
+.title-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.title-card__dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-lime);
+}
+
+.title-card__time {
+  display: inline-block;
+  min-width: 9ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.title-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  font-family: var(--font-label);
+  font-size: var(--text-t-12);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-bone);
+  white-space: nowrap;
+  opacity: 0;
+  animation: title-fade 520ms var(--ease-editorial) 480ms both;
+}
+
+.title-card__link span {
+  color: var(--color-lime);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+ * Entry
+ * -------------------------------------------------------------------------- */
+
+@keyframes title-rise {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes title-fade {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes title-rule {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes title-watermark {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes title-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-42%) rotate(10deg);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(42%) rotate(10deg);
+  }
+}
+
+@keyframes title-counter-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * Responsive
+ * -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .title-card {
+    --title-name: clamp(2.75rem, 10vw, 7rem);
+  }
+
+  .title-card__counter-wrap {
+    inset-block-start: calc(clamp(6.5rem, 12vh, 9rem) + 2.5rem);
+  }
+
+  .title-card__counter {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+}
+
+@media (max-width: 700px) {
+  .title-card {
+    --title-name: clamp(2.5rem, 12.5vw, 4.75rem);
+    padding-block-start: clamp(6.25rem, 13vh, 8rem);
+    padding-block-end: var(--space-3);
+  }
+
+  .title-card__watermark {
+    inset-inline-end: -0.18em;
+    font-size: 54vw;
+  }
+
+  .title-card__counter-wrap {
+    inset-block-start: calc(clamp(6.25rem, 13vh, 8rem) + 2.25rem);
+  }
+
+  .title-card__counter-label {
+    font-size: 0.5625rem;
+  }
+
+  .title-card__counter {
+    font-size: 2rem;
+  }
+
+  .title-card__body {
+    padding-block: var(--space-4);
+  }
+
+  .title-card__statement {
+    max-width: 30ch;
+    margin-block-start: var(--space-3);
+    font-size: 1.05rem;
+    line-height: 1.55;
+  }
+
+  .title-card__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .title-card__meta {
+    gap: 0.4rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.13em;
+  }
+
+  .title-card__link {
+    font-size: 0.6875rem;
+    letter-spacing: 0.13em;
+  }
+}
+
+@media (max-width: 360px) {
+  .title-card {
+    --title-name: clamp(2.25rem, 11.5vw, 3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-card__name i,
+  .title-card__role,
+  .title-card__statement,
+  .title-card__meta,
+  .title-card__link,
+  .title-card__counter-wrap {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .title-card__top::after,
+  .title-card__bottom::before {
+    transform: scaleX(1);
+    animation: none;
+  }
+
+  .title-card__watermark {
+    opacity: 1;
+    transform: translateY(-50%);
+    animation: none;
+  }
+
+  .title-card__glow::after {
+    display: none;
+  }
+}
+
+/*
+ * Prototype-only brand swap: the card owns the full name, so the header uses
+ * the monogram. The final header gets this as a prop, not a CSS override.
+ */
+body:has(.title-card) .site-header__brand {
+  font-size: 0;
+}
+
+body:has(.title-card) .site-header__brand::after {
+  content: "A.";
+  font-size: var(--text-t-14);
+}
+
+/* Keep review captures clean; the dev indicator is not part of the design. */
+body:has(.title-card) nextjs-portal {
+  display: none;
+}

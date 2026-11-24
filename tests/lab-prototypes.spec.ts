@@ -1,4 +1,5 @@
-import { expect, test, type Locator } from "./support/fixtures";
+import type { Locator } from "@playwright/test";
+import { expect, test } from "./support/fixtures";
 
 /*
  * Phase 0 review surfaces. These are prototype routes, but the behaviours they
@@ -307,13 +308,25 @@ test.describe("custom cursor", () => {
     await view.scrollIntoViewIfNeeded();
     await view.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "view");
-    await expect(page.locator(".cursor-label")).toHaveText("View");
+    await expect
+      .poll(() =>
+        page
+          .locator(".cursor-dot__disc")
+          .evaluate((element) => getComputedStyle(element).scale),
+      )
+      .toBe("2.6");
 
     const play = page.locator('[data-cursor="play"]');
     await play.scrollIntoViewIfNeeded();
     await play.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "play");
-    await expect(page.locator(".cursor-label")).toHaveText("Play");
+    await expect
+      .poll(() =>
+        page
+          .locator(".cursor-dot__disc")
+          .evaluate((element) => getComputedStyle(element).scale),
+      )
+      .toBe("2.6");
 
     const textField = page.locator("input[type='text']");
     await textField.scrollIntoViewIfNeeded();
@@ -322,7 +335,7 @@ test.describe("custom cursor", () => {
     expect(
       await textField.evaluate((element) => getComputedStyle(element).cursor),
     ).toBe("text");
-    await expect(page.locator(".cursor-ring")).toHaveCSS("opacity", "0");
+    await expect(page.locator(".cursor-dot")).toHaveCSS("opacity", "0");
 
     const disabled = page.locator('[data-cursor="disabled"]');
     await disabled.scrollIntoViewIfNeeded();
@@ -432,15 +445,15 @@ test.describe("custom cursor", () => {
   test.describe("reduced motion", () => {
     test.use({ reducedMotion: "reduce" });
 
-    test("snaps the ring to the pointer without a lerp", async ({ page }) => {
+    test("snaps the dot to the pointer without a lerp", async ({ page }) => {
       await page.goto("/lab/cursor");
-      await expect(page.locator(".cursor-ring")).toBeAttached();
+      await expect(page.locator(".cursor-dot")).toBeAttached();
       await page.mouse.move(320, 260);
 
       await expect
         .poll(() =>
           page
-            .locator(".cursor-ring")
+            .locator(".cursor-dot")
             .evaluate((element) => element.style.transform),
         )
         .toContain("320px");
@@ -457,7 +470,7 @@ test.describe("custom cursor", () => {
 
     test("never mounts the custom cursor", async ({ page }) => {
       await page.goto("/lab/cursor");
-      await expect(page.locator(".cursor-dot, .cursor-ring")).toHaveCount(0);
+      await expect(page.locator(".cursor-dot")).toHaveCount(0);
       expect(
         await page.evaluate(
           () => document.documentElement.dataset.cursor ?? null,
@@ -470,7 +483,7 @@ test.describe("custom cursor", () => {
 
     test("the live site never mounts it either", async ({ page }) => {
       await page.goto("/");
-      await expect(page.locator(".cursor-dot, .cursor-ring")).toHaveCount(0);
+      await expect(page.locator(".cursor-dot")).toHaveCount(0);
       expect(
         await page.evaluate(
           () => document.documentElement.dataset.cursor ?? null,
@@ -484,7 +497,7 @@ test.describe("custom cursor", () => {
 
     test("keeps the native pointer", async ({ page }) => {
       await page.goto("/lab/cursor");
-      await expect(page.locator(".cursor-dot, .cursor-ring")).toHaveCount(0);
+      await expect(page.locator(".cursor-dot")).toHaveCount(0);
       expect(
         await page.evaluate(() => document.documentElement.dataset.cursor ?? null),
       ).toBeNull();
@@ -492,7 +505,7 @@ test.describe("custom cursor", () => {
 
     test("the live site keeps the native pointer", async ({ page }) => {
       await page.goto("/");
-      await expect(page.locator(".cursor-dot, .cursor-ring")).toHaveCount(0);
+      await expect(page.locator(".cursor-dot")).toHaveCount(0);
       expect(
         await page.evaluate(() => document.documentElement.dataset.cursor ?? null),
       ).toBeNull();

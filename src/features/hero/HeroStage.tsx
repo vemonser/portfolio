@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
 import { POSTER_VERSION } from "@/content/poster-version";
 import { isMenuOpen, subscribeMenu } from "@/features/navigation/menu-store";
@@ -83,9 +84,9 @@ export default function HeroStage() {
     let loading = false;
     let disposed = false;
     let visible = true;
-    let scrollFrame = 0;
+    let scrollCall: gsap.core.Tween | null = null;
     let lastProgress = -1;
-    let pointerFrame = 0;
+    let pointerCall: gsap.core.Tween | null = null;
     let lastPointer: [number, number] | null = null;
     const cleanups: Array<() => void> = [];
 
@@ -180,7 +181,7 @@ export default function HeroStage() {
     const clearZone = () => applyZone(null, null);
 
     const updatePointerZone = () => {
-      pointerFrame = 0;
+      pointerCall = null;
 
       if (!lastPointer || !compressionAllowed() || isMenuOpen()) {
         clearZone();
@@ -205,8 +206,8 @@ export default function HeroStage() {
     };
 
     const schedulePointerZone = () => {
-      if (pointerFrame !== 0) return;
-      pointerFrame = requestAnimationFrame(updatePointerZone);
+      if (pointerCall !== null) return;
+      pointerCall = gsap.delayedCall(0, updatePointerZone);
     };
 
     // The menu covers the hero but does not remove it from the viewport, so
@@ -265,8 +266,8 @@ export default function HeroStage() {
 
     const onDocumentPointerLeave = () => {
       lastPointer = null;
-      if (pointerFrame !== 0) cancelAnimationFrame(pointerFrame);
-      pointerFrame = 0;
+      pointerCall?.kill();
+      pointerCall = null;
       clearZone();
     };
 
@@ -298,9 +299,9 @@ export default function HeroStage() {
     const onResize = () => schedulePointerZone();
 
     const onScroll = () => {
-      if (scrollFrame !== 0) return;
-      scrollFrame = requestAnimationFrame(() => {
-        scrollFrame = 0;
+      if (scrollCall !== null) return;
+      scrollCall = gsap.delayedCall(0, () => {
+        scrollCall = null;
         const rect = section.getBoundingClientRect();
         const progress = heroScrollProgress(
           rect.top,
@@ -382,8 +383,8 @@ export default function HeroStage() {
         document.removeEventListener("pointerleave", onDocumentPointerLeave);
         document.removeEventListener("focusin", onFocusIn);
         document.removeEventListener("focusout", onFocusOut);
-        if (scrollFrame !== 0) cancelAnimationFrame(scrollFrame);
-        if (pointerFrame !== 0) cancelAnimationFrame(pointerFrame);
+        scrollCall?.kill();
+        pointerCall?.kill();
       });
 
       observeVisibility();

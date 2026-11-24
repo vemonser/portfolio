@@ -4,7 +4,7 @@ import ChapterLabel from "@/features/ui/ChapterLabel";
 import { HOME_COUNT } from "@/features/ui/home-layout";
 import LinkLine from "@/features/ui/LinkLine";
 import ProjectIndex from "@/features/ui/ProjectIndex";
-import Reveal from "@/features/ui/Reveal";
+import TextReveal from "@/features/ui/TextReveal";
 import { displayTitle } from "@/features/ui/styles";
 
 /**
@@ -19,34 +19,31 @@ export default function SelectedWork() {
     <section
       aria-labelledby="selected-work-title"
       data-section="selected-work"
-      className="px-[var(--inset-edge)] pb-[var(--inset-chapter)] pt-[var(--inset-chapter)]"
+      className="page-shell section-pad"
     >
-      <Reveal className="border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
+      <div className="border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
         <ChapterLabel index={1}>{copy.nav.work}</ChapterLabel>
 
         <div className="mt-[var(--space-4)]">
-          <h2 id="selected-work-title" className={displayTitle}>
+          <TextReveal id="selected-work-title" as="h2" className={displayTitle}>
             {copy.workSection.label}
-          </h2>
+          </TextReveal>
         </div>
-      </Reveal>
+      </div>
 
       <div className="mt-[var(--space-7)]">
         <ProjectIndex projects={projects} variant="home" />
       </div>
 
-      <Reveal
-        delay={60}
-        className="mt-[var(--space-7)] flex justify-end border-t border-[var(--line-hairline)] pt-[var(--space-4)]"
-      >
+      <div className="mt-[var(--space-7)] flex justify-end border-t border-[var(--line-hairline)] pt-[var(--space-4)]">
         <LinkLine
           href="/work"
           className="inline-flex min-h-11 items-center gap-2 text-lede"
         >
-          {copy.workSection.more}
+          <TextReveal as="span">{copy.workSection.more}</TextReveal>
           <span aria-hidden="true">↗</span>
         </LinkLine>
-      </Reveal>
+      </div>
     </section>
   );
 }

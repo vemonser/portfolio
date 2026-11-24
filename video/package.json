@@ -2,11 +2,14 @@
   "name": "portfolio-showreel",
   "private": true,
   "version": "0.0.0",
-  "description": "Phase 0 Remotion prototype: Anom Creative directed-scroll showreel",
+  "description": "Portfolio showcase asset generator — Playwright captures, stepped-scroll Remotion films, ffmpeg delivery.",
   "scripts": {
     "studio": "remotion studio src/index.ts",
-    "render": "remotion render src/index.ts Showreel out/showreel.mp4 --codec=h264",
-    "render:webm": "remotion render src/index.ts Showreel out/showreel.webm --codec=vp9"
+    "render:showreel": "remotion render src/index.ts Showreel out/showreel.mp4 --codec=h264",
+    "render": "node scripts/render.mjs",
+    "render:webm": "remotion render src/index.ts Showreel out/showreel.webm --codec=vp9",
+    "capture": "node scripts/capture.mjs",
+    "discover": "node scripts/discover-routes.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.543",

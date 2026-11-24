@@ -24,8 +24,13 @@ export const projects: Project[] = [
       },
       {
         kind: "video",
-        src: "/work/anom-creative/scroll.webm",
-        poster: "/work/anom-creative/mid-1.webp",
+        // Page-only screen recording with section dwells. The site's own
+        // browser chrome wraps it; the Mac chrome is not baked in.
+        src: "/work/anom-creative/scroll.mp4",
+        poster: "/work/anom-creative/scroll-poster.webp",
+        width: 1600,
+        height: 948,
+        pinned: true,
       },
       {
         kind: "phones",

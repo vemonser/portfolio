@@ -1,0 +1,178 @@
+/*
+ * First-load plate — CRZ-style, with the route transition's arc language.
+ *
+ * Two full-screen layers: an ink plate on top and a lime plate underneath.
+ * Both wipe up with transform: translateY() and a curved leading edge (SVG
+ * clip-path arc); the lime trails the ink so it peeks as a curved band instead
+ * of filling the screen.
+ *
+ * The wordmark is a single line of inline letters inside an overflow: hidden
+ * box. Each letter moves with transform: translateY() only — no top/left.
+ * The counter counts up, in solid ink — no image fill, no background-clip.
+ *
+ * Geometry is written by the component. The word box is a 1em line at the
+ * bottom margin, so its own bottom edge IS the type baseline; the counter sits
+ * at cap height above it. Nothing here depends on a measured h1.
+ */
+
+.page-loader {
+  --loader-margin: clamp(1.25rem, 4vw, 4rem);
+
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--color-lime);
+}
+
+html[data-page-loader="run"] .page-loader {
+  display: block;
+}
+
+/* The plate owns the screen: no scrolling, and no width jump when the
+   scrollbar comes back at the end. */
+html[data-page-loader="run"] {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* The cursor has no meaning on the plate. */
+html[data-page-loader="run"] .cursor-layer {
+  opacity: 0 !important;
+}
+
+/* Black plate on top — wipes up with a curved leading edge (SVG clip-path
+   arc), revealing the lime layer beneath. Positioned with inset (no top/left)
+   and moved with transform only. */
+.page-loader__plate--black {
+  position: absolute;
+  inset: 0;
+  background: var(--color-black);
+  z-index: 1;
+  will-change: transform;
+  overflow: visible;
+  /*
+   * Static curved leading edge, baked in once. A polygon (not a per-frame
+   * path()) means the browser rasterizes the clip once and only composites
+   * the transform afterwards — the wipe stays smooth without re-clipping two
+   * full-screen plates every frame. The curve's y exceeds 100% (the bulge),
+   * which is what reads as the curved edge as the plate translates up.
+   */
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% 100%,
+    91.05% 104.1%,
+    82.47% 107.66%,
+    74.24% 110.66%,
+    66.38% 113.13%,
+    58.87% 115.04%,
+    51.72% 116.41%,
+    44.93% 117.23%,
+    38.5% 117.5%,
+    32.43% 117.23%,
+    26.72% 116.41%,
+    21.37% 115.04%,
+    16.38% 113.13%,
+    11.74% 110.66%,
+    7.47% 107.66%,
+    3.55% 104.1%,
+    0% 100%
+  );
+}
+
+/* Lime layer underneath — same box as the black plate, clipped with the same
+   curved arc so it trails the black plate instead of filling the screen. */
+.page-loader__plate--lime {
+  position: absolute;
+  inset: 0;
+  background: var(--color-lime);
+  z-index: 0;
+  will-change: transform;
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% 100%,
+    91.05% 104.1%,
+    82.47% 107.66%,
+    74.24% 110.66%,
+    66.38% 113.13%,
+    58.87% 115.04%,
+    51.72% 116.41%,
+    44.93% 117.23%,
+    38.5% 117.5%,
+    32.43% 117.23%,
+    26.72% 116.41%,
+    21.37% 115.04%,
+    16.38% 113.13%,
+    11.74% 110.66%,
+    7.47% 107.66%,
+    3.55% 104.1%,
+    0% 100%
+  );
+}
+
+.page-loader__word {
+  position: absolute;
+  inset-inline: var(--loader-margin);
+  inset-block-end: var(--loader-margin);
+  font-family: var(--font-display);
+  font-size: 100px;
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* The line box is the clip: it holds the letters and clips them as they move
+   with translateY. */
+.page-loader__line {
+  width: 100%;
+  height: 1em;
+  overflow: hidden;
+}
+
+.page-loader__letter {
+  display: inline-block;
+  will-change: transform;
+  transform: translateY(120%);
+  color: #ffffff;
+}
+
+.page-loader__count p {
+  transform: translateY(110%);
+}
+
+.page-loader__count {
+  position: absolute;
+  inset-inline-start: 0;
+  overflow: hidden;
+}
+
+.page-loader__count p {
+  margin: 0;
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  line-height: 1.2;
+  letter-spacing: var(--track);
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+/* Measurement copy: the same word at a fixed 100px, invisible and out of the
+   flow. The component scales the real line to whatever width this reports. */
+.page-loader__measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-page-loader="run"] .page-loader {
+    display: none;
+  }
+}

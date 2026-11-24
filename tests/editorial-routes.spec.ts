@@ -13,27 +13,67 @@ test.describe("navigation", () => {
       "href",
       "/work",
     );
-    await expect(nav.getByRole("link", { name: "Blog" })).toHaveAttribute(
-      "href",
-      "/blog",
-    );
+    // Blog is hidden while the archive is unpublished, behind SHOW_BLOG.
+    await expect(nav.getByRole("link", { name: "Blog" })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "About" })).toHaveAttribute(
       "href",
       "/about",
     );
-    await expect(nav.getByRole("link", { name: "Contact" })).toHaveAttribute(
-      "href",
-      "/contact",
-    );
+    await expect(nav.getByRole("link", { name: "Contact" })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "Work" })).toHaveAttribute(
       "aria-current",
       "page",
     );
 
+    const cta = page.locator("header .header-cta");
+    await expect(cta).toHaveAttribute("href", "/contact");
+    await expect(cta).toContainText("Contact");
+    await expect(cta).toHaveAttribute("data-active", "false");
+
     await page.goto("/about");
     await expect(
       page.locator("header").getByRole("link", { name: "About" }),
     ).toHaveAttribute("aria-current", "page");
+
+    await page.goto("/contact");
+    await expect(cta).toHaveAttribute("data-active", "true");
+    await expect(cta).toHaveAttribute("aria-current", "page");
+  });
+});
+
+test.describe("mobile header", () => {
+  test("keeps the Contact CTA beside the menu trigger", async ({ page }) => {
+    for (const width of [320, 360, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/contact");
+
+      const cta = page.locator("header .header-cta");
+      const trigger = page.locator(".menu-trigger");
+      const brand = page.locator("header .site-header__brand");
+
+      await expect(cta).toBeVisible();
+      await expect(trigger).toBeVisible();
+
+      const [ctaBox, triggerBox, brandBox] = await Promise.all([
+        cta.boundingBox(),
+        trigger.boundingBox(),
+        brand.boundingBox(),
+      ]);
+
+      expect(ctaBox).not.toBeNull();
+      expect(triggerBox).not.toBeNull();
+      expect(brandBox).not.toBeNull();
+
+      // The pill sits between the brand and the fixed trigger, never under
+      // either one.
+      expect(brandBox!.x + brandBox!.width).toBeLessThanOrEqual(ctaBox!.x);
+      expect(ctaBox!.x + ctaBox!.width).toBeLessThanOrEqual(triggerBox!.x);
+
+      const dot = await cta.evaluate((node) =>
+        getComputedStyle(node, "::before").backgroundColor,
+      );
+      expect(dot).toBe("rgb(198, 240, 53)");
+    }
   });
 });
 
@@ -137,7 +177,7 @@ test.describe("footer and targets", () => {
   test("the trigger never sits on contact links", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await page.waitForSelector('[data-ready="true"]', { timeout: 20_000 });
+    await page.locator(".hero-scene").waitFor({ timeout: 20_000 });
 
     const contact = page.locator(CONTACT_LINK).first();
     await contact.scrollIntoViewIfNeeded();

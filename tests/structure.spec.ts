@@ -84,17 +84,12 @@ test.describe("reading layout", () => {
 test.describe("reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 
-  test("keeps the poster and never starts the scene", async ({ page }) => {
+  test("freezes the hero scene instead of starting the loop", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.locator("[data-scene-state]")).toHaveAttribute(
-      "data-scene-state",
-      "off",
-    );
-    const opacity = await page
-      .locator("#hero canvas")
-      .evaluate((node) => getComputedStyle(node).opacity);
-    expect(opacity).toBe("0");
+    const canvas = page.locator("#hero canvas.hero-scene");
+    await expect(canvas).toHaveAttribute("data-motion", "frozen");
+    await expect(canvas).toHaveAttribute("data-running", "0");
   });
 });
 

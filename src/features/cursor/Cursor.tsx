@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
 import { isMenuOpen, subscribeMenu } from "@/features/navigation/menu-store";
 
@@ -9,30 +10,25 @@ import "./cursor.css";
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
-type CursorRole = "default" | "link" | "view" | "play" | "text" | "disabled";
-
-const LABELS: Partial<Record<CursorRole, string>> = {
-  view: "View",
-  play: "Play",
-};
+type CursorRole = "default" | "link" | "view" | "play" | "hello" | "visit" | "text" | "disabled";
 
 /**
  * A custom cursor that replaces the native one on fine pointers.
  *
  * The native pointer disappears only after this component mounts and sets
  * `html[data-cursor="on"]`; a no-JS visitor keeps the OS cursor. Touch devices
- * never mount it. The two nodes are moved in one rAF loop from a ref — no
- * React state per pointermove — and every role is opt-in through
+ * never mount it. One dot tracks the pointer exactly — no React state per
+ * pointermove — and every role is opt-in through
  * `data-cursor="view|play|text|disabled"` or a normal link/button.
  *
- * Text entry is the one exception: the custom nodes hide and the control gets
- * `cursor: text`, so the OS I-beam is exact.
+ * The dot inverts whatever sits behind it, so it stays legible on the black
+ * page, a light capture and the lime accent without ever painting a filled disc
+ * over the content underneath. Text entry is the one exception: the dot hides
+ * and the control gets `cursor: text`, so the OS I-beam is exact.
  */
 export default function Cursor() {
   const layerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
   const [enabled, setEnabled] = useState(false);
 
   // The nodes are not rendered at all on touch/coarse pointers or without JS.
@@ -48,10 +44,8 @@ export default function Cursor() {
     if (!enabled) return;
 
     const dot = dotRef.current;
-    const ring = ringRef.current;
-    const label = labelRef.current;
     const layer = layerRef.current;
-    if (!dot || !ring || !label || !layer) return;
+    if (!dot || !layer) return;
 
     const html = document.documentElement;
     const reduced = window.matchMedia(REDUCED);
@@ -75,18 +69,21 @@ export default function Cursor() {
 
     let targetX = -100;
     let targetY = -100;
-    let ringX = -100;
-    let ringY = -100;
     let hasPosition = false;
-    let frame = 0;
     let role: CursorRole = "default";
     let downTimer = 0;
+
+    /*
+     * One dot, moved exactly with the pointer. GSAP writes the transform on the
+     * compositor; size and colour state live in CSS so a role change never
+     * forces a React render.
+     */
+    gsap.set(dot, { xPercent: -50, yPercent: -50 });
 
     const setRole = (next: CursorRole) => {
       if (next === role) return;
       role = next;
       html.dataset.cursorState = next;
-      label.textContent = LABELS[next] ?? "";
     };
 
     const roleAt = (node: Element): CursorRole => {
@@ -97,8 +94,18 @@ export default function Cursor() {
       if (tagged) {
         const explicit = tagged.dataset.cursor;
         if (explicit === "view" || explicit === "play") return explicit;
+        if (explicit === "hello") return "hello";
+        if (explicit === "visit") return "visit";
         if (explicit === "text") return "text";
         if (explicit === "disabled") return "disabled";
+      }
+
+      // External links and mailto/tel get their own cursor labels.
+      const anchor = node.closest<HTMLAnchorElement>("a[href]");
+      if (anchor) {
+        const href = anchor.getAttribute("href") ?? "";
+        if (href.startsWith("mailto:") || href.startsWith("tel:")) return "hello";
+        if (anchor.target === "_blank") return "visit";
       }
 
       if (node.closest("textarea, select, [contenteditable='true']")) {
@@ -180,6 +187,7 @@ export default function Cursor() {
         html.dataset.cursorMenu = menuOpen ? "native" : "false";
       }
 
+      if (menuOpen) releaseMagnets();
       scheduleRole();
     });
 
@@ -204,33 +212,46 @@ export default function Cursor() {
       scheduleRole();
     }
 
-    const tick = () => {
-      frame = 0;
-      if (!hasPosition) return;
-      if (html.dataset.cursor === "off") return;
-      if (html.dataset.cursorMenu === "native") return;
+    const show = () => {
+      html.dataset.cursorVisible = "true";
+    };
 
-      const ease = reduced.matches ? 1 : 0.24;
-      ringX += (targetX - ringX) * ease;
-      ringY += (targetY - ringY) * ease;
+    /*
+     * Magnetic targets: the lime disc leans toward the pointer while it is
+     * inside roughly one diameter. `translate` is used rather than `transform`
+     * so the CTA's own hover scale remains independent.
+     */
+    const magnetize = (x: number, y: number) => {
+      const targets = document.querySelectorAll<HTMLElement>("[data-magnetic]");
+      for (const target of targets) {
+        const rect = target.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) continue;
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const radius = Math.max(rect.width, 160) * 0.85;
+        const dx = x - cx;
+        const dy = y - cy;
+        const distance = Math.hypot(dx, dy);
 
-      dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0) translate(-50%, -50%)`;
-      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) scale(var(--cursor-scale, 1))`;
+        if (distance > radius) {
+          target.style.translate = "";
+          continue;
+        }
 
-      if (
-        Math.abs(targetX - ringX) > 0.15 ||
-        Math.abs(targetY - ringY) > 0.15
-      ) {
-        frame = requestAnimationFrame(tick);
+        const pull = (1 - distance / radius) * 0.2;
+        const limit = 12;
+        const tx = Math.max(-limit, Math.min(limit, dx * pull));
+        const ty = Math.max(-limit, Math.min(limit, dy * pull));
+        target.style.translate = `${tx.toFixed(2)}px ${ty.toFixed(2)}px`;
       }
     };
 
-    const schedule = () => {
-      if (frame === 0) frame = requestAnimationFrame(tick);
-    };
-
-    const show = () => {
-      html.dataset.cursorVisible = "true";
+    const releaseMagnets = () => {
+      document
+        .querySelectorAll<HTMLElement>("[data-magnetic]")
+        .forEach((target) => {
+          target.style.translate = "";
+        });
     };
 
     const hide = () => {
@@ -242,12 +263,12 @@ export default function Cursor() {
       targetX = event.clientX;
       targetY = event.clientY;
       if (!hasPosition) {
-        ringX = targetX;
-        ringY = targetY;
+        gsap.set(dot, { x: targetX, y: targetY });
         hasPosition = true;
       }
       show();
-      schedule();
+      if (!reduced.matches) magnetize(targetX, targetY);
+      gsap.set(dot, { x: targetX, y: targetY });
     };
 
     const onOver = (event: PointerEvent) => {
@@ -269,7 +290,10 @@ export default function Cursor() {
       }, 120);
     };
 
-    const onLeave = () => hide();
+    const onLeave = () => {
+      releaseMagnets();
+      hide();
+    };
     const onVisibility = () => {
       if (document.hidden) hide();
     };
@@ -291,6 +315,7 @@ export default function Cursor() {
       window.removeEventListener("scroll", scheduleRole);
       window.removeEventListener("resize", scheduleRole);
       unsubscribeMenu();
+      releaseMagnets();
       if (supportsPopover) {
         try {
           layer.hidePopover();
@@ -299,8 +324,8 @@ export default function Cursor() {
         }
       }
       window.clearTimeout(downTimer);
-      cancelAnimationFrame(frame);
       cancelAnimationFrame(roleFrame);
+      gsap.killTweensOf(dot);
       delete html.dataset.cursorMenu;
       delete html.dataset.cursor;
       delete html.dataset.cursorState;
@@ -318,9 +343,8 @@ export default function Cursor() {
       popover="manual"
       aria-hidden="true"
     >
-      <div ref={dotRef} className="cursor-dot" aria-hidden="true" />
-      <div ref={ringRef} className="cursor-ring" aria-hidden="true">
-        <span ref={labelRef} className="cursor-label" />
+      <div ref={dotRef} className="cursor-dot" aria-hidden="true">
+        <span className="cursor-dot__disc" />
       </div>
     </div>
   );

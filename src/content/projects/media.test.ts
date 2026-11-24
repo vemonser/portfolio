@@ -20,7 +20,7 @@ describe("project media", () => {
           expect(block.alts).toHaveLength(3);
           for (const alt of block.alts) expect(alt.length).toBeGreaterThan(0);
         } else if (block.kind === "video") {
-          expect(block.src).toMatch(/\.webm$/);
+          expect(block.src).toMatch(/\.(webm|mp4)$/);
           expect(block.poster).toMatch(/\.webp$/);
         } else {
           throw new Error(`unknown media kind: ${JSON.stringify(block)}`);

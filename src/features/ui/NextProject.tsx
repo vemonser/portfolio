@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import type { Project } from "@/content/projects/types";
 
+import TextReveal from "./TextReveal";
+
 type Props = {
   project: Project;
   label: string;
@@ -18,13 +20,22 @@ export default function NextProject({ project, label }: Props) {
       href={`/work/${project.slug}`}
       data-next-project
       className="next-project group block border-t border-[var(--line-hairline)] pb-[var(--space-5)] pt-[var(--space-4)] no-underline"
+      transitionTypes={["nav-forward"]}
     >
-      <span className="ui-label">{label}</span>
+      <span className="ui-label">
+        <TextReveal as="span" split="words">
+          {label}
+        </TextReveal>
+      </span>
 
       <span className="mt-[var(--space-3)] flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-        <span className="font-display text-statement font-semibold transition-colors duration-[var(--dur-base)] group-hover:text-lime">
+        <TextReveal
+          as="span"
+          split="words"
+          className="font-display text-statement font-semibold transition-colors duration-[var(--dur-base)] group-hover:text-lime"
+        >
           {project.title}
-        </span>
+        </TextReveal>
 
         <span
           aria-hidden="true"

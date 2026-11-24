@@ -3,8 +3,10 @@ import { getProjects } from "@/content/projects";
 import ChapterLabel from "@/features/ui/ChapterLabel";
 import PageFrame from "@/features/ui/PageFrame";
 import ProjectIndex from "@/features/ui/ProjectIndex";
-import Reveal from "@/features/ui/Reveal";
+import DirectionalTransition from "@/features/transition/DirectionalTransition";
+import TextReveal from "@/features/ui/TextReveal";
 import { bodyMeasure, chapterFrame, displayTitle } from "@/features/ui/styles";
+import PageTitle from "@/features/motion/PageTitle";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -17,26 +19,31 @@ export default function WorkPage() {
   const projects = getProjects();
 
   return (
+    <DirectionalTransition>
     <PageFrame
-      className={`${chapterFrame} pb-[var(--inset-chapter)] pt-[clamp(8rem,22vh,14rem)]`}
+      className={`${chapterFrame} section-pad`}
     >
-      <Reveal className="chapter-open">
+      <div className="chapter-open">
         <ChapterLabel index={1}>{copy.workPage.label}</ChapterLabel>
 
-        <h1 className={`${displayTitle} mt-[var(--space-3)]`}>
-          {copy.workPage.title}
-        </h1>
+        <PageTitle>
+          <TextReveal as="h1" className={`${displayTitle} mt-[var(--space-3)]`}>
+            {copy.workPage.title}
+          </TextReveal>
+        </PageTitle>
 
-        <p
+        <TextReveal
+          as="p"
           className={`${bodyMeasure} mt-[var(--space-3)] text-lede`}
         >
           {copy.workPage.lede(projects.length)}
-        </p>
-      </Reveal>
+        </TextReveal>
+      </div>
 
       <div className="mt-[var(--space-8)]">
         <ProjectIndex projects={projects} variant="archive" />
       </div>
     </PageFrame>
+    </DirectionalTransition>
   );
 }

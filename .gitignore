@@ -48,3 +48,7 @@ next-env.d.ts
 # remotion prototype (video/ is its own pnpm workspace)
 /video/node_modules
 /video/out
+
+# showcase captures and render intermediates (generated)
+/video/public/captures
+/video/.tmp

@@ -8,6 +8,8 @@ type Props = {
   external?: boolean;
   className?: string;
   ariaLabel?: string;
+  /** View-transition type for in-app navigation. Defaults to nav-forward. */
+  transitionType?: "nav-forward" | "nav-back";
 };
 
 /**
@@ -21,6 +23,7 @@ export default function LinkLine({
   external = false,
   className,
   ariaLabel,
+  transitionType = "nav-forward",
 }: Props) {
   const classes = className ? `link-line ${className}` : "link-line";
 
@@ -39,7 +42,12 @@ export default function LinkLine({
   }
 
   return (
-    <Link href={href} className={classes} aria-label={ariaLabel}>
+    <Link
+      href={href}
+      className={classes}
+      aria-label={ariaLabel}
+      transitionTypes={[transitionType]}
+    >
       {children}
     </Link>
   );

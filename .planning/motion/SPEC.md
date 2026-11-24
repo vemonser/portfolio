@@ -1,5 +1,9 @@
 # Motion — Lottie menu icon + first-session intro
 
+> Superseded (2026-11-18): the first-session intro was removed at the user's
+> request; the 404 follow-up lives in `.planning/not-found/SPEC.md`. The menu
+> mark decisions and its evidence remain valid.
+
 Scope: replace the CSS-drawn trigger/close marks with the supplied
 `burger-menu` Lottie animation, and add a one-per-session intro overlay built
 from a bespoke Lottie monogram.

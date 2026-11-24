@@ -1,0 +1,178 @@
+/*
+ * Home hero — the Chris composition promoted from the lab.
+ *
+ * The canvas is the atmosphere; the DOM is the information. Every measurement
+ * comes from the shared scale, and the headline occupies the left nine tracks
+ * while the note owns the right three, so the two can never collide.
+ */
+
+.hero-home {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100svh;
+  overflow: clip;
+  background:
+    radial-gradient(120% 80% at 68% 22%, #191917 0%, #0e0e0d 48%, #0b0b0a 100%);
+  color: var(--color-bone);
+}
+
+.hero-home .hero-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+
+.hero-home__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-block-size: 100svh;
+  padding-block: calc(var(--section-pad) + var(--space-4)) var(--space-4);
+}
+
+.hero-home__content {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--space-3);
+  align-items: end;
+}
+
+.hero-home__title {
+  grid-column: 1 / 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 8.2vw, 8.5rem);
+  font-weight: 550;
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.hero-home__line {
+  display: block;
+  white-space: nowrap;
+}
+
+.hero-home__note {
+  grid-column: 10 / 13;
+  align-self: end;
+  justify-self: end;
+  max-inline-size: 30ch;
+  margin: 0 0 0.35rem;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 72%, transparent);
+}
+
+.hero-home__meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  margin-block-start: var(--space-5);
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--line-hairline);
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-warm);
+}
+
+.hero-home__meta > :last-child {
+  justify-self: end;
+}
+
+.hero-home__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: center;
+  color: color-mix(in srgb, var(--color-bone) 78%, transparent);
+}
+
+.hero-home__status::before {
+  content: "";
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 50%;
+  background: var(--color-lime);
+}
+
+.hero-home__scroll {
+  display: inline-flex;
+  min-block-size: 44px;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-bone);
+  text-decoration: none;
+}
+
+.hero-home__scroll svg {
+  transition: transform var(--dur-base) var(--ease-editorial);
+}
+
+.hero-home__scroll:hover svg,
+.hero-home__scroll:focus-visible svg {
+  transform: translateY(3px);
+}
+
+@media (max-width: 1023px) {
+  .hero-home__title {
+    grid-column: 1 / -1;
+    font-size: 7.6vw;
+  }
+
+  .hero-home__note {
+    grid-column: 1 / -1;
+    justify-self: start;
+    max-inline-size: 46ch;
+    margin-block-start: var(--space-4);
+  }
+}
+
+@media (max-width: 639px) {
+  .hero-home__title {
+    font-size: 10.2vw;
+  }
+
+  .hero-home__inner {
+    padding-block-start: calc(var(--section-pad) + var(--space-4));
+  }
+
+  .hero-home__meta {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--space-2);
+  }
+
+  .hero-home__status {
+    justify-self: end;
+  }
+
+  .hero-home__meta > :last-child {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-home__scroll svg {
+    transition: none;
+  }
+}

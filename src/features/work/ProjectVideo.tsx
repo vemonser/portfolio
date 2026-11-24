@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
 
 type Props = {
   src: string;
   poster: string;
   label: string;
   className?: string;
+  width?: number;
+  height?: number;
+  style?: CSSProperties;
 };
 
 /**
@@ -14,7 +18,15 @@ type Props = {
  * drives playback so a reduced-motion visitor gets the poster and nothing
  * moves, and an off-screen video does not burn battery.
  */
-export default function ProjectVideo({ src, poster, label, className }: Props) {
+export default function ProjectVideo({
+  src,
+  poster,
+  label,
+  className,
+  width,
+  height,
+  style,
+}: Props) {
   const ref = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -54,9 +66,15 @@ export default function ProjectVideo({ src, poster, label, className }: Props) {
       preload="none"
       poster={poster}
       aria-label={label}
+      width={width}
+      height={height}
+      style={style}
       className={className}
     >
-      <source src={src} type="video/webm" />
+      <source
+        src={src}
+        type={src.endsWith(".mp4") ? "video/mp4" : "video/webm"}
+      />
     </video>
   );
 }

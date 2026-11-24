@@ -6,12 +6,16 @@ import { socials } from "@/content/socials";
 import ContactChapter from "@/features/contact-cta/ContactChapter";
 import ContactCta from "@/features/contact-cta/ContactCta";
 import Cursor from "@/features/cursor/Cursor";
+import BackToTop from "@/features/ui/BackToTop";
+import { PAGE_LOADER_GATE } from "@/features/loader/gate";
+import PageLoader from "@/features/loader/page-loader";
+import RouteCurtain from "@/features/transition/RouteCurtain";
 import SiteFooter from "@/features/footer/SiteFooter";
-import SiteIntro from "@/features/intro/SiteIntro";
-import { introGateScript } from "@/features/intro/intro-session";
 import SiteHeader from "@/features/navigation/SiteHeader";
 import { buildNavLinks } from "@/features/navigation/nav";
+
 import SmoothScroll from "@/features/scroll/SmoothScroll";
+import WebVitals from "@/features/analytics/WebVitals";
 import { siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -71,22 +75,25 @@ export default function RootLayout({
         {/*
           Arms the reveal CSS before the first paint. The React warning about
           script tags is dev-only: this runs during HTML parse on every real
-          load, and no-JS visitors never get the hidden state. The intro gate
-          shares the same parse: it marks the document before the cover below
-          can paint, so a returning visitor never sees a flash of it.
+          load, and no-JS visitors never get the hidden state.
         */}
+        <script dangerouslySetInnerHTML={{ __html: PAGE_LOADER_GATE }} />
         <script
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.dataset.js = "true";${introGateScript()}`,
+            __html: 'document.documentElement.dataset.js = "true"',
           }}
         />
-        <SiteIntro brand={copy.meta.title} />
         <SmoothScroll />
+        <WebVitals />
+        <PageLoader />
+        <RouteCurtain />
         <Cursor />
+        <BackToTop />
         <SiteHeader
           brand={copy.meta.title}
           homeHref="/"
           links={links}
+          ctaLabel={copy.cta.label}
           labels={{
             open: copy.nav.open,
             close: copy.nav.close,
@@ -109,6 +116,7 @@ export default function RootLayout({
           }}
           links={links}
           socials={liveSocials}
+          wordmark={copy.meta.title}
         />
       </body>
     </html>

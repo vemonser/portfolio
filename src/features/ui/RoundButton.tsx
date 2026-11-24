@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ArrowUpRight } from "./Arrow";
 import { roundButton } from "./styles";
 
 type Props = {
@@ -9,26 +10,7 @@ type Props = {
   className?: string;
 };
 
-function Arrow() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M7 17 17 7M9 7h8v8" />
-    </svg>
-  );
-}
-
-/** The big lime disc — dennissnellenberg's "Get in touch" button. */
+/** The one CTA: a lime disc with the same arrow at the same size everywhere. */
 export default function RoundButton({
   href,
   label,
@@ -39,20 +21,32 @@ export default function RoundButton({
   const content = (
     <>
       <span>{label}</span>
-      <Arrow />
+      <ArrowUpRight className="transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:translate-x-1 group-hover:-translate-y-1" />
     </>
   );
 
   if (external) {
     return (
-      <a href={href} className={classes} target="_blank" rel="noreferrer">
+      <a
+        href={href}
+        className={classes}
+        target="_blank"
+        rel="noreferrer"
+        data-magnetic
+      >
         {content}
       </a>
     );
   }
 
   return (
-    <Link href={href} className={classes}>
+    <Link
+      href={href}
+      className={classes}
+      data-magnetic
+      data-cursor="hello"
+      transitionTypes={["nav-forward"]}
+    >
       {content}
     </Link>
   );

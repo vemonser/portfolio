@@ -108,6 +108,91 @@ test.describe("case study — reduced motion", () => {
   });
 });
 
+test.describe("image reveal", () => {
+  test("reveals a card only once it enters the viewport", async ({ page }) => {
+    await page.goto("/work");
+
+    const card = page.locator("a[data-project]").last();
+    const overlay = card.locator("[data-overlay]");
+    const scaleY = () =>
+      overlay.evaluate((el) => {
+        const matrix = new DOMMatrix(getComputedStyle(el).transform);
+        return matrix.d;
+      });
+
+    // Wait for the cover to arm itself, then confirm it stays closed below
+    // the fold — it must not uncover ahead of the reader just because the page
+    // finished loading.
+    await expect.poll(scaleY).toBeCloseTo(1, 2);
+    await page.waitForTimeout(2500);
+    expect(await scaleY()).toBeCloseTo(1, 2);
+
+    await card.scrollIntoViewIfNeeded();
+    await expect.poll(scaleY).toBeCloseTo(0, 2);
+  });
+
+  test("uncovers from the top edge down, without a fade or a slide", async ({
+    page,
+  }) => {
+    await page.goto("/work");
+
+    const card = page.locator("a[data-project]").last();
+    const overlay = card.locator("[data-overlay]");
+    const media = card.locator("[data-media]");
+    const opacity = () => media.evaluate((el) => getComputedStyle(el).opacity);
+    const scale = () =>
+      media.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+
+    await expect.poll(scale).toBeGreaterThan(1.05);
+    expect(await opacity()).toBe("1");
+
+    const scaleY = () =>
+      overlay.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).d);
+
+    await expect.poll(scaleY).toBeCloseTo(1, 2);
+
+    // Scroll first so the reveal has a chance to arm, then sample the cover
+    // while it collapses: it must fall monotonically from 1 to 0, and the
+    // media must settle from a push-in to exactly 1.
+    await card.scrollIntoViewIfNeeded();
+    const recording = await card.evaluate(async (element) => {
+      const overlay = element.querySelector<HTMLElement>("[data-overlay]");
+      const media = element.querySelector<HTMLElement>("[data-media]");
+      const read = () => ({
+        cover: overlay
+          ? new DOMMatrix(getComputedStyle(overlay).transform).d
+          : 1,
+        zoom: media
+          ? new DOMMatrix(getComputedStyle(media).transform).a
+          : 1,
+      });
+      const out: Array<{ cover: number; zoom: number }> = [];
+      const t0 = performance.now();
+      return await new Promise<typeof out>((resolve) => {
+        const check = () => {
+          out.push(read());
+          if (performance.now() - t0 > 1800) {
+            resolve(out);
+            return;
+          }
+          requestAnimationFrame(check);
+        };
+        check();
+      });
+    });
+
+    expect(recording.length).toBeGreaterThan(1);
+    expect(recording[0].cover).toBeCloseTo(1, 1);
+    expect(recording[recording.length - 1].cover).toBeLessThan(0.02);
+    expect(recording[recording.length - 1].zoom).toBeCloseTo(1, 2);
+    for (let i = 1; i < recording.length; i += 1) {
+      expect(recording[i].cover).toBeLessThanOrEqual(
+        recording[i - 1].cover + 0.02,
+      );
+    }
+  });
+});
+
 test.describe("project cards — every project", () => {
   for (const route of ["/", "/work"]) {
     test(`renders two captures on every card at ${route}`, async ({ page }) => {

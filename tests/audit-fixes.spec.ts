@@ -1,68 +1,42 @@
-import { expect, test, type Page } from "./support/fixtures";
-import sharp from "sharp";
+import { expect, test } from "./support/fixtures";
 
 /**
  * Regression cover for AUDIT.md Phases 1 and 2. Each test names the audit
  * finding it protects, so a failure points at the defect, not just a pixel.
  */
 
-async function hideHeroScenery(page: Page) {
-  await page.evaluate(() => {
-    document
-      .querySelectorAll(
-        "#hero canvas, #hero img, #hero picture, #hero [data-hero-meta], .grain",
-      )
-      .forEach((node) => {
-        (node as HTMLElement).style.visibility = "hidden";
-      });
-  });
-}
-
-/** Bottom-most row that still carries wordmark ink, searched from `fromRow`. */
-async function lastInkRow(page: Page, fromRow: number) {
-  const buffer = await page.screenshot();
-  const { data, info } = await sharp(buffer)
-    .removeAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-
-  for (let y = info.height - 1; y >= fromRow; y -= 1) {
-    let bright = 0;
-    for (let x = 0; x < info.width; x += 1) {
-      const i = (y * info.width + x) * 3;
-      if (data[i] > 180 && data[i + 1] > 175 && data[i + 2] > 165) {
-        bright += 1;
-        if (bright >= 3) return y;
-      }
-    }
-  }
-
-  return -1;
-}
-
-test.describe("P1-1 hero wordmark", () => {
+test.describe("P1-1 hero composition", () => {
   for (const [width, height] of [
     [390, 800],
     [768, 900],
     [1440, 900],
     [1920, 900],
   ] as const) {
-    test(`keeps its baseline clear of the fold at ${width}`, async ({
+    test(`keeps the three lines inside the first screen at ${width}`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height });
       await page.goto("/");
-      await page.waitForTimeout(2500);
-      await hideHeroScenery(page);
+      await page.evaluate(() => document.fonts.ready);
 
-      const viewportHeight = await page.evaluate(() => window.innerHeight);
-      // Only the bottom band can hold the wordmark; searching the whole frame
-      // would let the header satisfy the check even if the wordmark vanished.
-      const band = Math.floor(viewportHeight * 0.5);
-      const ink = await lastInkRow(page, band);
+      const boxes = await page.locator(".hero-home__line").evaluateAll(
+        (nodes) =>
+          nodes.map((node) => {
+            const rect = node.getBoundingClientRect();
+            return { left: rect.left, right: rect.right, bottom: rect.bottom };
+          }),
+      );
 
-      expect(ink).toBeGreaterThan(viewportHeight - 140);
-      expect(ink).toBeLessThanOrEqual(viewportHeight - 6);
+      expect(boxes).toHaveLength(3);
+      for (const box of boxes) {
+        expect(box.left).toBeGreaterThanOrEqual(0);
+        expect(box.right).toBeLessThanOrEqual(width);
+        expect(box.bottom).toBeLessThanOrEqual(height);
+      }
+
+      const meta = await page.locator(".hero-home__meta").boundingBox();
+      expect(meta).not.toBeNull();
+      expect(meta!.y + meta!.height).toBeLessThanOrEqual(height);
     });
   }
 });
@@ -158,7 +132,9 @@ test.describe("P2-1 contact disc", () => {
 
   test("centres its label and arrow as one block", async ({ page }) => {
     await page.goto("/");
-    const disc = page.locator('a[href="/contact"]', { hasText: "Get in touch" });
+    const disc = page
+      .locator('[data-section="contact-cta"]')
+      .locator('a[href="/contact"]', { hasText: "Get in touch" });
     await disc.scrollIntoViewIfNeeded();
     await page.waitForTimeout(900);
 
@@ -197,40 +173,18 @@ test.describe("P2-2 chapter numbering", () => {
   });
 });
 
-test.describe("hero cleanup", () => {
+test.describe("hero meta", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test("shows the wordmark only", async ({ page }) => {
+  test("replaces the circled arrow with corner meta", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("#hero [data-hero-meta]")).toHaveCount(0);
-    await expect(
-      page.locator("#hero").getByText("Available for work"),
-    ).toHaveCount(0);
-    await expect(page.locator("#hero").getByText("Cairo, Egypt")).toHaveCount(0);
-    await expect(page.locator("#hero").getByText("Scroll", { exact: true })).toHaveCount(0);
-  });
-});
 
-test.describe("poster cache busting", () => {
-  test.use({ viewport: { width: 1440, height: 900 } });
-
-  test("versions every poster URL", async ({ page }) => {
-    await page.goto("/");
-    const urls = await page.evaluate(() => {
-      const picture = document.querySelector("#hero picture");
-      if (!picture) return [];
-      return [...picture.querySelectorAll("source, img")].map(
-        (node) =>
-          node.getAttribute("srcset") ?? node.getAttribute("src") ?? "",
-      );
-    });
-
-    expect(urls.length).toBe(3);
-    for (const url of urls) {
-      // A regenerated poster keeps the same path, so the browser must be told
-      // the bytes changed; otherwise an open tab keeps the old frame forever.
-      expect(url).toMatch(/\?v=[a-f0-9]{8}/);
-    }
+    await expect(page.locator(".hero-circle")).toHaveCount(0);
+    await expect(page.locator(".hero-home__meta")).toContainText("Cairo, Egypt");
+    await expect(page.locator(".hero-home__meta")).toContainText(
+      "Available for work",
+    );
+    await expect(page.locator(".hero-home__scroll")).toContainText("Scroll");
   });
 });
 
@@ -266,34 +220,26 @@ test.describe("hero first paint", () => {
 test.describe("hero fit at 320", () => {
   test.use({ viewport: { width: 320, height: 800 } });
 
-  test("does not clip the wordmark", async ({ page }) => {
+  test("does not clip the headline or overflow horizontally", async ({
+    page,
+  }) => {
     for (const width of [320, 360]) {
       await page.setViewportSize({ width, height: 800 });
       await page.goto("/");
       await page.evaluate(() => document.fonts.ready);
-      await page.waitForTimeout(200);
-      await hideHeroScenery(page);
 
-      const buffer = await page.screenshot();
-      const { data, info } = await sharp(buffer)
-        .removeAlpha()
-        .raw()
-        .toBuffer({ resolveWithObject: true });
+      const result = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+        headline: [...document.querySelectorAll(".hero-home__line")].map(
+          (node) => node.getBoundingClientRect().right,
+        ),
+      }));
 
-      const brightInColumn = (x: number) => {
-        for (let y = 120; y < info.height; y += 1) {
-          const i = (y * info.width + x) * 3;
-          if (data[i] > 180 && data[i + 1] > 175 && data[i + 2] > 165) return true;
-        }
-        return false;
-      };
-
-      // A clipped line leaves ink against the viewport edge.
-      expect(brightInColumn(0), `ink at x=0 at ${width}px`).toBe(false);
-      expect(
-        brightInColumn(info.width - 1),
-        `ink at x=${info.width - 1} at ${width}px`,
-      ).toBe(false);
+      expect(result.scrollWidth - result.clientWidth).toBeLessThanOrEqual(1);
+      for (const right of result.headline) {
+        expect(right).toBeLessThanOrEqual(width);
+      }
     }
   });
 });

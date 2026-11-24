@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "./support/fixtures";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./support/fixtures";
 
 const FORM = "form[data-contact-form]";
 const STATUS = "[data-form-status]";

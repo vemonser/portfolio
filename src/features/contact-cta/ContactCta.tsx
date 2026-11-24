@@ -1,7 +1,7 @@
 import { copy } from "@/content/copy";
 import ChapterLabel from "@/features/ui/ChapterLabel";
-import LinkLine from "@/features/ui/LinkLine";
-import Reveal from "@/features/ui/Reveal";
+import CopyLink from "@/features/ui/CopyLink";
+import TextReveal from "@/features/ui/TextReveal";
 import RoundButton from "@/features/ui/RoundButton";
 import { displayCta } from "@/features/ui/styles";
 
@@ -17,51 +17,62 @@ export default function ContactCta() {
     <section
       aria-labelledby="cta-title"
       data-section="contact-cta"
-      className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] pb-[calc(var(--inset-chapter)+2rem)] pt-[var(--inset-chapter)]"
+      className="page-shell section-pad border-t border-[var(--line-hairline)]"
     >
-      <Reveal>
+      <div>
         <ChapterLabel>{cta.label}</ChapterLabel>
 
-        <h2
+        <TextReveal
           id="cta-title"
+          as="h2"
           className={`${displayCta} mt-[var(--space-3)] max-w-[18ch]`}
         >
           {cta.title}
-        </h2>
-      </Reveal>
+        </TextReveal>
+      </div>
 
-      <div className="mt-[var(--space-6)] grid items-end gap-[var(--space-6)] md:grid-cols-[minmax(0,1fr)_auto]">
-        <Reveal delay={80}>
+      <div className="mt-[var(--space-5)] grid items-start gap-[var(--space-4)] md:grid-cols-[minmax(0,1fr)_auto] md:gap-[var(--space-6)]">
+        <div>
           <dl className="m-0 flex flex-col gap-[var(--space-3)]">
             <div className="flex flex-col gap-[0.35rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
-              <dt className="ui-label">{cta.emailLabel}</dt>
-              <dd className="m-0 break-words text-title [overflow-wrap:anywhere]">
-                <LinkLine
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">
+                  {cta.emailLabel}
+                </TextReveal>
+              </dt>
+              <dd className="contact-cta__value m-0 break-words [overflow-wrap:anywhere]">
+                <CopyLink
                   href={`mailto:${cta.email}`}
                   className="inline-flex min-h-11 items-center"
+                  reveal
                 >
                   {cta.email}
-                </LinkLine>
+                </CopyLink>
               </dd>
             </div>
 
             <div className="flex flex-col gap-[0.35rem] border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
-              <dt className="ui-label">{cta.phoneLabel}</dt>
-              <dd className="m-0 text-title" dir="ltr">
-                <LinkLine
+              <dt className="ui-label">
+                <TextReveal as="span" split="words">
+                  {cta.phoneLabel}
+                </TextReveal>
+              </dt>
+              <dd className="contact-cta__value m-0" dir="ltr">
+                <CopyLink
                   href={cta.phoneHref}
                   className="inline-flex min-h-11 items-center"
+                  reveal
                 >
                   {cta.phone}
-                </LinkLine>
+                </CopyLink>
               </dd>
             </div>
           </dl>
-        </Reveal>
+        </div>
 
-        <Reveal delay={140} className="justify-self-start md:justify-self-end">
+        <div className="justify-self-start md:justify-self-end">
           <RoundButton href="/contact" label={cta.button} />
-        </Reveal>
+        </div>
       </div>
     </section>
   );

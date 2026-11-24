@@ -1,6 +1,6 @@
 import { copy } from "@/content/copy";
 import ChapterLabel from "@/features/ui/ChapterLabel";
-import Reveal from "@/features/ui/Reveal";
+import TextReveal from "@/features/ui/TextReveal";
 
 /**
  * The first chapter after the Hero: one statement, one supporting argument and
@@ -10,47 +10,32 @@ import Reveal from "@/features/ui/Reveal";
 export default function IntroSection() {
   return (
     <section
+      id="intro"
       aria-labelledby="intro-title"
       data-section="intro"
-      className="px-[var(--inset-edge)] pb-[var(--inset-chapter)] pt-[var(--inset-chapter-lg)]"
+      className="page-shell section-pad"
     >
-      <Reveal className="border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
+      <div className="border-t border-[var(--line-hairline)] pt-[var(--space-2)]">
         <ChapterLabel index={0}>{copy.intro.label}</ChapterLabel>
-      </Reveal>
+      </div>
 
-      <div className="mt-[var(--space-6)] grid items-start gap-[var(--space-5)] lg:grid-cols-12 lg:gap-x-[var(--space-5)]">
-        <Reveal className="lg:col-span-8">
-          <h2
+      <div className="grid-12 mt-[var(--space-5)] items-start">
+        <div className="lg:col-span-8">
+          <TextReveal
             id="intro-title"
+            as="h2"
             className="m-0 max-w-[22ch] font-display text-statement font-medium"
           >
             {copy.intro.statement}
-          </h2>
-        </Reveal>
+          </TextReveal>
+        </div>
 
-        <Reveal delay={120} className="lg:col-span-4 lg:col-start-9 lg:mt-[var(--space-5)]">
-          <p className="m-0 max-w-[34ch] text-lede text-fg-muted">
+        <div className="lg:col-span-4 lg:col-start-9 lg:mt-[var(--space-5)]">
+          <TextReveal as="p" className="m-0 max-w-[34ch] text-lede text-fg-muted">
             {copy.intro.body}
-          </p>
-        </Reveal>
+          </TextReveal>
+        </div>
       </div>
-
-      <Reveal
-        delay={180}
-        className="mt-[var(--space-6)] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-1)] border-t border-[var(--line-hairline)] pt-[var(--space-2)] font-label text-t-14 uppercase tracking-[var(--track)] text-warm"
-      >
-        <span>{copy.hero.location}</span>
-        <span aria-hidden="true" className="text-bone/25">
-          ·
-        </span>
-        <span className="inline-flex items-center gap-[0.45rem] text-fg-muted">
-          <span
-            className="h-[6px] w-[6px] rounded-full bg-lime"
-            aria-hidden="true"
-          />
-          {copy.hero.available}
-        </span>
-      </Reveal>
     </section>
   );
 }

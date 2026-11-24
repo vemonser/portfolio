@@ -12,9 +12,15 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "evidence": "node scripts/editorial-evidence.mjs",
-    "capture:work": "node scripts/capture-work.mjs"
+    "capture:work": "node scripts/capture-work.mjs",
+    "capture:thumbs": "node scripts/capture-thumbnails.ts",
+    "capture": "node video/scripts/capture.mjs",
+    "studio": "npm --prefix video run studio",
+    "render": "node video/scripts/render.mjs",
+    "discover": "node video/scripts/discover-routes.mjs"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.4.6",
@@ -25,7 +31,8 @@
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "three": "0.187.0"
+    "three": "0.187.0",
+    "web-vitals": "^6.2.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",
