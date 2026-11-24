@@ -88,6 +88,22 @@ export default function CursorLabPage() {
                 A normal link
               </a>
 
+              <a
+                href="mailto:hello@example.com"
+                className="link-line w-fit text-t-16"
+              >
+                Email — hello role
+              </a>
+
+              <a
+                href="https://example.com"
+                target="_blank"
+                rel="noreferrer"
+                className="link-line w-fit text-t-16"
+              >
+                External — visit role
+              </a>
+
               <button
                 type="button"
                 className="w-fit border border-[var(--line-strong)] px-5 py-3 font-label text-t-12 uppercase tracking-[var(--track)] transition-colors duration-200 hover:border-lime hover:text-lime"

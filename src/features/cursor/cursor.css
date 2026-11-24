@@ -121,6 +121,22 @@
   color: var(--color-bone);
 }
 
+.cursor-ring__label {
+  display: none;
+  position: absolute;
+  inset: 0;
+  place-items: center;
+  padding: 0;
+  color: var(--color-bone);
+  font-family: var(--font-label);
+  font-size: var(--cursor-label-size);
+  font-weight: 500;
+  letter-spacing: var(--track);
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* Production-only arrow swap. Lab variants keep this hidden. */
 .cursor-arrow {
   --arrow-scale: 1;
@@ -157,6 +173,10 @@ html[data-cursor-variant="orbit"] .cursor-dot__disc {
   --dot-size: var(--cursor-dot-size);
   background: var(--color-bone);
   mix-blend-mode: difference;
+}
+
+html[data-cursor-variant="orbit"] .cursor-ring__arrow {
+  display: none !important;
 }
 
 /* Lime Target: a lime dot with an ink keyline; the ring exists only on hover. */
@@ -230,6 +250,22 @@ html[data-cursor-variant="orbit"]:is(
   )
   .cursor-ring {
   --ring-scale: var(--cursor-orbit-focus-scale);
+}
+
+html[data-cursor-variant="orbit"]:is(
+    [data-cursor-state="link"],
+    [data-cursor-state="hello"],
+    [data-cursor-state="visit"],
+    [data-cursor-state="view"],
+    [data-cursor-state="play"]
+  )
+  .cursor-ring__label {
+  display: grid;
+}
+
+html[data-cursor-variant="lime"] .cursor-ring__label,
+html[data-cursor-variant="editorial"] .cursor-ring__label {
+  display: none !important;
 }
 
 html[data-cursor-variant="lime"]:is(

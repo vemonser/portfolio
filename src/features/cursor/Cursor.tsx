@@ -12,6 +12,14 @@ const REDUCED = "(prefers-reduced-motion: reduce)";
 
 type CursorRole = "default" | "link" | "view" | "play" | "hello" | "visit" | "text" | "disabled";
 
+const ROLE_LABELS: Partial<Record<CursorRole, string>> = {
+  link: "OPEN",
+  view: "VIEW",
+  play: "PLAY",
+  hello: "HELLO",
+  visit: "VISIT",
+};
+
 function hasRing(value: string | undefined): boolean {
   return value === "orbit" || value === "lime" || value === "editorial";
 }
@@ -35,6 +43,7 @@ export default function Cursor() {
   const layerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
   const [enabled, setEnabled] = useState(false);
 
   // The nodes are not rendered at all on touch/coarse pointers or without JS.
@@ -51,8 +60,9 @@ export default function Cursor() {
 
     const dot = dotRef.current;
     const ring = ringRef.current;
+    const label = labelRef.current;
     const layer = layerRef.current;
-    if (!dot || !ring || !layer) return;
+    if (!dot || !ring || !label || !layer) return;
 
     const html = document.documentElement;
     const reduced = window.matchMedia(REDUCED);
@@ -113,6 +123,7 @@ export default function Cursor() {
       if (next === role) return;
       role = next;
       html.dataset.cursorState = next;
+      label.textContent = ROLE_LABELS[next] ?? "";
     };
 
     const roleAt = (node: Element): CursorRole => {
@@ -406,6 +417,7 @@ export default function Cursor() {
           >
             <path d="M5 19 19 5M9 5h10v10" />
           </svg>
+          <span ref={labelRef} className="cursor-ring__label" />
         </span>
       </div>
     </div>

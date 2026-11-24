@@ -326,25 +326,35 @@ test.describe("cursor variants lab", () => {
     const disc = page.locator(".cursor-dot__disc");
     const ring = page.locator(".cursor-ring__inner");
     const ringArrow = page.locator(".cursor-ring__arrow");
+    const ringLabel = page.locator(".cursor-ring__label");
     const productionArrow = page.locator(".cursor-arrow");
 
     // Orbit: 10px difference-blended dot + 30px trailing ring at rest.
     await setRole("default");
     await expect(disc).toBeVisible();
     await expect(ring).toBeVisible();
+    await expect(ringLabel).toBeHidden();
     expect(await disc.evaluate((el) => getComputedStyle(el).width)).toBe(
       "10px",
     );
     expect(
       await disc.evaluate((el) => getComputedStyle(el).mixBlendMode),
     ).toBe("difference");
-    await setRole("view");
+    const viewTarget = page.locator('[data-cursor="view"]').first();
+    await viewTarget.scrollIntoViewIfNeeded();
+    await viewTarget.hover();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-state",
+      "view",
+    );
     await expect(disc).toBeHidden();
     await expect(ring).toBeVisible();
-    await expect(ringArrow).toBeVisible();
+    await expect(ringArrow).toBeHidden();
+    await expect(ringLabel).toBeVisible();
+    await expect(ringLabel).toHaveText("VIEW");
     await expect
       .poll(() => ring.evaluate((el) => el.getBoundingClientRect().width))
-      .toBeCloseTo(48, 0);
+      .toBeCloseTo(72, 0);
 
     // Lime Target: lime dot with an ink keyline; no ring until hover.
     await page.locator('[data-cursor-variant-option="lime"]').click();
@@ -361,6 +371,7 @@ test.describe("cursor variants lab", () => {
     await expect(disc).toBeHidden();
     await expect(ring).toBeVisible();
     await expect(ringArrow).toBeVisible();
+    await expect(ringLabel).toBeHidden();
     await expect
       .poll(() => ring.evaluate((el) => el.getBoundingClientRect().width))
       .toBeCloseTo(44, 0);
@@ -380,12 +391,45 @@ test.describe("cursor variants lab", () => {
     await expect(disc).toBeHidden();
     await expect(ring).toBeVisible();
     await expect(ringArrow).toBeVisible();
+    await expect(ringLabel).toBeHidden();
     await expect
       .poll(() => ring.evaluate((el) => el.getBoundingClientRect().width))
       .toBeCloseTo(52, 0);
 
     // The production arrow swap is not layered underneath a lab variant.
     await expect(productionArrow).toBeHidden();
+  });
+
+  test("labels Orbit by role", async ({ page }) => {
+    await page.goto("/lab/cursor");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
+
+    const label = page.locator(".cursor-ring__label");
+    await page.evaluate(() => {
+      document.documentElement.dataset.cursorVisible = "true";
+    });
+
+    const cases = [
+      [page.getByRole("link", { name: "A normal link" }), "OPEN"],
+      [page.locator('[data-cursor="view"]').first(), "VIEW"],
+      [page.locator('[data-cursor="play"]'), "PLAY"],
+      [page.locator('a[href^="mailto:"]').first(), "HELLO"],
+      [page.locator('a[target="_blank"]').first(), "VISIT"],
+    ] as const;
+
+    for (const [target, word] of cases) {
+      await target.dispatchEvent("pointerover", { pointerType: "mouse" });
+      await expect(label).toBeVisible();
+      await expect(label).toHaveText(word);
+    }
+
+    await page.locator("body").dispatchEvent("pointerover", {
+      pointerType: "mouse",
+    });
+    await expect(label).toBeHidden();
   });
 
   test("switches live and keeps the ring under the pointer", async ({ page }) => {
@@ -477,7 +521,8 @@ test.describe("custom cursor", () => {
     await expect(html).toHaveAttribute("data-cursor-state", "link");
     await expect(page.locator(".cursor-dot__disc")).toBeHidden();
     await expect(page.locator(".cursor-ring__inner")).toBeVisible();
-    await expect(page.locator(".cursor-ring__arrow")).toBeVisible();
+    await expect(page.locator(".cursor-ring__arrow")).toBeHidden();
+    await expect(page.locator(".cursor-ring__label")).toHaveText("OPEN");
 
     const view = page.locator('[data-cursor="view"]').first();
     await view.scrollIntoViewIfNeeded();
@@ -485,14 +530,15 @@ test.describe("custom cursor", () => {
     await expect(html).toHaveAttribute("data-cursor-state", "view");
     await expect(page.locator(".cursor-dot__disc")).toBeHidden();
     await expect(page.locator(".cursor-ring__inner")).toBeVisible();
-    await expect(page.locator(".cursor-ring__arrow")).toBeVisible();
+    await expect(page.locator(".cursor-ring__arrow")).toBeHidden();
+    await expect(page.locator(".cursor-ring__label")).toHaveText("VIEW");
     await expect
       .poll(() =>
         page
           .locator(".cursor-ring__inner")
           .evaluate((element) => getComputedStyle(element).scale),
       )
-      .toBe("1.6");
+      .toBe("2.4");
 
     const play = page.locator('[data-cursor="play"]');
     await play.scrollIntoViewIfNeeded();
@@ -500,7 +546,8 @@ test.describe("custom cursor", () => {
     await expect(html).toHaveAttribute("data-cursor-state", "play");
     await expect(page.locator(".cursor-dot__disc")).toBeHidden();
     await expect(page.locator(".cursor-ring__inner")).toBeVisible();
-    await expect(page.locator(".cursor-ring__arrow")).toBeVisible();
+    await expect(page.locator(".cursor-ring__arrow")).toBeHidden();
+    await expect(page.locator(".cursor-ring__label")).toHaveText("PLAY");
 
     const textField = page.locator("input[type='text']");
     await textField.scrollIntoViewIfNeeded();

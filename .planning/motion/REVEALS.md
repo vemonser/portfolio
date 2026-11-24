@@ -51,11 +51,11 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
 - Prose is split after hydration in a layout effect; the article is hidden
   until every block has its masks.
 - Cursor: a 10 px difference-blended dot at rest; interactive roles hide the
-  dot and reveal one arrow treatment. The lab compares Orbit (30 → 48 px
-  trailing ring), Lime Target (lime/ink keyline, 44 px hover ring) and Editorial
-  Double (12 px keyed dot, 36 → 52 px double ring). Production uses the
-  standalone arrow swap until a variant is chosen. Text entry keeps the native
-  I-beam.
+  dot and reveal one treatment. The lab compares Orbit (30 → 72 px trailing
+  ring with role words VIEW/PLAY/OPEN/HELLO/VISIT), Lime Target (lime/ink
+  keyline, 44 px hover ring) and Editorial Double (12 px keyed dot, 36 → 52 px
+  double ring). Production uses the standalone arrow swap until a variant is
+  chosen. Text entry keeps the native I-beam.
 - Project media: cards overscan their fixed frame (`scale(1.08)`) and drift
   `yPercent: -4 → 4` with scroll (`scrub: 0.6`). Scale and travel live on
   separate nodes so GSAP cannot erase the overscan. Reduced motion rests at
