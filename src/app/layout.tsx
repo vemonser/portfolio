@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 
 import { copy } from "@/content/copy";
@@ -13,9 +13,11 @@ import RouteCurtain from "@/features/transition/RouteCurtain";
 import SiteFooter from "@/features/footer/SiteFooter";
 import SiteHeader from "@/features/navigation/SiteHeader";
 import { buildNavLinks } from "@/features/navigation/nav";
+import RouteFocus from "@/features/navigation/RouteFocus";
 
 import SmoothScroll from "@/features/scroll/SmoothScroll";
 import WebVitals from "@/features/analytics/WebVitals";
+import JsonLd from "@/features/seo/JsonLd";
 import { siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -39,6 +41,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const fontVariables = [inter.variable, jetbrainsMono.variable].join(" ");
+
+export const viewport: Viewport = {
+  themeColor: "#0b0b0a",
+  colorScheme: "dark",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -72,6 +79,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-black font-body text-bone antialiased">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         {/*
           Arms the reveal CSS before the first paint. The React warning about
           script tags is dev-only: this runs during HTML parse on every real
@@ -87,7 +97,40 @@ export default function RootLayout({
         <WebVitals />
         <PageLoader />
         <RouteCurtain />
+        <RouteFocus />
         <Cursor />
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Person",
+                name: "Abdelrhman Samy",
+                url: siteUrl(),
+                jobTitle: "Frontend Engineer",
+                sameAs: [
+                  "https://github.com/vemonser/",
+                  "https://www.linkedin.com/in/abdelrhman-samy-366260201/",
+                ],
+                knowsAbout: [
+                  "Next.js",
+                  "React",
+                  "TypeScript",
+                  "GSAP",
+                  "three.js",
+                  "Arabic RTL interfaces",
+                  "Payload CMS",
+                  "Core Web Vitals",
+                ],
+              },
+              {
+                "@type": "WebSite",
+                name: siteName,
+                url: siteUrl(),
+              },
+            ],
+          }}
+        />
         <BackToTop />
         <SiteHeader
           brand={copy.meta.title}

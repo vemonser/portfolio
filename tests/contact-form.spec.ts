@@ -22,6 +22,7 @@ const copy = {
 async function openContact(page: Page) {
   await page.goto("/contact");
   await page.locator(FORM).waitFor();
+  await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
 }
 
 /** Point the form at a mock endpoint; the default transport is mailto. */

@@ -69,9 +69,9 @@ test.describe("mobile header", () => {
       expect(brandBox!.x + brandBox!.width).toBeLessThanOrEqual(ctaBox!.x);
       expect(ctaBox!.x + ctaBox!.width).toBeLessThanOrEqual(triggerBox!.x);
 
-      const dot = await cta.evaluate((node) =>
-        getComputedStyle(node, "::before").backgroundColor,
-      );
+      const dot = await cta
+        .locator(".header-cta__dot")
+        .evaluate((node) => getComputedStyle(node).backgroundColor);
       expect(dot).toBe("rgb(198, 240, 53)");
     }
   });

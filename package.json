@@ -9,6 +9,7 @@
     "lint": "eslint",
     "poster": "node scripts/poster.mjs",
     "og": "node scripts/og.mjs",
+    "og:projects": "node scripts/generate-project-og.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "evidence": "node scripts/editorial-evidence.mjs",

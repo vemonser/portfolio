@@ -12,6 +12,8 @@ import { formatNumber } from "@/features/ui/editorial";
 import { chapterFrame, displayTitle } from "@/features/ui/styles";
 import PageTitle from "@/features/motion/PageTitle";
 import { pageMetadata } from "@/lib/seo";
+import { siteUrl } from "@/lib/site";
+import JsonLd from "@/features/seo/JsonLd";
 import MediaBlock from "@/features/work/MediaBlock";
 
 type Props = {
@@ -32,6 +34,8 @@ export async function generateMetadata({ params }: Props) {
     title: project.title,
     description: project.tagline,
     path: `/work/${slug}`,
+    image: `/og/${project.slug}.jpg`,
+    imageAlt: `${project.title} — project cover`,
   });
 }
 
@@ -52,6 +56,19 @@ export default async function ProjectPage({ params }: Props) {
       className={`${chapterFrame} section-pad`}
     >
       <article>
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "CreativeWork",
+            name: project.title,
+            description: project.tagline,
+            url: `${siteUrl()}/work/${project.slug}`,
+            image: `${siteUrl()}/og/${project.slug}.jpg`,
+            creator: { "@type": "Person", name: "Abdelrhman Samy" },
+            dateCreated: project.year,
+            keywords: [project.role, ...project.stack].join(", "),
+          }}
+        />
         <header>
           <div className="chapter-open">
           <ChapterLabel index={1}>{copy.project.caseStudy}</ChapterLabel>

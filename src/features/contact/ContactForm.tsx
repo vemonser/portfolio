@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
+
+import Turnstile from "@/features/contact/Turnstile";
 
 import { ArrowUpRight } from "@/features/ui/Arrow";
 import Field from "@/features/ui/Field";
@@ -25,6 +27,8 @@ type Labels = {
   ready: string;
   openMail: string;
   failed: string;
+  privacy: string;
+  verifyRequired: string;
 };
 
 type Props = {
@@ -75,6 +79,17 @@ export default function ContactForm({
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [mailto, setMailto] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileReset, setTurnstileReset] = useState(0);
+  const [verificationError, setVerificationError] = useState(false);
+  const turnstileRequired = Boolean(
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+  );
+
+  const onTurnstile = useCallback((token: string | null) => {
+    setTurnstileToken(token ?? "");
+    setVerificationError(false);
+  }, []);
 
   const fieldError = (field: FieldName, value: string): string | undefined => {
     const trimmed = value.trim();
@@ -144,6 +159,11 @@ export default function ContactForm({
       return;
     }
 
+    if (turnstileRequired && !turnstileToken) {
+      setVerificationError(true);
+      return;
+    }
+
     const payload = {
       name: values.name.trim(),
       email: values.email.trim(),
@@ -159,6 +179,7 @@ export default function ContactForm({
         body: JSON.stringify({
           ...payload,
           company,
+          turnstileToken,
         }),
       });
 
@@ -178,6 +199,12 @@ export default function ContactForm({
     } catch {
       // Deliberately generic: the visitor gets an action, not a status code.
       setStatus("error");
+    } finally {
+      if (turnstileRequired) {
+        setTurnstileToken("");
+        setTurnstileReset((value) => value + 1);
+      }
+      setVerificationError(false);
     }
   };
 
@@ -198,7 +225,7 @@ export default function ContactForm({
         submission while answering as if it succeeded.
       */}
       <div
-        aria-hidden="true"
+        inert
         className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden"
       >
         <label htmlFor="contact-company">Company</label>
@@ -237,6 +264,7 @@ export default function ContactForm({
             type="email"
             name="email"
             autoComplete="email"
+            spellCheck={false}
             maxLength={200}
             dir="ltr"
             value={values.email}
@@ -261,6 +289,23 @@ export default function ContactForm({
         )}
       </Field>
 
+      <input
+        type="hidden"
+        name="turnstileToken"
+        value={turnstileToken}
+        readOnly
+      />
+      <Turnstile key={turnstileReset} onToken={onTurnstile} />
+      {verificationError ? (
+        <p
+          id="contact-turnstile-error"
+          role="alert"
+          className="m-0 text-t-14 leading-[1.6] text-lime"
+        >
+          {labels.verifyRequired}
+        </p>
+      ) : null}
+
       <div className="mt-[var(--space-1)] flex flex-wrap items-center gap-[var(--space-4)]">
         <button
           type="submit"
@@ -275,9 +320,17 @@ export default function ContactForm({
         <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm">
           {labels.hint}
         </p>
+        <p className="m-0 max-w-[34ch] text-t-14 leading-[1.6] text-fg-subtle">
+          {labels.privacy}
+        </p>
       </div>
 
-      <div className="min-h-0">
+      <div
+        data-form-status-live
+        aria-live="polite"
+        aria-atomic="true"
+        className="min-h-0"
+      >
         {status === "success" ? (
           <StatusMessage kind="success">
             <span>{mailto ? labels.ready : labels.sent}</span>
@@ -291,7 +344,14 @@ export default function ContactForm({
             ) : null}
           </StatusMessage>
         ) : null}
+      </div>
 
+      <div
+        data-form-error-live
+        aria-live="assertive"
+        aria-atomic="true"
+        className="min-h-0"
+      >
         {status === "error" ? (
           <StatusMessage kind="error">{labels.failed}</StatusMessage>
         ) : null}

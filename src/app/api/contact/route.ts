@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { verifyTurnstile } from "../../../features/contact/turnstile-server";
+
 /**
  * Contact submission.
  *
@@ -55,6 +57,18 @@ export async function POST(request: Request) {
   if (company) return NextResponse.json({ ok: true });
 
   if (!name || !EMAIL.test(email) || !message) return fail(422, "invalid");
+
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY?.trim();
+  if (turnstileSecret) {
+    const token = text(data.turnstileToken, 2048);
+    const remoteIp = request.headers
+      .get("x-forwarded-for")
+      ?.split(",")[0]
+      ?.trim();
+    if (!(await verifyTurnstile(token, turnstileSecret, remoteIp))) {
+      return fail(422, "verification");
+    }
+  }
 
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.CONTACT_FROM;

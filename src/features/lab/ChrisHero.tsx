@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 
@@ -165,6 +165,7 @@ function useRevealOnScreen() {
  */
 export default function ChrisHero() {
   const sectionRef = useRevealOnScreen();
+  const [paused, setPaused] = useState(false);
 
   // On a client-nav return the loader has already run and the title sits in its
   // final state; fade the stage in gently instead of replaying the title roll.
@@ -191,7 +192,7 @@ export default function ChrisHero() {
       aria-labelledby="hero-title"
     >
       <span className="hero-chris__paper" aria-hidden="true" />
-      <HeroScene />
+      <HeroScene paused={paused} />
 
       <div className="hero-chris__stage">
         <h1
@@ -233,6 +234,15 @@ export default function ChrisHero() {
         <p className="hero-sr">{NOTE.join(" ")}</p>
 
         <HeroCircle label="Scroll to introduction" />
+
+        <button
+          type="button"
+          className="hero-motion-toggle"
+          aria-pressed={paused}
+          onClick={() => setPaused((value) => !value)}
+        >
+          {paused ? "Play motion" : "Pause motion"}
+        </button>
       </div>
     </section>
   );

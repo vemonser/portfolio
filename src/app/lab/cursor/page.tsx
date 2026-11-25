@@ -10,7 +10,7 @@ import CursorReadout from "@/features/lab/CursorReadout";
 export default function CursorLabPage() {
   return (
     <>
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Hero />
 
         <section className="border-t border-[var(--line-hairline)] px-[var(--inset-edge)] py-[var(--space-8)]">

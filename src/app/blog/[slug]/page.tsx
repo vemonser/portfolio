@@ -12,6 +12,8 @@ import TextReveal from "@/features/ui/TextReveal";
 import { chapterFrame, displayArticle } from "@/features/ui/styles";
 import PageTitle from "@/features/motion/PageTitle";
 import { pageMetadata } from "@/lib/seo";
+import { siteUrl } from "@/lib/site";
+import JsonLd from "@/features/seo/JsonLd";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -31,6 +33,9 @@ export async function generateMetadata({ params }: Props) {
     title: post.title,
     description: post.excerpt,
     path: `/blog/${slug}`,
+    image: null,
+    type: "article",
+    publishedTime: post.date,
   });
 }
 
@@ -48,6 +53,19 @@ export default async function BlogPostPage({ params }: Props) {
       className={`${chapterFrame} section-pad`}
     >
       <div className="max-w-[var(--measure-body)]">
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: post.title,
+            description: post.excerpt,
+            datePublished: post.date,
+            author: { "@type": "Person", name: "Abdelrhman Samy" },
+            publisher: { "@type": "Person", name: "Abdelrhman Samy" },
+            mainEntityOfPage: `${siteUrl()}/blog/${post.slug}`,
+            image: `${siteUrl()}/blog/${post.slug}/opengraph-image`,
+          }}
+        />
         <div className="chapter-open">
           <div className="flex flex-col gap-[var(--space-3)]">
             <ChapterLabel index={2}>{copy.blogPage.label}</ChapterLabel>

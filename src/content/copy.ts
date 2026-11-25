@@ -155,6 +155,8 @@ export const copy = {
       ready: "Your message is ready. Open your mail app to send it.",
       openMail: "Open mail app",
       failed: "Something went wrong. Your message is still here — try again.",
+      privacy: "Your details are used only to reply to this enquiry.",
+      verifyRequired: "Please complete the human verification.",
     },
   },
 

@@ -8,6 +8,11 @@ type PageInput = {
   description: string;
   /** Route path, used for the canonical and the Open Graph URL. */
   path: string;
+  /** Custom social image; null lets a colocated opengraph-image route win. */
+  image?: string | null;
+  imageAlt?: string;
+  type?: "website" | "article";
+  publishedTime?: string;
 };
 
 const OG_IMAGE = {
@@ -23,27 +28,49 @@ const OG_IMAGE = {
  * image is named explicitly because a page that sets `openGraph` replaces the
  * inherited object, including the file-convention image.
  */
-export function pageMetadata({ title, description, path }: PageInput): Metadata {
+export function pageMetadata({
+  title,
+  description,
+  path,
+  image,
+  imageAlt,
+  type = "website",
+  publishedTime,
+}: PageInput): Metadata {
   const socialTitle = `${title} — ${siteName}`;
+  const images =
+    image === null
+      ? undefined
+      : image
+        ? [{ url: image, alt: imageAlt ?? `${title} — ${siteName}` }]
+        : [OG_IMAGE];
+  const rss = {
+    url: "/feed.xml",
+    title: `${siteName} — Writing`,
+  };
 
   return {
     title: { absolute: socialTitle },
     description,
-    alternates: { canonical: path },
+    alternates: {
+      canonical: path,
+      types: { "application/rss+xml": [rss] },
+    },
     openGraph: {
-      type: "website",
+      type,
       title: socialTitle,
       description,
       url: path,
       siteName,
       locale: "en_US",
-      images: [OG_IMAGE],
+      ...(images ? { images } : {}),
+      ...(publishedTime ? { publishedTime } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: socialTitle,
       description,
-      images: [OG_IMAGE.url],
+      ...(images ? { images: images.map((entry) => entry.url) } : {}),
     },
   };
 }
@@ -55,7 +82,14 @@ export function homeMetadata(description: string): Metadata {
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: "/" },
+    alternates: {
+      canonical: "/",
+      types: {
+        "application/rss+xml": [
+          { url: "/feed.xml", title: `${siteName} — Writing` },
+        ],
+      },
+    },
     openGraph: {
       type: "website",
       title,

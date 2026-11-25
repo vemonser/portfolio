@@ -208,8 +208,12 @@ type Puff = {
  * bone plate in the page is what the visitor sees. On Home there is no loader,
  * so the first frame is already the settled field.
  */
-export default function HeroScene() {
+export default function HeroScene({ paused = false }: { paused?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pausedRef = useRef(paused);
+  const controlsRef = useRef<{ start: () => void; stop: () => void } | null>(
+    null,
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -244,10 +248,10 @@ export default function HeroScene() {
         ? 0
         : 1;
     let disposed = false;
-    let running = true;
+    let running = !pausedRef.current && !reduced.matches;
     let onScreen = true;
     canvas.dataset.motion = reduced.matches ? "frozen" : "live";
-    canvas.dataset.running = "1";
+    canvas.dataset.running = running ? "1" : "0";
 
     /*
      * Pointer state lives in canvas UV (0..1, y up). The target is what the
@@ -503,7 +507,15 @@ export default function HeroScene() {
     };
 
     const start = () => {
-      if (running || disposed) return;
+      if (
+        running ||
+        disposed ||
+        pausedRef.current ||
+        reduced.matches ||
+        !onScreen
+      ) {
+        return;
+      }
       running = true;
       canvas.dataset.running = "1";
       last = performance.now();
@@ -516,6 +528,8 @@ export default function HeroScene() {
       cancelAnimationFrame(frame);
       frame = 0;
     };
+
+    controlsRef.current = { start, stop };
 
     const onPointerMove = (event: PointerEvent) => {
       if (reduced.matches) return;
@@ -549,7 +563,7 @@ export default function HeroScene() {
     };
 
     const onVisibility = () => {
-      if (document.hidden) stop();
+      if (document.hidden || pausedRef.current) stop();
       else if (!reduced.matches && onScreen) start();
     };
 
@@ -575,10 +589,12 @@ export default function HeroScene() {
     window.addEventListener("blur", onPointerLeave);
     document.addEventListener("visibilitychange", onVisibility);
 
-    if (reduced.matches) {
+    if (reduced.matches || pausedRef.current) {
       stop();
       render(performance.now());
     } else {
+      running = true;
+      canvas.dataset.running = "1";
       frame = requestAnimationFrame(loop);
     }
 
@@ -616,6 +632,7 @@ export default function HeroScene() {
     reduced.addEventListener("change", onReducedChange);
 
     cleanup = () => {
+      controlsRef.current = null;
       stop();
       stopRevealWatch();
       gsap.killTweensOf(revealState);
@@ -684,6 +701,16 @@ export default function HeroScene() {
       delete canvas.dataset.motion;
     };
   }, []);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    if (paused) {
+      if (canvasRef.current) canvasRef.current.dataset.running = "0";
+      controlsRef.current?.stop();
+    } else {
+      controlsRef.current?.start();
+    }
+  }, [paused]);
 
   return <canvas ref={canvasRef} className="hero-scene" aria-hidden="true" />;
 }

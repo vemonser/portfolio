@@ -12,5 +12,9 @@ type Props = {
 export default function PageFrame({ children, className }: Props) {
   const classes = className ? `page-frame ${className}` : "page-frame";
 
-  return <main className={classes}>{children}</main>;
+  return (
+    <main id="main-content" tabIndex={-1} className={classes}>
+      {children}
+    </main>
+  );
 }

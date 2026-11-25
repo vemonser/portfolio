@@ -146,6 +146,7 @@ export default function SiteHeader({
             data-active={currentPath === "/contact" ? "true" : "false"}
             transitionTypes={["nav-forward"]}
           >
+            <span className="header-cta__dot" aria-hidden="true" />
             {ctaLabel}
             <ArrowUpRight className="header-cta__arrow" />
           </Link>

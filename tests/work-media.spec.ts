@@ -169,11 +169,10 @@ test.describe("image reveal", () => {
 
     await expect.poll(scaleY).toBeCloseTo(1, 2);
 
-    // Scroll first so the reveal has a chance to arm, then sample the cover
-    // while it collapses: it must fall monotonically from 1 to 0, and the
-    // media must settle from a push-in to exactly 1.
-    await card.scrollIntoViewIfNeeded();
-    const recording = await card.evaluate(async (element) => {
+    // Start sampling while the card is still below the fold, then scroll. The
+    // first frame is deterministically the closed cover; the reveal must fall
+    // monotonically to 0 and the media must settle to exactly 1.
+    const recordingPromise = card.evaluate(async (element) => {
       const overlay = element.querySelector<HTMLElement>("[data-overlay]");
       const media = element.querySelector<HTMLElement>("[data-media]");
       const read = () => ({
@@ -198,6 +197,9 @@ test.describe("image reveal", () => {
         check();
       });
     });
+
+    await card.scrollIntoViewIfNeeded();
+    const recording = await recordingPromise;
 
     expect(recording.length).toBeGreaterThan(1);
     expect(recording[0].cover).toBeCloseTo(1, 1);

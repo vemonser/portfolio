@@ -226,6 +226,41 @@ html[data-hero-phase="reveal"] .hero-note__inner {
   animation-delay: calc(2000ms + var(--i) * 55ms);
 }
 
+.hero-motion-toggle {
+  position: absolute;
+  inset-inline-end: var(--gutter);
+  inset-block-end: var(--space-3);
+  z-index: 3;
+  min-block-size: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-hairline);
+  border-radius: 999px;
+  background: rgb(11 11 10 / 0.65);
+  color: var(--color-bone);
+  font-family: var(--font-label);
+  font-size: var(--text-t-12);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  transition:
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.hero-motion-toggle:hover,
+.hero-motion-toggle:focus-visible {
+  border-color: var(--color-lime);
+  background: var(--color-lime);
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-motion-toggle {
+    display: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
  * Circle — magnetic, two rings, no fill
  * -------------------------------------------------------------------------- */

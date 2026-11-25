@@ -237,6 +237,33 @@ html.lenis body {
   }
 }
 
+.skip-link {
+  position: fixed;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 10000;
+  min-block-size: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-lime);
+  background: var(--color-black);
+  color: var(--color-bone);
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  text-decoration: none;
+  transform: translateY(calc(-100% - var(--space-3)));
+  transition: transform var(--dur-fast) var(--ease-editorial);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.skip-link:focus:not(:focus-visible) {
+  transform: translateY(calc(-100% - var(--space-3)));
+}
+
 @layer components {
 /*
  * The wordmark: real HTML text, the LCP element, and the h1.
@@ -417,6 +444,20 @@ html.lenis body {
   color: var(--color-ink);
 }
 
+.header-cta__dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--color-lime);
+  transition: background-color var(--dur-fast) ease;
+}
+
+.header-cta:hover .header-cta__dot,
+.header-cta:focus-visible .header-cta__dot {
+  background: var(--color-ink);
+}
+
 .header-cta__arrow {
   transition: transform var(--dur-base) var(--ease-editorial);
 }
@@ -561,8 +602,9 @@ html.lenis body {
   stroke: currentColor !important;
 }
 
-/* No inline links or CTA on small screens; the trigger carries navigation
-   there. Its visibility is state-driven so it can step aside over running copy. */
+/* No inline navigation on small screens; a compact Contact action and the
+   trigger carry the header. Its visibility is state-driven so it can step
+   aside over running copy. */
 @media (max-width: 767px) {
   .site-header__nav {
     display: none;
@@ -570,14 +612,21 @@ html.lenis body {
 
   .site-header {
     gap: var(--space-1);
-    padding-inline-end: calc(var(--gutter) + 4.5rem);
+    padding-inline-end: calc(var(--gutter) + 4.75rem);
   }
 
   .site-header__actions {
-    gap: 0;
+    gap: var(--space-2);
   }
 
   .header-cta {
+    min-block-size: 44px;
+    padding-inline: 0;
+    border: 0;
+    font-size: var(--text-t-12);
+  }
+
+  .header-cta__arrow {
     display: none;
   }
 }
