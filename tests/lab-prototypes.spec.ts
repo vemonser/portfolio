@@ -1,4 +1,5 @@
 import type { Locator } from "@playwright/test";
+import sharp from "sharp";
 import { expect, test } from "./support/fixtures";
 
 /*
@@ -297,7 +298,10 @@ test.describe("cursor variants lab", () => {
   }) => {
     await page.goto("/lab/cursor");
 
-    const group = page.getByRole("group", { name: "Cursor variant" });
+    const group = page.getByRole("group", {
+      name: "Cursor variant",
+      exact: true,
+    });
     await expect(group).toBeVisible();
     await expect(group.getByRole("button", { name: "Orbit" })).toBeVisible();
     await expect(
@@ -305,6 +309,16 @@ test.describe("cursor variants lab", () => {
     ).toBeVisible();
     await expect(
       group.getByRole("button", { name: "Editorial Double" }),
+    ).toBeVisible();
+
+    const magnetic = page.getByRole("group", {
+      name: "Magnetic cursor variant",
+    });
+    await expect(magnetic).toBeVisible();
+    await expect(magnetic.getByRole("button", { name: "Bone" })).toBeVisible();
+    await expect(magnetic.getByRole("button", { name: "Lime" })).toBeVisible();
+    await expect(
+      magnetic.getByRole("button", { name: "Inverse" }),
     ).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute(
       "data-cursor-variant",
@@ -432,8 +446,157 @@ test.describe("cursor variants lab", () => {
     await expect(label).toBeHidden();
   });
 
+  test("magnetic variants use a larger trailing dot and role words", async ({
+    page,
+  }) => {
+    await page.goto("/lab/cursor");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
+
+    const magneticDisc = page.locator(".cursor-magnetic__disc");
+    const magneticLabel = page.locator(".cursor-magnetic__label");
+    const exactDot = page.locator(".cursor-dot__disc");
+    const ring = page.locator(".cursor-ring__inner");
+    const viewTarget = page.locator('[data-cursor="view"]').first();
+
+    const setRest = () =>
+      page.evaluate(() => {
+        document.documentElement.dataset.cursorVisible = "true";
+        document.documentElement.dataset.cursorState = "default";
+      });
+
+    const cases = [
+      {
+        id: "bone",
+        background: "rgb(245, 241, 232)",
+        layerBlend: "normal",
+      },
+      {
+        id: "lime",
+        background: "rgb(198, 240, 53)",
+        layerBlend: "normal",
+      },
+      {
+        id: "inverse",
+        background: "rgb(245, 241, 232)",
+        layerBlend: "difference",
+      },
+    ] as const;
+
+    for (const item of cases) {
+      await page
+        .locator(`[data-cursor-variant-option="magnetic-${item.id}"]`)
+        .click();
+      await setRest();
+
+      await expect(magneticDisc).toBeVisible();
+      await expect(exactDot).toBeHidden();
+      await expect(ring).toBeHidden();
+      await expect
+        .poll(() =>
+          magneticDisc.evaluate((el) => getComputedStyle(el).width),
+        )
+        .toBe("16px");
+      await expect
+        .poll(() =>
+          magneticDisc.evaluate(
+            (el) => getComputedStyle(el).backgroundColor,
+          ),
+        )
+        .toBe(item.background);
+      expect(
+        await page
+          .locator(".cursor-layer")
+          .evaluate((el) => getComputedStyle(el).mixBlendMode),
+      ).toBe(item.layerBlend);
+      await expect
+        .poll(() =>
+          magneticDisc.evaluate(
+            (el) => getComputedStyle(el).borderTopColor,
+          ),
+        )
+        .toBe("rgba(0, 0, 0, 0)");
+
+      await viewTarget.dispatchEvent("pointerover", {
+        pointerType: "mouse",
+      });
+      await expect(magneticLabel).toBeVisible();
+      await expect(magneticLabel).toHaveText("VIEW");
+      await expect
+        .poll(() =>
+          magneticDisc.evaluate((el) => el.getBoundingClientRect().width),
+        )
+        .toBeCloseTo(64, 0);
+    }
+  });
+
+  test("magnetic colors render correctly over white", async ({ page }) => {
+    await page.goto("/lab/cursor");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
+
+    await page.evaluate(() => {
+      const swatch = document.createElement("div");
+      swatch.id = "cursor-color-swatch";
+      swatch.style.cssText =
+        "position:fixed;left:80px;top:80px;width:240px;height:240px;background:#fff;z-index:1000";
+      document.body.appendChild(swatch);
+    });
+
+    const cases = [
+      { id: "bone", expected: [245, 241, 232] },
+      { id: "lime", expected: [198, 240, 53] },
+      { id: "inverse", expected: [10, 14, 23] },
+    ] as const;
+
+    for (const item of cases) {
+      await page
+        .locator(`[data-cursor-variant-option="magnetic-${item.id}"]`)
+        .click();
+      await page.mouse.move(200, 200);
+      await page.waitForTimeout(650);
+
+      const discBox = await page
+        .locator(".cursor-magnetic__disc")
+        .boundingBox();
+      expect(discBox).not.toBeNull();
+      expect(
+        Math.abs(discBox!.x + discBox!.width / 2 - 200),
+      ).toBeLessThan(3);
+      expect(
+        Math.abs(discBox!.y + discBox!.height / 2 - 200),
+      ).toBeLessThan(3);
+
+      const shot = await page.screenshot({
+        clip: { x: 184, y: 184, width: 32, height: 32 },
+      });
+      const { data, info } = await sharp(shot)
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const x = 16;
+      const y = 16;
+      const offset = (y * info.width + x) * info.channels;
+      const pixel = Array.from(data.slice(offset, offset + 3));
+
+      for (let channel = 0; channel < 3; channel += 1) {
+        expect(
+          Math.abs(pixel[channel] - item.expected[channel]),
+          `${item.id} channel ${channel}: ${pixel.join(",")}`,
+        ).toBeLessThanOrEqual(4);
+      }
+    }
+  });
+
   test("switches live and keeps the ring under the pointer", async ({ page }) => {
     await page.goto("/lab/cursor");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
     await page.mouse.move(420, 320);
 
     await page.locator('[data-cursor-variant-option="lime"]').click();
@@ -493,6 +656,10 @@ test.describe("cursor variants lab", () => {
 
   test("does not carry the lab choice into production", async ({ page }) => {
     await page.goto("/lab/cursor");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
     await page.locator('[data-cursor-variant-option="editorial"]').click();
     await expect(page.locator("html")).toHaveAttribute(
       "data-cursor-variant",

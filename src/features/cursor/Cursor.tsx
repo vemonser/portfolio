@@ -20,8 +20,21 @@ const ROLE_LABELS: Partial<Record<CursorRole, string>> = {
   visit: "VISIT",
 };
 
+function isMagnetic(value: string | undefined): boolean {
+  return (
+    value === "magnetic-bone" ||
+    value === "magnetic-lime" ||
+    value === "magnetic-inverse"
+  );
+}
+
 function hasRing(value: string | undefined): boolean {
-  return value === "orbit" || value === "lime" || value === "editorial";
+  return (
+    value === "orbit" ||
+    value === "lime" ||
+    value === "editorial" ||
+    isMagnetic(value)
+  );
 }
 
 /**
@@ -44,6 +57,7 @@ export default function Cursor() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
+  const magneticLabelRef = useRef<HTMLSpanElement>(null);
   const [enabled, setEnabled] = useState(false);
 
   // The nodes are not rendered at all on touch/coarse pointers or without JS.
@@ -61,8 +75,9 @@ export default function Cursor() {
     const dot = dotRef.current;
     const ring = ringRef.current;
     const label = labelRef.current;
+    const magneticLabel = magneticLabelRef.current;
     const layer = layerRef.current;
-    if (!dot || !ring || !label || !layer) return;
+    if (!dot || !ring || !label || !magneticLabel || !layer) return;
 
     const html = document.documentElement;
     const reduced = window.matchMedia(REDUCED);
@@ -105,18 +120,13 @@ export default function Cursor() {
       duration: reduced.matches ? 0 : 0.18,
       ease: "power3.out",
     });
-
-    // Switching back to the ring in the lab must put it under the current
-    // pointer immediately, not at the last place it had while hidden.
-    const syncRing = () => {
-      if (hasRing(html.dataset.cursorVariant) && hasPosition) {
-        gsap.set(ring, { x: targetX, y: targetY });
-      }
-    };
-    const variantObserver = new MutationObserver(syncRing);
-    variantObserver.observe(html, {
-      attributes: true,
-      attributeFilter: ["data-cursor-variant"],
+    const moveMagneticX = gsap.quickTo(ring, "x", {
+      duration: reduced.matches ? 0 : 0.35,
+      ease: "expo.out",
+    });
+    const moveMagneticY = gsap.quickTo(ring, "y", {
+      duration: reduced.matches ? 0 : 0.35,
+      ease: "expo.out",
     });
 
     const setRole = (next: CursorRole) => {
@@ -124,6 +134,7 @@ export default function Cursor() {
       role = next;
       html.dataset.cursorState = next;
       label.textContent = ROLE_LABELS[next] ?? "";
+      magneticLabel.textContent = ROLE_LABELS[next] ?? "";
     };
 
     const roleAt = (node: Element): CursorRole => {
@@ -309,7 +320,10 @@ export default function Cursor() {
       show();
       if (!reduced.matches) magnetize(targetX, targetY);
       gsap.set(dot, { x: targetX, y: targetY });
-      if (hasRing(html.dataset.cursorVariant)) {
+      if (isMagnetic(html.dataset.cursorVariant)) {
+        moveMagneticX(targetX);
+        moveMagneticY(targetY);
+      } else if (hasRing(html.dataset.cursorVariant)) {
         moveRingX(targetX);
         moveRingY(targetY);
       }
@@ -358,7 +372,6 @@ export default function Cursor() {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("scroll", scheduleRole);
       window.removeEventListener("resize", scheduleRole);
-      variantObserver.disconnect();
       unsubscribeMenu();
       releaseMagnets();
       if (supportsPopover) {
@@ -404,6 +417,12 @@ export default function Cursor() {
         </svg>
       </div>
       <div ref={ringRef} className="cursor-ring" aria-hidden="true">
+        <span className="cursor-magnetic__disc">
+          <span
+            ref={magneticLabelRef}
+            className="cursor-magnetic__label"
+          />
+        </span>
         <span className="cursor-ring__inner">
           <svg
             className="cursor-ring__arrow"

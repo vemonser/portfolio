@@ -8,7 +8,21 @@ const VARIANTS = [
   { id: "editorial", label: "Editorial Double" },
 ] as const;
 
-type CursorVariant = (typeof VARIANTS)[number]["id"];
+const MAGNETIC_VARIANTS = [
+  { id: "magnetic-bone", label: "Bone" },
+  { id: "magnetic-lime", label: "Lime" },
+  { id: "magnetic-inverse", label: "Inverse" },
+] as const;
+
+type CursorVariant =
+  | (typeof VARIANTS)[number]["id"]
+  | (typeof MAGNETIC_VARIANTS)[number]["id"];
+
+function isCursorVariant(value: string | undefined): value is CursorVariant {
+  return [...VARIANTS, ...MAGNETIC_VARIANTS].some(
+    (option) => option.id === value,
+  );
+}
 
 /**
  * Lab-only readout for the cursor roles and the three visual candidates. The
@@ -30,13 +44,7 @@ export default function CursorReadout() {
       setVisible(html.dataset.cursorVisible === "true");
       setCustom(html.dataset.cursor !== "off");
       const next = html.dataset.cursorVariant;
-      setVariant(
-        next === "lime" ||
-          next === "editorial" ||
-          next === "orbit"
-          ? next
-          : "orbit",
-      );
+      setVariant(isCursorVariant(next) ? next : "orbit");
     };
 
     read();
@@ -68,7 +76,7 @@ export default function CursorReadout() {
   };
 
   return (
-    <aside className="fixed bottom-[var(--space-3)] right-[var(--space-3)] z-[70] grid w-[min(20rem,calc(100vw-2rem))] gap-3 border border-[var(--line-hairline)] bg-black/85 p-4 font-label text-t-12 uppercase tracking-[var(--track)] text-warm backdrop-blur-md">
+    <aside className="fixed bottom-[var(--space-3)] right-[var(--space-3)] z-[70] grid max-h-[calc(100dvh-2rem)] w-[min(20rem,calc(100vw-2rem))] gap-3 overflow-auto border border-[var(--line-hairline)] bg-black/85 p-4 font-label text-t-12 uppercase tracking-[var(--track)] text-warm backdrop-blur-md">
       <p className="m-0 flex items-baseline justify-between gap-6">
         <span>Role</span>
         <strong className="font-normal text-lime">{state}</strong>
@@ -84,6 +92,28 @@ export default function CursorReadout() {
         <span className="text-fg-subtle">Variant</span>
         <div className="grid grid-cols-3 gap-1">
           {VARIANTS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              data-cursor-variant-option={option.id}
+              aria-pressed={variant === option.id}
+              onClick={() => choose(option.id)}
+              className="min-h-11 border border-[var(--line-strong)] bg-transparent px-2 py-2 text-t-12 text-bone transition-colors duration-200 hover:border-lime hover:text-lime aria-pressed:border-lime aria-pressed:bg-lime/10 aria-pressed:text-lime"
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div
+        role="group"
+        aria-label="Magnetic cursor variant"
+        className="grid gap-2"
+      >
+        <span className="text-fg-subtle">Magnetic</span>
+        <div className="grid grid-cols-3 gap-1">
+          {MAGNETIC_VARIANTS.map((option) => (
             <button
               key={option.id}
               type="button"

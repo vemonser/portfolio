@@ -137,6 +137,100 @@
   pointer-events: none;
 }
 
+/* Magnetic candidates: a larger dot that follows with a softer lag, then
+   expands into a role word. The origin is the same lagging node as the ring. */
+.cursor-magnetic__disc {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--cursor-magnetic-size);
+  height: var(--cursor-magnetic-size);
+  margin: calc(var(--cursor-magnetic-size) / -2) 0 0
+    calc(var(--cursor-magnetic-size) / -2);
+  border: 0 solid transparent;
+  border-radius: 999px;
+  background: var(--color-bone);
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
+  scale: var(--cursor-press);
+  transition:
+    width 300ms var(--ease-editorial),
+    height 300ms var(--ease-editorial),
+    margin 300ms var(--ease-editorial),
+    background-color 300ms var(--ease-editorial),
+    border-color 300ms var(--ease-editorial);
+}
+
+.cursor-magnetic__label {
+  display: none;
+  position: absolute;
+  inset: 0;
+  place-items: center;
+  color: var(--color-ink);
+  font-family: var(--font-label);
+  font-size: var(--cursor-magnetic-label);
+  font-weight: 600;
+  letter-spacing: var(--track);
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+html[data-cursor-variant^="magnetic-"] .cursor-ring {
+  display: block;
+}
+
+html[data-cursor-variant^="magnetic-"] .cursor-magnetic__disc {
+  display: block;
+}
+
+html[data-cursor-variant^="magnetic-"] .cursor-dot,
+html[data-cursor-variant^="magnetic-"] .cursor-ring__inner,
+html[data-cursor-variant^="magnetic-"] .cursor-arrow {
+  display: none !important;
+}
+
+html[data-cursor-variant="magnetic-lime"] .cursor-magnetic__disc {
+  background: var(--color-lime);
+}
+
+html[data-cursor-variant="magnetic-inverse"] .cursor-layer {
+  mix-blend-mode: difference;
+}
+
+html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__disc {
+  background: var(--color-bone);
+}
+
+html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__label {
+  color: var(--color-bone);
+}
+
+html[data-cursor-variant^="magnetic-"]:is(
+    [data-cursor-state="link"],
+    [data-cursor-state="hello"],
+    [data-cursor-state="visit"],
+    [data-cursor-state="view"],
+    [data-cursor-state="play"]
+  )
+  .cursor-magnetic__disc {
+  width: var(--cursor-magnetic-focus);
+  height: var(--cursor-magnetic-focus);
+  margin: calc(var(--cursor-magnetic-focus) / -2) 0 0
+    calc(var(--cursor-magnetic-focus) / -2);
+}
+
+html[data-cursor-variant^="magnetic-"]:is(
+    [data-cursor-state="link"],
+    [data-cursor-state="hello"],
+    [data-cursor-state="visit"],
+    [data-cursor-state="view"],
+    [data-cursor-state="play"]
+  )
+  .cursor-magnetic__label {
+  display: grid;
+}
+
 /* Production-only arrow swap. Lab variants keep this hidden. */
 .cursor-arrow {
   --arrow-scale: 1;
@@ -377,6 +471,7 @@ html[data-cursor="on"][data-cursor-menu="native"] * {
   .cursor-ring,
   .cursor-dot__disc,
   .cursor-ring__inner,
+  .cursor-magnetic__disc,
   .cursor-arrow {
     transition: none;
   }
