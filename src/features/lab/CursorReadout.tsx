@@ -2,18 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  CURSOR_VARIANTS,
+  DEFAULT_CURSOR_VARIANT,
+  isCursorVariant,
+  type CursorVariant,
+} from "@/features/cursor/cursor-variants";
+
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
-
-const VARIANTS = [
-  { id: "magnetic-lime", label: "Lime" },
-  { id: "magnetic-bone", label: "Bone" },
-] as const;
-
-type CursorVariant = (typeof VARIANTS)[number]["id"];
-
-function isCursorVariant(value: string | undefined): value is CursorVariant {
-  return VARIANTS.some((option) => option.id === value);
-}
 
 /**
  * Lab-only controls for the two approved magnetic treatments. The choice lives
@@ -25,7 +21,7 @@ export default function CursorReadout() {
   const [visible, setVisible] = useState(false);
   const [cursorOn, setCursorOn] = useState(true);
   const [finePointer, setFinePointer] = useState<boolean | null>(null);
-  const [variant, setVariant] = useState<CursorVariant>("magnetic-lime");
+  const [variant, setVariant] = useState<CursorVariant>(DEFAULT_CURSOR_VARIANT);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -33,14 +29,14 @@ export default function CursorReadout() {
     const syncPointer = () => setFinePointer(pointerMedia.matches);
     syncPointer();
     pointerMedia.addEventListener("change", syncPointer);
-    html.dataset.cursorVariant = "magnetic-lime";
+    html.dataset.cursorVariant = DEFAULT_CURSOR_VARIANT;
 
     const read = () => {
       setState(html.dataset.cursorState ?? "default");
       setVisible(html.dataset.cursorVisible === "true");
       setCursorOn(html.dataset.cursor !== "off");
       const next = html.dataset.cursorVariant;
-      setVariant(isCursorVariant(next) ? next : "magnetic-lime");
+      setVariant(isCursorVariant(next) ? next : DEFAULT_CURSOR_VARIANT);
     };
 
     read();
@@ -95,7 +91,7 @@ export default function CursorReadout() {
       <div role="group" aria-label="Cursor variant" className="grid gap-2">
         <span className="text-fg-subtle">Variant</span>
         <div className="grid grid-cols-2 gap-1">
-          {VARIANTS.map((option) => (
+          {CURSOR_VARIANTS.map((option) => (
             <button
               key={option.id}
               type="button"
