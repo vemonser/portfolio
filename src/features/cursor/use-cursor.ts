@@ -70,8 +70,15 @@ export function useCursor(): {
     let targetY = -100;
     let hasPosition = false;
     let role: CursorRole = "default";
+    let labelTween: gsap.core.Tween | null = null;
 
     const motion = createCursorMotion({ cursor, root: html, reduced });
+
+    const clearLabelFeedback = () => {
+      label.style.removeProperty("transform");
+      label.style.removeProperty("scale");
+      label.style.removeProperty("opacity");
+    };
 
     const setRole = (next: CursorRole) => {
       if (next === role) return;
@@ -85,7 +92,8 @@ export function useCursor(): {
         (previous === "link" && next === "close") ||
         (previous === "close" && next === "link");
       if (menuFlip && !reduced.matches) {
-        gsap.fromTo(
+        labelTween?.kill();
+        labelTween = gsap.fromTo(
           label,
           { scale: 0.6, opacity: 0 },
           {
@@ -95,6 +103,10 @@ export function useCursor(): {
             ease: "power2.out",
             overwrite: true,
             clearProps: "transform,opacity",
+            onComplete: () => {
+              clearLabelFeedback();
+              labelTween = null;
+            },
           },
         );
       }
@@ -223,6 +235,10 @@ export function useCursor(): {
       window.removeEventListener("scroll", scheduleRole);
       window.removeEventListener("resize", scheduleRole);
       unsubscribeMenu();
+      labelTween?.kill();
+      labelTween = null;
+      gsap.killTweensOf(label);
+      clearLabelFeedback();
       motion.destroy();
       if (supportsPopover) {
         try {

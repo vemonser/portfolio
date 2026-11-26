@@ -632,7 +632,10 @@ test.describe("custom cursor", () => {
     await page.evaluate(() => {
       document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
     });
-    await page.waitForTimeout(100);
+    await expect(page.locator(".menu-trigger")).toHaveAttribute(
+      "data-visible",
+      "true",
+    );
 
     const label = page.locator(".cursor-magnetic__label");
     const trigger = page.locator(".menu-trigger");
@@ -679,7 +682,10 @@ test.describe("custom cursor", () => {
     await page.evaluate(() => {
       document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
     });
-    await page.waitForTimeout(100);
+    await expect(page.locator(".menu-trigger")).toHaveAttribute(
+      "data-visible",
+      "true",
+    );
 
     const label = page.locator(".cursor-magnetic__label");
     const trigger = page.locator(".menu-trigger");
@@ -707,8 +713,100 @@ test.describe("custom cursor", () => {
     await page.evaluate(() => {
       document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
     });
-    await page.waitForTimeout(100);
+    await expect(page.locator(".menu-trigger")).toHaveAttribute(
+      "data-visible",
+      "true",
+    );
     await expect(label).toHaveText("OPEN");
+  });
+
+  test("menu feedback leaves no stale inline transform after completion", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+
+    await page.evaluate(() => {
+      document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
+    });
+    await expect(page.locator(".menu-trigger")).toHaveAttribute(
+      "data-visible",
+      "true",
+    );
+
+    const label = page.locator(".cursor-magnetic__label");
+    const trigger = page.locator(".menu-trigger");
+    const triggerBox = await trigger.boundingBox();
+    expect(triggerBox).not.toBeNull();
+    await page.mouse.move(
+      triggerBox!.x + triggerBox!.width / 2,
+      triggerBox!.y + triggerBox!.height / 2,
+    );
+    await expect(label).toHaveText("OPEN");
+
+    await trigger.dispatchEvent("click");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "open",
+    );
+    await expect(label).toHaveText("CLOSE");
+
+    await expect
+      .poll(
+        async () =>
+          label.evaluate((element) => {
+            const style = (element as HTMLElement).style;
+            return `${style.transform}|${style.scale}|${style.opacity}`;
+          }),
+        { timeout: 1000 },
+      )
+      .toBe("||");
+  });
+
+  test("explicit role on nav-close wins while menu is open", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+
+    await page.evaluate(() => {
+      document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
+    });
+    await expect(page.locator(".menu-trigger")).toHaveAttribute(
+      "data-visible",
+      "true",
+    );
+
+    const trigger = page.locator(".menu-trigger");
+    const triggerBox = await trigger.boundingBox();
+    expect(triggerBox).not.toBeNull();
+    await page.mouse.move(
+      triggerBox!.x + triggerBox!.width / 2,
+      triggerBox!.y + triggerBox!.height / 2,
+    );
+
+    await trigger.dispatchEvent("click");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "open",
+    );
+
+    const closeBtn = page.locator(".nav-close");
+    await page.evaluate(() => {
+      document
+        .querySelector(".nav-close")
+        ?.setAttribute("data-cursor", "view");
+    });
+
+    const closeBox = await closeBtn.boundingBox();
+    expect(closeBox).not.toBeNull();
+    await page.mouse.move(10, 10);
+    await page.mouse.move(
+      closeBox!.x + closeBox!.width / 2,
+      closeBox!.y + closeBox!.height / 2,
+    );
+
+    await expect(page.locator(".cursor-magnetic__label")).toHaveText("VIEW");
   });
 
   test("clears a stale role when the window shrinks", async ({ page }) => {

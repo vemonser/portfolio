@@ -66,14 +66,15 @@ export function resolveCursorRole(
   // An unavailable control tells the truth before any decorative role.
   if (node.closest(":disabled, [aria-disabled='true']")) return "disabled";
 
-  // The menu's close control only becomes a close target while the menu is open.
-  if (menuOpen && node.closest(".nav-close")) return "close";
-
   const tagged = node.closest<HTMLElement>("[data-cursor]:not(html)");
   if (tagged) {
     const explicit = roleFromDataset(tagged.dataset.cursor);
     if (explicit) return explicit;
   }
+
+  // The menu's close control only becomes a close target while the menu is open,
+  // after any explicit data-cursor role so an override can win.
+  if (menuOpen && node.closest(".nav-close")) return "close";
 
   const anchor = node.closest<HTMLAnchorElement>("a[href]");
   if (anchor) {
