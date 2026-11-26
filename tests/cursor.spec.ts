@@ -414,6 +414,18 @@ test.describe("cursor variants lab", () => {
 });
 
 test.describe("custom cursor", () => {
+  test("renders one cursor layer, magnetic, disc and label with no legacy nodes", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await expect(page.locator(".cursor-layer")).toHaveCount(1);
+    await expect(page.locator(".cursor-magnetic")).toHaveCount(1);
+    await expect(page.locator(".cursor-magnetic__disc")).toHaveCount(1);
+    await expect(page.locator(".cursor-magnetic__label")).toHaveCount(1);
+    await expect(page.locator(LEGACY_CURSOR_NODES)).toHaveCount(0);
+  });
+
   test("uses Lime in production and expands with the role word", async ({
     page,
   }) => {
