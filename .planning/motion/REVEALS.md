@@ -54,9 +54,8 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
   dot and reveal one treatment. The lab compares Orbit (30 → 72 px trailing
   ring with role words VIEW/PLAY/OPEN/HELLO/VISIT), Lime Target (lime/ink
   keyline, 44 px hover ring), Editorial Double (12 px keyed dot, 36 → 52 px
-  double ring), and three magnetic variants: Bone/Lime use a 16 → 64 px
-  lagging disc, while Inverse is a deliberately large 96 → 112 px difference-
-  blended circle. All show role words on hover. Production uses the standalone
+  double ring), and three magnetic variants (16 → 64 px lagging disc with role
+  words): Bone, Lime and true Inverse/difference on the cursor layer. Production uses the standalone
   arrow swap until a variant is chosen. Text entry keeps the native I-beam.
 - Project media: cards overscan their fixed frame (`scale(1.08)`) and drift
   `yPercent: -4 → 4` with scroll (`scrub: 0.6`). Scale and travel live on

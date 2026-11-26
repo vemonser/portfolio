@@ -202,15 +202,11 @@ html[data-cursor-variant="magnetic-inverse"] .cursor-layer {
 }
 
 html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__disc {
-  --magnetic-size: var(--cursor-magnetic-inverse-size);
-  --magnetic-focus: var(--cursor-magnetic-inverse-focus);
-
   background: var(--color-bone);
 }
 
 html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__label {
   color: var(--color-bone);
-  font-size: var(--cursor-magnetic-inverse-label);
 }
 
 html[data-cursor-variant^="magnetic-"]:is(

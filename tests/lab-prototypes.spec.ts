@@ -488,9 +488,9 @@ test.describe("cursor variants lab", () => {
         id: "inverse",
         background: "rgb(245, 241, 232)",
         layerBlend: "difference",
-        restSize: 96,
-        focusSize: 112,
-        labelSize: "12px",
+        restSize: 16,
+        focusSize: 64,
+        labelSize: "10px",
       },
     ] as const;
 
