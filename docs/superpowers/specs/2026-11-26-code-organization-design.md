@@ -32,7 +32,7 @@ The user wants a gradual, feature-by-feature refactor performed with subagents a
 - No wholesale folder migration.
 - No repository/service abstractions that only forward calls.
 - No mandatory conversion of every GSAP effect to `useGSAP`.
-- No edits to concurrent untracked `lab-scene` work until its owner explicitly includes it.
+- No edits to concurrent user work, tracked or untracked, unless it is explicitly inside the active feature's file allowlist.
 
 ## Design principles
 
