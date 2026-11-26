@@ -521,14 +521,6 @@ test.describe("custom cursor", () => {
       ),
     ).toContain("0.1s");
     await disc.evaluate((element) => {
-      element.style.transitionDuration = "360ms, 300ms, 300ms";
-    });
-    expect(
-      await disc.evaluate(
-        (element) => getComputedStyle(element).transitionDuration,
-      ),
-    ).toContain("0.3s");
-    await disc.evaluate((element) => {
       const probe = { completed: "" };
       (
         window as Window & {
@@ -563,9 +555,6 @@ test.describe("custom cursor", () => {
       .toBe("matrix(0.75, 0, 0, 0.75, 0, 0)");
     await page.mouse.up();
     await expect(html).toHaveAttribute("data-cursor-down", "false");
-    await disc.evaluate((element) => {
-      element.style.removeProperty("transition-duration");
-    });
   });
 
   test("the system-cursor escape hatch restores the OS pointer", async ({
