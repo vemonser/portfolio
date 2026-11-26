@@ -11,6 +11,8 @@ import {
   resolveCursorRole,
 } from "@/features/cursor/cursor-roles";
 
+import { createCursorMotion } from "@/features/cursor/cursor-motion";
+
 import "./cursor.css";
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
@@ -68,20 +70,8 @@ export default function Cursor() {
     let targetY = -100;
     let hasPosition = false;
     let role: CursorRole = "default";
-    let downTimer = 0;
 
-    // Size, colour and role state live in CSS. GSAP owns only the lagging
-    // origin, so its transforms never erase the disc's visual transitions.
-    gsap.set(cursor, { xPercent: -50, yPercent: -50 });
-    gsap.set(cursor, { x: targetX, y: targetY });
-    const moveX = gsap.quickTo(cursor, "x", {
-      duration: 0.35,
-      ease: "expo.out",
-    });
-    const moveY = gsap.quickTo(cursor, "y", {
-      duration: 0.35,
-      ease: "expo.out",
-    });
+    const motion = createCursorMotion({ cursor, root: html, reduced });
 
     const setRole = (next: CursorRole) => {
       if (next === role) return;
@@ -157,7 +147,7 @@ export default function Cursor() {
         html.dataset.cursorMenu = menuOpen ? "native" : "false";
       }
 
-      if (menuOpen) releaseMagnets();
+      if (menuOpen) motion.releaseMagnets();
       scheduleRole();
     });
 
@@ -183,41 +173,6 @@ export default function Cursor() {
       html.dataset.cursorVisible = "true";
     };
 
-    // Magnetic targets lean toward the pointer. `translate` keeps that motion
-    // independent from a target's own hover transform or scale.
-    const magnetize = (x: number, y: number) => {
-      const targets = document.querySelectorAll<HTMLElement>("[data-magnetic]");
-      for (const target of targets) {
-        const rect = target.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) continue;
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const radius = Math.max(rect.width, 160) * 0.85;
-        const dx = x - cx;
-        const dy = y - cy;
-        const distance = Math.hypot(dx, dy);
-
-        if (distance > radius) {
-          target.style.translate = "";
-          continue;
-        }
-
-        const pull = (1 - distance / radius) * 0.2;
-        const limit = 12;
-        const tx = Math.max(-limit, Math.min(limit, dx * pull));
-        const ty = Math.max(-limit, Math.min(limit, dy * pull));
-        target.style.translate = `${tx.toFixed(2)}px ${ty.toFixed(2)}px`;
-      }
-    };
-
-    const releaseMagnets = () => {
-      document
-        .querySelectorAll<HTMLElement>("[data-magnetic]")
-        .forEach((target) => {
-          target.style.translate = "";
-        });
-    };
-
     const hide = () => {
       html.dataset.cursorVisible = "false";
     };
@@ -226,19 +181,10 @@ export default function Cursor() {
       if (event.pointerType === "touch") return;
       targetX = event.clientX;
       targetY = event.clientY;
-      if (!hasPosition) {
-        gsap.set(cursor, { x: targetX, y: targetY });
-        hasPosition = true;
-      }
+      if (!hasPosition) hasPosition = true;
       show();
-      if (!reduced.matches) magnetize(targetX, targetY);
-      if (reduced.matches) {
-        gsap.killTweensOf(cursor);
-        gsap.set(cursor, { x: targetX, y: targetY });
-      } else {
-        moveX(targetX);
-        moveY(targetY);
-      }
+      if (!reduced.matches) motion.magnetize(targetX, targetY);
+      motion.move(targetX, targetY);
     };
 
     const onOver = (event: PointerEvent) => {
@@ -247,29 +193,13 @@ export default function Cursor() {
       setRole(node ? resolveCursorRole(node, isMenuOpen()) : "default");
     };
 
-    const releasePress = () => {
-      window.clearTimeout(downTimer);
-      html.dataset.cursorDown = "false";
-    };
-
-    const onPressTransitionEnd = (event: TransitionEvent) => {
-      if (
-        event.propertyName === "transform" &&
-        html.dataset.cursorDown === "true"
-      ) {
-        releasePress();
-      }
-    };
-
     const onDown = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
-      html.dataset.cursorDown = "true";
-      window.clearTimeout(downTimer);
-      downTimer = window.setTimeout(releasePress, reduced.matches ? 120 : 600);
+      motion.setPressed(true);
     };
 
     const onLeave = () => {
-      releaseMagnets();
+      motion.releaseMagnets();
       hide();
     };
     const onVisibility = () => {
@@ -279,7 +209,6 @@ export default function Cursor() {
     document.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerover", onOver, { passive: true });
     document.addEventListener("pointerdown", onDown, { passive: true });
-    cursor.addEventListener("transitionend", onPressTransitionEnd);
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("scroll", scheduleRole, { passive: true });
@@ -289,13 +218,12 @@ export default function Cursor() {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerdown", onDown);
-      cursor.removeEventListener("transitionend", onPressTransitionEnd);
       document.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("scroll", scheduleRole);
       window.removeEventListener("resize", scheduleRole);
       unsubscribeMenu();
-      releaseMagnets();
+      motion.destroy();
       if (supportsPopover) {
         try {
           layer.hidePopover();
@@ -303,9 +231,7 @@ export default function Cursor() {
           // Already hidden on teardown.
         }
       }
-      window.clearTimeout(downTimer);
       cancelAnimationFrame(roleFrame);
-      gsap.killTweensOf(cursor);
       delete html.dataset.cursorMenu;
       delete html.dataset.cursor;
       delete html.dataset.cursorState;
