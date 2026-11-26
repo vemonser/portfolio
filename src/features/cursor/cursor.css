@@ -140,14 +140,17 @@
 /* Magnetic candidates: a larger dot that follows with a softer lag, then
    expands into a role word. The origin is the same lagging node as the ring. */
 .cursor-magnetic__disc {
+  --magnetic-size: var(--cursor-magnetic-size);
+  --magnetic-focus: var(--cursor-magnetic-focus);
+
   display: none;
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--cursor-magnetic-size);
-  height: var(--cursor-magnetic-size);
-  margin: calc(var(--cursor-magnetic-size) / -2) 0 0
-    calc(var(--cursor-magnetic-size) / -2);
+  width: var(--magnetic-size);
+  height: var(--magnetic-size);
+  margin: calc(var(--magnetic-size) / -2) 0 0
+    calc(var(--magnetic-size) / -2);
   border: 0 solid transparent;
   border-radius: 999px;
   background: var(--color-bone);
@@ -199,11 +202,15 @@ html[data-cursor-variant="magnetic-inverse"] .cursor-layer {
 }
 
 html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__disc {
+  --magnetic-size: var(--cursor-magnetic-inverse-size);
+  --magnetic-focus: var(--cursor-magnetic-inverse-focus);
+
   background: var(--color-bone);
 }
 
 html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__label {
   color: var(--color-bone);
+  font-size: var(--cursor-magnetic-inverse-label);
 }
 
 html[data-cursor-variant^="magnetic-"]:is(
@@ -214,10 +221,10 @@ html[data-cursor-variant^="magnetic-"]:is(
     [data-cursor-state="play"]
   )
   .cursor-magnetic__disc {
-  width: var(--cursor-magnetic-focus);
-  height: var(--cursor-magnetic-focus);
-  margin: calc(var(--cursor-magnetic-focus) / -2) 0 0
-    calc(var(--cursor-magnetic-focus) / -2);
+  width: var(--magnetic-focus);
+  height: var(--magnetic-focus);
+  margin: calc(var(--magnetic-focus) / -2) 0 0
+    calc(var(--magnetic-focus) / -2);
 }
 
 html[data-cursor-variant^="magnetic-"]:is(

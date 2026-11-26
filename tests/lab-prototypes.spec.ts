@@ -446,7 +446,7 @@ test.describe("cursor variants lab", () => {
     await expect(label).toBeHidden();
   });
 
-  test("magnetic variants use a larger trailing dot and role words", async ({
+  test("magnetic variants use their own resting and focus sizes", async ({
     page,
   }) => {
     await page.goto("/lab/cursor");
@@ -472,16 +472,25 @@ test.describe("cursor variants lab", () => {
         id: "bone",
         background: "rgb(245, 241, 232)",
         layerBlend: "normal",
+        restSize: 16,
+        focusSize: 64,
+        labelSize: "10px",
       },
       {
         id: "lime",
         background: "rgb(198, 240, 53)",
         layerBlend: "normal",
+        restSize: 16,
+        focusSize: 64,
+        labelSize: "10px",
       },
       {
         id: "inverse",
         background: "rgb(245, 241, 232)",
         layerBlend: "difference",
+        restSize: 96,
+        focusSize: 112,
+        labelSize: "12px",
       },
     ] as const;
 
@@ -489,6 +498,10 @@ test.describe("cursor variants lab", () => {
       await page
         .locator(`[data-cursor-variant-option="magnetic-${item.id}"]`)
         .click();
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-cursor-variant",
+        `magnetic-${item.id}`,
+      );
       await setRest();
 
       await expect(magneticDisc).toBeVisible();
@@ -498,7 +511,7 @@ test.describe("cursor variants lab", () => {
         .poll(() =>
           magneticDisc.evaluate((el) => getComputedStyle(el).width),
         )
-        .toBe("16px");
+        .toBe(`${item.restSize}px`);
       await expect
         .poll(() =>
           magneticDisc.evaluate(
@@ -524,11 +537,14 @@ test.describe("cursor variants lab", () => {
       });
       await expect(magneticLabel).toBeVisible();
       await expect(magneticLabel).toHaveText("VIEW");
+      expect(
+        await magneticLabel.evaluate((el) => getComputedStyle(el).fontSize),
+      ).toBe(item.labelSize);
       await expect
         .poll(() =>
           magneticDisc.evaluate((el) => el.getBoundingClientRect().width),
         )
-        .toBeCloseTo(64, 0);
+        .toBeCloseTo(item.focusSize, 0);
     }
   });
 
@@ -557,19 +573,24 @@ test.describe("cursor variants lab", () => {
       await page
         .locator(`[data-cursor-variant-option="magnetic-${item.id}"]`)
         .click();
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-cursor-variant",
+        `magnetic-${item.id}`,
+      );
       await page.mouse.move(200, 200);
-      await page.waitForTimeout(650);
 
-      const discBox = await page
-        .locator(".cursor-magnetic__disc")
-        .boundingBox();
-      expect(discBox).not.toBeNull();
-      expect(
-        Math.abs(discBox!.x + discBox!.width / 2 - 200),
-      ).toBeLessThan(3);
-      expect(
-        Math.abs(discBox!.y + discBox!.height / 2 - 200),
-      ).toBeLessThan(3);
+      await expect
+        .poll(async () => {
+          const box = await page
+            .locator(".cursor-magnetic__disc")
+            .boundingBox();
+          if (!box) return 1000;
+          return Math.max(
+            Math.abs(box.x + box.width / 2 - 200),
+            Math.abs(box.y + box.height / 2 - 200),
+          );
+        })
+        .toBeLessThan(3);
 
       const shot = await page.screenshot({
         clip: { x: 184, y: 184, width: 32, height: 32 },

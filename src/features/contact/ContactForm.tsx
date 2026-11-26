@@ -305,15 +305,29 @@ export default function ContactForm({
         </p>
       ) : null}
 
-      <div className="mt-[var(--space-3)] grid gap-[var(--space-1)]">
-        <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm">
+      <div className="mt-(--space-3)   gap-(--space-2) flex flex-col sm:flex-row items-start justify-between">
+        <div className="">
+
+        <p className="m-0  text-t-14 leading-[1.6] text-warm">
           {labels.hint}
         </p>
-        <p className="m-0 max-w-[34ch] text-t-14 leading-[1.6] text-fg-subtle">
+        <p className="m-0  text-t-14 leading-[1.6] text-fg-subtle">
           {labels.privacy}
         </p>
+        </div>
+        <div className="w-full sm:w-max justify-end flex">
+        <button
+          type="submit"
+          data-magnetic
+          disabled={submitting}
+          className={`${roundButton} cursor-pointer border-0 disabled:cursor-wait disabled:opacity-70`}
+        >
+          <span>{submitting ? labels.sending : labels.send}</span>
+        </button>
+        </div>
       </div>
-
+    <div className=" flex justify-end">
+      </div>
       <div
         data-form-status-live
         aria-live="polite"
@@ -346,16 +360,7 @@ export default function ContactForm({
         ) : null}
       </div>
 
-      <div className="mt-[var(--space-7)] flex justify-end">
-        <button
-          type="submit"
-          data-magnetic
-          disabled={submitting}
-          className={`${roundButton} cursor-pointer border-0 disabled:cursor-wait disabled:opacity-70`}
-        >
-          <span>{submitting ? labels.sending : labels.send}</span>
-        </button>
-      </div>
+  
     </form>
   );
 }
