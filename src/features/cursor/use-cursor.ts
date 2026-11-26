@@ -70,7 +70,7 @@ export function useCursor(): {
     let targetY = -100;
     let hasPosition = false;
     let role: CursorRole = "default";
-    let labelTween: gsap.core.Tween | null = null;
+    let labelTimeline: gsap.core.Timeline | null = null;
 
     const motion = createCursorMotion({ cursor, root: html, reduced });
 
@@ -85,31 +85,42 @@ export function useCursor(): {
       const previous = role;
       role = next;
       html.dataset.cursorState = next;
-      label.textContent = ROLE_LABELS[next] ?? "";
 
-      // Brief feedback when the menu trigger flips between OPEN and CLOSE.
+      const text = ROLE_LABELS[next] ?? "";
       const menuFlip =
         (previous === "link" && next === "close") ||
         (previous === "close" && next === "link");
-      if (menuFlip && !reduced.matches) {
-        labelTween?.kill();
-        labelTween = gsap.fromTo(
-          label,
-          { scale: 0.6, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 0.18,
-            ease: "power2.out",
-            overwrite: true,
-            clearProps: "transform,opacity",
-            onComplete: () => {
-              clearLabelFeedback();
-              labelTween = null;
-            },
-          },
-        );
+      if (!menuFlip || reduced.matches) {
+        label.textContent = text;
+        return;
       }
+
+      labelTimeline?.kill();
+      labelTimeline = gsap.timeline({
+        onComplete: () => {
+          clearLabelFeedback();
+          labelTimeline = null;
+        },
+      });
+      labelTimeline.to(label, {
+        opacity: 0,
+        scale: 0.94,
+        duration: 0.12,
+        ease: "power2.in",
+      });
+      labelTimeline.call(() => {
+        label.textContent = text;
+      });
+      labelTimeline.fromTo(
+        label,
+        { opacity: 0, scale: 0.96 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.22,
+          ease: "expo.out",
+        },
+      );
     };
 
     let roleFrame = 0;
@@ -235,8 +246,8 @@ export function useCursor(): {
       window.removeEventListener("scroll", scheduleRole);
       window.removeEventListener("resize", scheduleRole);
       unsubscribeMenu();
-      labelTween?.kill();
-      labelTween = null;
+      labelTimeline?.kill();
+      labelTimeline = null;
       gsap.killTweensOf(label);
       clearLabelFeedback();
       motion.destroy();

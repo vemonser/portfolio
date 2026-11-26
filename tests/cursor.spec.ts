@@ -744,7 +744,57 @@ test.describe("custom cursor", () => {
     );
     await expect(label).toHaveText("OPEN");
 
-    await trigger.dispatchEvent("click");
+    const result = await page.evaluate(async () => {
+      const label = document.querySelector<HTMLElement>(
+        ".cursor-magnetic__label",
+      );
+      const trigger = document.querySelector<HTMLElement>(".menu-trigger");
+      if (!label || !trigger) {
+        return { duration: 0, swapOpacity: 1, finalOpacity: 0, inline: "" };
+      }
+
+      const start = performance.now();
+      trigger.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      let swapOpacity = 1;
+      let swapTime = start;
+      let finalOpacity = 0;
+      let finalTime = start;
+      let inline = "";
+
+      while (performance.now() - start < 1000) {
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => resolve());
+        });
+        const style = getComputedStyle(label);
+        const currentInline = `${label.style.transform}|${label.style.scale}|${label.style.opacity}`;
+        if (label.textContent === "CLOSE" && swapOpacity === 1) {
+          swapOpacity = Number(style.opacity);
+          swapTime = performance.now();
+        }
+        finalOpacity = Number(style.opacity);
+        finalTime = performance.now();
+        inline = currentInline;
+        if (
+          label.textContent === "CLOSE" &&
+          finalOpacity === 1 &&
+          currentInline === "||"
+        ) {
+          break;
+        }
+      }
+
+      return {
+        duration: finalTime - swapTime,
+        swapOpacity,
+        finalOpacity,
+        inline,
+      };
+    });
+
+    expect(result.duration).toBeGreaterThanOrEqual(180);
+    expect(result.swapOpacity).toBeLessThan(0.25);
+    expect(result.finalOpacity).toBe(1);
+    expect(result.inline).toBe("||");
     await expect(page.locator("dialog#site-menu")).toHaveAttribute(
       "data-state",
       "open",
@@ -790,6 +840,7 @@ test.describe("custom cursor", () => {
       "data-state",
       "open",
     );
+    await expect(page.locator(".cursor-magnetic__label")).toHaveText("CLOSE");
 
     const closeBtn = page.locator(".nav-close");
     await page.evaluate(() => {
