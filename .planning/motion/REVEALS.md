@@ -1,4 +1,4 @@
-# Motion — masked image and text reveals + inverting dot cursor
+# Motion — masked image and text reveals + magnetic cursor
 
 Scope: replace the page's entrance motion with two masked reveals and one
 minimal cursor.
@@ -10,7 +10,7 @@ curtain label, header/footer/menu, form controls, copy or locale changes.
 
 ```text
 SCOPE: masked image reveal (scaleY cover), masked text reveal (SplitText),
-  one shared reveal gate, dot-only inverting cursor.
+  one shared reveal gate, magnetic Lime cursor with a Bone lab alternative.
 NON-GOALS: hero, loader, curtain, header/footer/menu, form chrome.
 ACCEPTANCE CRITERIA: AC-01 … AC-08 below.
 AFFECTED AREAS: src/features/motion/**, src/features/ui/{TextReveal,ImageReveal,
@@ -50,15 +50,10 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
   mirror the string into an `aria-label` on the wrapper and duplicate labels.
 - Prose is split after hydration in a layout effect; the article is hidden
   until every block has its masks.
-- Cursor: a 10 px difference-blended dot at rest; interactive roles hide the
-  dot and reveal one treatment. The lab compares Orbit (30 → 72 px trailing
-  ring with role words VIEW/PLAY/OPEN/HELLO/VISIT), Lime Target (lime/ink
-  keyline, 44 px hover ring), Editorial Double (12 px keyed dot, 36 → 52 px
-  double ring), and three magnetic variants (16 → 64 px lagging disc with role
-  words): Bone, Lime and true Inverse/difference on the cursor layer. The
-  Inverse label uses a separate normal-blended layer so the word stays readable
-  while the disc inverts. Production uses the standalone
-  arrow swap until a variant is chosen. Text entry keeps the native I-beam.
+- Cursor: Lime is the production default: a 16 px filled disc at rest that
+  expands to 64 px with the role word VIEW/PLAY/OPEN/HELLO/VISIT. The lab offers
+  only Lime and Bone; Bone changes the fill colour while preserving the same
+  sizing, lag and role labels. Text entry keeps the native I-beam.
 - Project media: cards overscan their fixed frame (`scale(1.08)`) and drift
   `yPercent: -4 → 4` with scroll (`scrub: 0.6`). Scale and travel live on
   separate nodes so GSAP cannot erase the overscan. Reduced motion rests at
@@ -79,15 +74,140 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
   copy is visible with no masks and no cover.
 - AC-06 — Given no JavaScript, when a page loads, then the cover is absent and
   the copy is visible.
-- AC-07 — Given a fine pointer, when it rests, then one inverting dot follows
-  it; when it enters a link or project card, the dot is replaced by one arrow
-  treatment (never both). The lab can switch the treatment live.
-- AC-08 — Given a text field, when it is hovered, then the dot hides and the OS
-  I-beam is used.
+- AC-07 — Given a fine pointer, when it rests, then a 16 px Lime disc follows
+  it; when it enters an interactive element, the disc expands to 64 px and
+  shows its role word (never an arrow underneath). The lab can switch to Bone.
+- AC-08 — Given a text field, when it is hovered, then the custom cursor hides
+  and the OS I-beam is used.
 - AC-09 — Given a project card, when it crosses the viewport, then its capture
   drifts inside the fixed frame; reduced motion keeps it static.
 - AC-10 — Given a case study with a live URL, then both Visit site actions use
   the shared masked text reveal.
+
+## Cursor consolidation — Bone and Lime only
+
+```text
+SCOPE: keep the magnetic Bone and Lime cursors, remove every other cursor
+  treatment, and make Lime the production default.
+NON-GOALS: contact form, page copy, content, layout, motion outside the cursor.
+ACCEPTANCE CRITERIA: CURSOR-AC-01 … CURSOR-AC-08 below.
+AFFECTED AREAS: src/features/cursor/**, src/features/lab/CursorReadout.tsx,
+  src/app/globals.css, tests/cursor.spec.ts, tests/lab-prototypes.spec.ts.
+RISK: MEDIUM
+BLAST RADIUS: SHARED (the cursor mounts on every route)
+COMMIT: f58bb6a
+BRANCH: main
+PR: null
+VALIDATION: targeted Playwright cursor suite, full Playwright suite,
+  typecheck, lint, Vitest, production build, browser screenshots, independent
+  review, Evidence Gate.
+ROLLBACK/GATING: revert the cursor-consolidation commit. The native pointer
+  remains the no-JS, touch, text-entry and unsupported-Popover fallback.
+```
+
+### Decisions
+
+- Lime is the default treatment without a lab override. Bone is the only
+  opt-in override, exposed in the lab alongside Lime.
+- Both treatments use the same 16 px resting disc and 64 px interactive disc,
+  with role words `VIEW`, `PLAY`, `OPEN`, `HELLO` and `VISIT`.
+- Remove the old dot/arrow swap, ring treatments, Inverse blend workaround and
+  their unused tokens/DOM. The magnetic disc and its label share one normal
+  blended cursor layer again.
+- The lab starts on Lime, offers exactly Bone and Lime, and removes its override
+  on unmount so production returns to Lime.
+
+### Acceptance criteria
+
+- CURSOR-AC-01 — The cursor lab exposes exactly Bone and Lime, starts on Lime,
+  and no longer exposes Orbit, Lime Target, Editorial Double or Inverse.
+- CURSOR-AC-02 — Production uses the Lime magnetic cursor by default: a 16 px
+  lime disc at rest and a 64 px disc with the role word on interactive hover.
+- CURSOR-AC-03 — Bone and Lime preserve their colours, borderless 16 → 64 px
+  sizing, lagging movement and all five role labels.
+- CURSOR-AC-04 — Existing cursor contracts remain intact: native-pointer
+  replacement, text I-beam, disabled state, system-cursor toggle, menu top
+  layer, scroll/resize role refresh, client navigation, reduced motion, touch
+  and no-JavaScript fallbacks.
+- CURSOR-AC-05 — A Bone selection in the lab does not leak into production;
+  leaving the lab restores the default Lime treatment.
+- CURSOR-AC-06 — The lab controls do not cover hero content or its focus ring,
+  and they precede the demo content in keyboard order.
+- CURSOR-AC-07 — On a coarse pointer, the lab reports the system cursor and
+  disables controls that cannot change a custom cursor.
+- CURSOR-AC-08 — A live change to reduced motion stops cursor trailing
+  immediately; restoring normal motion restores the lag.
+
+### Test scope and matrix
+
+```text
+FEATURE: cursor consolidation
+SCOPE: Bone/Lime magnetic cursor and lab controls
+NON-GOALS: contact form and all non-cursor behavior
+SOURCE OF TRUTH: user request plus CURSOR-AC-01 … CURSOR-AC-05
+RISK: MEDIUM
+BLAST RADIUS: SHARED
+TEST DEPTH: STANDARD
+PRIMARY FLOWS: production default, lab selection, role hover, fallbacks
+OUT-OF-SCOPE FLOWS: contact submission, content/case studies
+VALIDATION MODES: Playwright E2E, browser visual, typecheck, lint, Vitest, build
+TEST DATA NEEDS: none
+REGRESSION AREAS: every route's cursor, menu/dialog stacking, text controls,
+  reduced motion, touch/no-JS, client navigation
+```
+
+| ID | Acceptance criterion | Title | Preconditions | Steps | Expected result |
+| --- | --- | --- | --- | --- | --- |
+| CURSOR-TC-01 | CURSOR-AC-01 | Lab offers only Bone and Lime and starts on Lime | Fine pointer | Open `/lab/cursor` | One variant group; exactly Bone/Lime; Lime pressed; old options absent |
+| CURSOR-TC-02 | CURSOR-AC-02 | Production defaults to Lime | Fine pointer | Open `/`; rest; hover a project card | Lime 16 px disc at rest; 64 px disc with `VIEW` on hover; no legacy nodes |
+| CURSOR-TC-03 | CURSOR-AC-03 | Both magnetic variants keep their visual contract | Lab open | Select each variant; inspect rest and interactive states | Correct colour; borderless 16 → 64 px disc; 10 px role label |
+| CURSOR-TC-04 | CURSOR-AC-03 | Both variants map every interactive role | Lab open | Hover/dispatch pointerover for link, view, play, mailto and external link | `OPEN`, `VIEW`, `PLAY`, `HELLO`, `VISIT`; disc returns to 16 px on neutral surface |
+| CURSOR-TC-05 | CURSOR-AC-03 | Bone and Lime render their literal colours | Lab open; white swatch | Select each variant; move to swatch; sample centre pixel | Bone `245,241,232`; Lime `198,240,53` |
+| CURSOR-TC-06 | CURSOR-AC-04 | Existing role and fallback contracts survive consolidation | Fine pointer | Exercise link/view/play/text/disabled, system toggle, menu, scroll, resize, navigation, reduced motion, touch and no-JS | Each existing contract still passes |
+| CURSOR-TC-07 | CURSOR-AC-05 | Lab choice does not leak | Lab open | Select Bone; navigate home | No lab override; production disc is Lime |
+| CURSOR-TC-08 | CURSOR-AC-06 | Lab controls clear hero content and precede the demo | Fine pointer | Open lab at 390/1440; inspect geometry; Tab through controls | No overlap; Scroll receives pointer; Lime/Bone precede View project |
+| CURSOR-TC-09 | CURSOR-AC-07 | Touch state is honest | Coarse pointer | Open lab with touch emulation | `System · touch`; no cursor node; variant/toggle controls disabled |
+| CURSOR-TC-10 | CURSOR-AC-08 | Live reduced-motion changes take effect immediately | Fine pointer | Move pointer; switch OS preference; move again | Reduced motion snaps; normal motion restores lag |
+
+Negative coverage is CURSOR-TC-01 (removed choices are absent). Edge coverage is
+CURSOR-TC-06 (text, disabled, reduced motion, touch, no-JS and viewport changes).
+
+### Requirement-to-test coverage
+
+| Criterion | Test case(s) | Validation type | Planned evidence | Status |
+| --- | --- | --- | --- | --- |
+| CURSOR-AC-01 | CURSOR-TC-01 | Playwright E2E | test report | PASS |
+| CURSOR-AC-02 | CURSOR-TC-02 | Playwright E2E + visual | test report + screenshot | PASS |
+| CURSOR-AC-03 | CURSOR-TC-03, CURSOR-TC-04, CURSOR-TC-05 | Playwright E2E + pixel visual | test report + screenshot | PASS |
+| CURSOR-AC-04 | CURSOR-TC-06 | Playwright E2E | test report | PASS |
+| CURSOR-AC-05 | CURSOR-TC-07 | Playwright E2E | test report | PASS |
+| CURSOR-AC-06 | CURSOR-TC-08 | Playwright E2E + visual | test report + screenshot | PASS |
+| CURSOR-AC-07 | CURSOR-TC-09 | Playwright E2E + visual | test report + screenshot | PASS |
+| CURSOR-AC-08 | CURSOR-TC-10 | Playwright E2E + runtime measurement | test report + measurements | PASS |
+
+Evidence run: `.quality/runs/2026-11-26T04-32-37-000Z/evidence-manifest.json`.
+The cursor suite passes 24/24; the combined cursor, contact-form and technical
+accessibility regression run passes 39/39. The full Playwright suite at the
+time of the cursor-only change passed 155/163; the eight
+failures are pre-existing stale hero-selector tests documented in that run's
+`known-issues.md`. A later global typecheck is blocked by concurrent untracked
+lab-scene work outside this change; the initial typecheck and production build
+passed before those files appeared, and the final scoped cursor typecheck passes.
+
+### Regression map
+
+```text
+CHANGED AREA: site-wide magnetic cursor and its lab controls
+DIRECT CONSUMERS: RootLayout -> Cursor on every route; /lab/cursor -> CursorReadout
+SHARED DEPENDENCIES: html cursor datasets, GSAP quickTo, Popover top layer,
+  menu-store subscription, global cursor tokens
+CRITICAL FLOWS AT RISK: project/link hover labels, text-entry I-beam, disabled
+  controls, menu/dialog stacking, client navigation, reduced motion, touch/no-JS
+REGRESSION TESTS TO RUN: tests/cursor.spec.ts, tests/lab-prototypes.spec.ts,
+  tests/contact-form.spec.ts, tests/technical-a11y.spec.ts, full Playwright suite
+UNCHANGED/SAFE AREAS: contact form implementation and layout, content, API,
+  SEO, reveal system, hero scenes
+```
 
 ## Requirement-to-test coverage
 

@@ -161,26 +161,11 @@ html.lenis body {
   --dur-entrance: 1050ms;
   --ease-editorial: cubic-bezier(0.7, 0, 0.2, 1);
 
-  /* Project media drift and cursor lab variants. */
+  /* Project media drift and the two approved magnetic cursor treatments. */
   --parallax-scale: 1.08;
-  --cursor-dot-size: 10px;
-  --cursor-orbit-ring: 30px;
-  --cursor-orbit-focus: 72px;
-  --cursor-orbit-focus-scale: 2.4;
-  --cursor-lime-ring: 44px;
-  --cursor-editorial-dot: 12px;
-  --cursor-editorial-ring: 36px;
-  --cursor-editorial-focus: 52px;
-  --cursor-editorial-focus-scale: 1.444;
-  --cursor-hover-arrow: 16px;
-  --cursor-default-arrow: 22px;
-  --cursor-label-size: 10px;
   --cursor-magnetic-size: 16px;
   --cursor-magnetic-focus: 64px;
-  --cursor-magnetic-follow: 0.35s;
   --cursor-magnetic-label: 10px;
-  --cursor-outline: 2px;
-  --cursor-follow-duration: 0.18s;
   --cursor-follow-ease: cubic-bezier(0.7, 0, 0.2, 1);
 
   --inset-edge: var(--gutter);

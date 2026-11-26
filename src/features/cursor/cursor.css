@@ -1,12 +1,7 @@
 /*
- * The custom cursor. Mounted only when a fine pointer is present; the native
- * cursor is hidden only after `html[data-cursor="on"]` is set by JS, so a
- * no-JS visitor keeps the OS pointer.
- *
- * Production is a dot at rest and an arrow on interactive hover. The lab sets
- * `data-cursor-variant="orbit|lime|editorial"` on <html> to compare three
- * portfolio-ready treatments live. Every lab variant follows the same rule:
- * the dot is replaced by one arrow treatment, never layered with it.
+ * The site-wide magnetic cursor. Lime is the default; the lab can opt into
+ * Bone with `data-cursor-variant="magnetic-bone"`. The native cursor is hidden
+ * only after JS sets `html[data-cursor="on"]`, so no-JS visitors keep it.
  */
 
 @media (hover: hover) and (pointer: fine) {
@@ -15,12 +10,11 @@
     cursor: none !important;
   }
 
-  /* The one deliberate exception: text entry keeps the OS I-beam. */
+  /* Text entry deliberately restores the exact OS I-beam. */
   html[data-cursor="on"] :is(input, textarea, select, [contenteditable="true"]) {
     cursor: text !important;
   }
 
-  /* A range/checkbox is a control, not a text field. */
   html[data-cursor="on"] :is(
     input[type="range"],
     input[type="checkbox"],
@@ -32,8 +26,7 @@
   }
 }
 
-.cursor-layer,
-.cursor-label-layer {
+.cursor-layer {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -47,15 +40,11 @@
   pointer-events: none;
 }
 
-.cursor-layer:popover-open,
-.cursor-label-layer:popover-open {
+.cursor-layer:popover-open {
   display: block;
 }
 
-/* The two origins are moved by GSAP. Their visual children own size, scale and
-   colour, so GSAP's individual transform properties never erase the styling. */
-.cursor-dot,
-.cursor-ring {
+.cursor-magnetic {
   --cursor-press: 1;
 
   position: fixed;
@@ -70,100 +59,24 @@
   will-change: transform;
 }
 
-.cursor-dot {
-  --cursor-scale: 1;
-}
-
-.cursor-ring {
-  --ring-size: var(--cursor-orbit-ring);
-  --ring-scale: 1;
-
-  display: none;
-}
-
-/* Difference blend is the reliable visibility treatment: bone becomes black
-   on white, white on black, and stays legible over photography. */
-.cursor-dot__disc {
-  --dot-size: var(--cursor-dot-size);
-
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--dot-size);
-  height: var(--dot-size);
-  margin: calc(var(--dot-size) / -2) 0 0 calc(var(--dot-size) / -2);
-  border: 0 solid var(--color-ink);
-  border-radius: 999px;
-  background: var(--color-bone);
-  mix-blend-mode: difference;
-  scale: calc(var(--cursor-scale) * var(--cursor-press));
-  transition: scale 180ms var(--cursor-follow-ease);
-}
-
-.cursor-ring__inner {
-  position: relative;
-  display: block;
-  width: var(--ring-size);
-  height: var(--ring-size);
-  margin: calc(var(--ring-size) / -2) 0 0 calc(var(--ring-size) / -2);
-  border: 1px solid var(--color-bone);
-  border-radius: 999px;
-  mix-blend-mode: difference;
-  scale: calc(var(--ring-scale) * var(--cursor-press));
-  transition: scale 180ms var(--cursor-follow-ease);
-}
-
-.cursor-ring__arrow {
-  display: none;
-  position: absolute;
-  inset: 0;
-  width: var(--cursor-hover-arrow);
-  height: var(--cursor-hover-arrow);
-  margin: auto;
-  color: var(--color-bone);
-}
-
-.cursor-ring__label {
-  display: none;
-  position: absolute;
-  inset: 0;
-  place-items: center;
-  padding: 0;
-  color: var(--color-bone);
-  font-family: var(--font-label);
-  font-size: var(--cursor-label-size);
-  font-weight: 500;
-  letter-spacing: var(--track);
-  line-height: 1;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-/* Magnetic candidates: a larger dot that follows with a softer lag, then
-   expands into a role word. The origin is the same lagging node as the ring. */
 .cursor-magnetic__disc {
-  --magnetic-size: var(--cursor-magnetic-size);
-  --magnetic-focus: var(--cursor-magnetic-focus);
-
-  display: none;
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--magnetic-size);
-  height: var(--magnetic-size);
-  margin: calc(var(--magnetic-size) / -2) 0 0
-    calc(var(--magnetic-size) / -2);
+  width: var(--cursor-magnetic-size);
+  height: var(--cursor-magnetic-size);
+  margin: calc(var(--cursor-magnetic-size) / -2) 0 0
+    calc(var(--cursor-magnetic-size) / -2);
   border: 0 solid transparent;
   border-radius: 999px;
-  background: var(--color-bone);
+  background: var(--color-lime);
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
   scale: var(--cursor-press);
   transition:
     width 300ms var(--ease-editorial),
     height 300ms var(--ease-editorial),
     margin 300ms var(--ease-editorial),
-    background-color 300ms var(--ease-editorial),
-    border-color 300ms var(--ease-editorial);
+    scale 180ms var(--cursor-follow-ease);
 }
 
 .cursor-magnetic__label {
@@ -183,58 +96,15 @@
   pointer-events: none;
 }
 
-.cursor-magnetic-label-origin {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 160ms linear;
-  will-change: transform;
-}
-
-html[data-cursor-variant^="magnetic-"] .cursor-ring {
-  display: block;
-}
-
-html[data-cursor-variant^="magnetic-"] .cursor-magnetic__disc {
-  display: block;
-}
-
-html[data-cursor-variant^="magnetic-"] .cursor-magnetic-label-origin {
-  display: block;
-}
-
-html[data-cursor-variant^="magnetic-"] .cursor-dot,
-html[data-cursor-variant^="magnetic-"] .cursor-ring__inner,
-html[data-cursor-variant^="magnetic-"] .cursor-arrow {
-  display: none !important;
+html[data-cursor-variant="magnetic-bone"] .cursor-magnetic__disc {
+  background: var(--color-bone);
 }
 
 html[data-cursor-variant="magnetic-lime"] .cursor-magnetic__disc {
   background: var(--color-lime);
 }
 
-html[data-cursor-variant="magnetic-inverse"] .cursor-layer {
-  mix-blend-mode: difference;
-}
-
-html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__disc {
-  background: var(--color-bone);
-}
-
-html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__label {
-  padding: 4px 7px;
-  border-radius: 999px;
-  background: var(--color-ink);
-  color: var(--color-bone);
-}
-
-html[data-cursor-variant^="magnetic-"]:is(
+html:is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
@@ -242,13 +112,13 @@ html[data-cursor-variant^="magnetic-"]:is(
     [data-cursor-state="play"]
   )
   .cursor-magnetic__disc {
-  width: var(--magnetic-focus);
-  height: var(--magnetic-focus);
-  margin: calc(var(--magnetic-focus) / -2) 0 0
-    calc(var(--magnetic-focus) / -2);
+  width: var(--cursor-magnetic-focus);
+  height: var(--cursor-magnetic-focus);
+  margin: calc(var(--cursor-magnetic-focus) / -2) 0 0
+    calc(var(--cursor-magnetic-focus) / -2);
 }
 
-html[data-cursor-variant^="magnetic-"]:is(
+html:is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
@@ -259,238 +129,31 @@ html[data-cursor-variant^="magnetic-"]:is(
   display: grid;
 }
 
-/* Production-only arrow swap. Lab variants keep this hidden. */
-.cursor-arrow {
-  --arrow-scale: 1;
-
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--cursor-default-arrow);
-  height: var(--cursor-default-arrow);
-  margin: calc(var(--cursor-default-arrow) / -2) 0 0
-    calc(var(--cursor-default-arrow) / -2);
-  color: var(--color-bone);
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
-  scale: calc(var(--arrow-scale) * var(--cursor-press));
-  rotate: 0deg;
-  transition:
-    scale 180ms var(--cursor-follow-ease),
-    rotate 180ms var(--cursor-follow-ease),
-    opacity 160ms linear;
-}
-
-.cursor-arrow path {
-  fill: var(--color-ink);
-  stroke: var(--color-bone);
-}
-
-/* Orbit: a 10px difference dot and a 30px trailing ring at rest. */
-html[data-cursor-variant="orbit"] .cursor-ring {
-  display: block;
-}
-
-html[data-cursor-variant="orbit"] .cursor-dot__disc {
-  --dot-size: var(--cursor-dot-size);
-  background: var(--color-bone);
-  mix-blend-mode: difference;
-}
-
-html[data-cursor-variant="orbit"] .cursor-ring__arrow {
-  display: none !important;
-}
-
-/* Lime Target: a lime dot with an ink keyline; the ring exists only on hover. */
-html[data-cursor-variant="lime"] .cursor-ring {
-  --ring-size: var(--cursor-lime-ring);
-
-  display: none;
-}
-
-html[data-cursor-variant="lime"] .cursor-dot__disc {
-  --dot-size: var(--cursor-dot-size);
-  border-width: var(--cursor-outline);
-  background: var(--color-lime);
-  mix-blend-mode: normal;
-}
-
-html[data-cursor-variant="lime"] .cursor-ring__inner {
-  border: var(--cursor-outline) solid var(--color-lime);
-  box-shadow: 0 0 0 var(--cursor-outline) var(--color-ink);
-  mix-blend-mode: normal;
-}
-
-html[data-cursor-variant="lime"] .cursor-ring__arrow {
-  color: var(--color-ink);
-}
-
-/* Editorial Double: a 12px bone dot with an ink keyline and a 36px double ring. */
-html[data-cursor-variant="editorial"] .cursor-ring {
-  --ring-size: var(--cursor-editorial-ring);
-
-  display: block;
-}
-
-html[data-cursor-variant="editorial"] .cursor-dot__disc {
-  --dot-size: var(--cursor-editorial-dot);
-  border-width: var(--cursor-outline);
-  background: var(--color-bone);
-  mix-blend-mode: normal;
-}
-
-html[data-cursor-variant="editorial"] .cursor-ring__inner {
-  border: var(--cursor-outline) solid var(--color-bone);
-  box-shadow: 0 0 0 var(--cursor-outline) var(--color-ink);
-  mix-blend-mode: normal;
-}
-
-html[data-cursor-variant="editorial"] .cursor-ring__arrow {
-  color: var(--color-bone);
-  filter: drop-shadow(0 0 1px var(--color-ink));
-}
-
-/* Every interactive role hides the resting dot. */
-html:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-dot__disc {
-  display: none !important;
-}
-
-/* Orbit and Editorial open their ring; Lime brings its ring into existence. */
-html[data-cursor-variant="orbit"]:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-ring {
-  --ring-scale: var(--cursor-orbit-focus-scale);
-}
-
-html[data-cursor-variant="orbit"]:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-ring__label {
-  display: grid;
-}
-
-html[data-cursor-variant="lime"] .cursor-ring__label,
-html[data-cursor-variant="editorial"] .cursor-ring__label {
-  display: none !important;
-}
-
-html[data-cursor-variant="lime"]:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-ring {
-  display: block !important;
-}
-
-html[data-cursor-variant="editorial"]:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-ring {
-  --ring-scale: var(--cursor-editorial-focus-scale);
-}
-
-html:is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-ring__arrow {
-  display: block;
-}
-
-/* Production default: the dot is replaced by the standalone arrow. */
-html[data-cursor-variant] .cursor-arrow {
-  display: none !important;
-}
-
-html:not([data-cursor-variant]):is(
-    [data-cursor-state="link"],
-    [data-cursor-state="hello"],
-    [data-cursor-state="visit"],
-    [data-cursor-state="view"],
-    [data-cursor-state="play"]
-  )
-  .cursor-arrow {
-  display: block !important;
-}
-
-html[data-cursor-visible="true"] .cursor-dot,
-html[data-cursor-visible="true"] .cursor-ring,
-html[data-cursor-visible="true"] .cursor-magnetic-label-origin {
+html[data-cursor-visible="true"] .cursor-magnetic {
   opacity: 1;
 }
 
-/* Production arrow roles. */
-html[data-cursor-state="link"] .cursor-arrow,
-html[data-cursor-state="hello"] .cursor-arrow,
-html[data-cursor-state="visit"] .cursor-arrow {
-  --arrow-scale: 1.15;
-  rotate: 45deg;
-}
-
-html[data-cursor-state="view"] .cursor-arrow,
-html[data-cursor-state="play"] .cursor-arrow {
-  --arrow-scale: 1.6;
-  rotate: 0deg;
-}
-
 /* Text entry: the OS I-beam takes over. */
-html[data-cursor-state="text"] .cursor-dot,
-html[data-cursor-state="text"] .cursor-ring,
-html[data-cursor-state="text"] .cursor-magnetic-label-origin {
+html[data-cursor-state="text"] .cursor-magnetic {
   opacity: 0 !important;
 }
 
 /* Disabled is visibly inert, but only while the pointer is present. */
-html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-dot,
-html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-ring,
-html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-magnetic-label-origin {
+html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-magnetic {
   opacity: 0.4;
 }
 
-/* Press. */
-html[data-cursor-down="true"] .cursor-dot,
-html[data-cursor-down="true"] .cursor-ring {
+html[data-cursor-down="true"] .cursor-magnetic {
   --cursor-press: 0.75;
 }
 
 /* The escape hatch: native cursor, custom visuals gone. */
-html[data-cursor="off"] .cursor-dot,
-html[data-cursor="off"] .cursor-ring,
-html[data-cursor="off"] .cursor-magnetic-label-origin {
+html[data-cursor="off"] .cursor-magnetic {
   opacity: 0 !important;
 }
 
-/* Browsers without the Popover API fall back to the native pointer while the
-   modal menu is open, because a dialog lives in the top layer. */
-html[data-cursor-menu="native"] .cursor-dot,
-html[data-cursor-menu="native"] .cursor-ring,
-html[data-cursor-menu="native"] .cursor-magnetic-label-origin {
+/* Without Popover, a modal dialog would paint over the cursor. */
+html[data-cursor-menu="native"] .cursor-magnetic {
   opacity: 0 !important;
 }
 
@@ -500,13 +163,8 @@ html[data-cursor="on"][data-cursor-menu="native"] * {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cursor-dot,
-  .cursor-ring,
-  .cursor-magnetic-label-origin,
-  .cursor-dot__disc,
-  .cursor-ring__inner,
-  .cursor-magnetic__disc,
-  .cursor-arrow {
+  .cursor-magnetic,
+  .cursor-magnetic__disc {
     transition: none;
   }
 }

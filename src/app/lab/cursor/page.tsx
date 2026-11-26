@@ -10,6 +10,7 @@ import CursorReadout from "@/features/lab/CursorReadout";
 export default function CursorLabPage() {
   return (
     <>
+      <CursorReadout />
       <main id="main-content" tabIndex={-1}>
         <Hero />
 
@@ -162,8 +163,6 @@ export default function CursorLabPage() {
           </p>
         </section>
       </main>
-
-      <CursorReadout />
     </>
   );
 }

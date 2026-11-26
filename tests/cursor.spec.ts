@@ -1,0 +1,605 @@
+import type { Page } from "@playwright/test";
+import sharp from "sharp";
+
+import { expect, test } from "./support/fixtures";
+
+const LEGACY_CURSOR_NODES =
+  ".cursor-dot, .cursor-arrow, .cursor-ring, .cursor-ring__inner, .cursor-label-layer";
+
+async function openLab(page: Page) {
+  await page.goto("/lab/cursor");
+  await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+}
+
+async function showCursor(page: Page) {
+  await page.evaluate(() => {
+    document.documentElement.dataset.cursorVisible = "true";
+  });
+}
+
+test.describe("cursor variants lab", () => {
+  test("offers only Bone and Lime and starts on Lime", async ({ page }) => {
+    await openLab(page);
+
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute(
+      "data-cursor-variant",
+      "magnetic-lime",
+    );
+
+    const group = page.getByRole("group", { name: "Cursor variant" });
+    await expect(group).toBeVisible();
+    await expect(group.getByRole("button")).toHaveCount(2);
+    await expect(group.getByRole("button", { name: "Lime" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(group.getByRole("button", { name: "Bone" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    for (const name of ["Orbit", "Lime Target", "Editorial Double", "Inverse"]) {
+      await expect(group.getByRole("button", { name })).toHaveCount(0);
+    }
+    await expect(
+      page.getByRole("group", { name: "Magnetic cursor variant" }),
+    ).toHaveCount(0);
+    await expect(page.locator(LEGACY_CURSOR_NODES)).toHaveCount(0);
+  });
+
+  for (const width of [390, 1440]) {
+    test(`keeps the lab controls clear of hero content at ${width}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+      await openLab(page);
+
+      const panel = page.locator("aside");
+      const scroll = page.getByRole("link", { name: "Scroll" });
+      const heading = page.locator("h1");
+      const [panelBox, scrollBox, headingBox] = await Promise.all([
+        panel.boundingBox(),
+        scroll.boundingBox(),
+        heading.boundingBox(),
+      ]);
+
+      expect(panelBox).not.toBeNull();
+      expect(scrollBox).not.toBeNull();
+      expect(headingBox).not.toBeNull();
+      const overlap = (a: typeof panelBox, b: typeof panelBox) => {
+        if (!a || !b) return 0;
+        return (
+          Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) *
+          Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y))
+        );
+      };
+      expect(overlap(panelBox, scrollBox)).toBe(0);
+      expect(overlap(panelBox, headingBox)).toBe(0);
+
+      const scrollReceivesPointer = await scroll.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          rect.x + rect.width / 2,
+          rect.y + rect.height / 2,
+        );
+        return hit === element || (hit instanceof Node && element.contains(hit));
+      });
+      expect(scrollReceivesPointer).toBe(true);
+    });
+  }
+
+  test("places the variant controls before the demo in keyboard order", async ({
+    page,
+  }) => {
+    await openLab(page);
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+
+    const order: string[] = [];
+    for (let index = 0; index < 24; index += 1) {
+      await page.keyboard.press("Tab");
+      order.push(
+        await page.evaluate(() => {
+          const active = document.activeElement;
+          return (
+            active?.getAttribute("aria-label") ??
+            active?.textContent?.trim() ??
+            ""
+          );
+        }),
+      );
+    }
+
+    const limeIndex = order.indexOf("Lime");
+    const demoIndex = order.findIndex((label) => label.includes("View project"));
+    expect(limeIndex).toBeGreaterThanOrEqual(0);
+    expect(demoIndex).toBeGreaterThan(limeIndex);
+  });
+
+  test("magnetic variants keep their resting and focus sizes", async ({
+    page,
+  }) => {
+    await openLab(page);
+
+    const disc = page.locator(".cursor-magnetic__disc");
+    const label = page.locator(".cursor-magnetic__label");
+    const viewTarget = page.locator('[data-cursor="view"]').first();
+    const cases = [
+      { id: "bone", background: "rgb(245, 241, 232)" },
+      { id: "lime", background: "rgb(198, 240, 53)" },
+    ] as const;
+
+    for (const item of cases) {
+      await page
+        .getByRole("button", { name: item.id === "bone" ? "Bone" : "Lime" })
+        .click();
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-cursor-variant",
+        `magnetic-${item.id}`,
+      );
+      await page.locator("body").dispatchEvent("pointerover", {
+        pointerType: "mouse",
+      });
+      await showCursor(page);
+
+      await expect(disc).toBeVisible();
+      await expect(disc).toHaveCSS("width", "16px");
+      await expect(disc).toHaveCSS("height", "16px");
+      await expect(disc).toHaveCSS("background-color", item.background);
+      await expect(disc).toHaveCSS("border-top-color", "rgba(0, 0, 0, 0)");
+      await expect(label).toBeHidden();
+
+      await viewTarget.dispatchEvent("pointerover", {
+        pointerType: "mouse",
+      });
+      await expect(disc).toHaveCSS("width", "64px");
+      await expect(disc).toHaveCSS("height", "64px");
+      await expect(label).toBeVisible();
+      await expect(label).toHaveText("VIEW");
+      await expect(label).toHaveCSS("font-size", "10px");
+      await expect(label).toHaveCSS("color", "rgb(23, 22, 20)");
+    }
+  });
+
+  test("maps every interactive role for both magnetic variants", async ({
+    page,
+  }) => {
+    await openLab(page);
+    await showCursor(page);
+
+    const disc = page.locator(".cursor-magnetic__disc");
+    const label = page.locator(".cursor-magnetic__label");
+    const cases = [
+      [page.getByRole("link", { name: "A normal link" }), "OPEN"],
+      [page.locator('[data-cursor="view"]').first(), "VIEW"],
+      [page.locator('[data-cursor="play"]'), "PLAY"],
+      [page.locator('a[href^="mailto:"]').first(), "HELLO"],
+      [page.locator('a[target="_blank"]').first(), "VISIT"],
+    ] as const;
+
+    for (const name of ["Bone", "Lime"]) {
+      await page.getByRole("button", { name }).click();
+      for (const [target, word] of cases) {
+        await target.dispatchEvent("pointerover", { pointerType: "mouse" });
+        await expect(label).toBeVisible();
+        await expect(label).toHaveText(word);
+        await expect(disc).toHaveCSS("width", "64px");
+      }
+
+      await page.locator("body").dispatchEvent("pointerover", {
+        pointerType: "mouse",
+      });
+      await expect(label).toBeHidden();
+      await expect(disc).toHaveCSS("width", "16px");
+    }
+  });
+
+  test("renders the literal Bone and Lime colours over white", async ({
+    page,
+  }) => {
+    await openLab(page);
+
+    await page.evaluate(() => {
+      const swatch = document.createElement("div");
+      swatch.id = "cursor-color-swatch";
+      swatch.style.cssText =
+        "position:fixed;left:80px;top:80px;width:240px;height:240px;background:#fff;z-index:1000";
+      document.body.appendChild(swatch);
+    });
+
+    const cases = [
+      { name: "Bone", expected: [245, 241, 232] },
+      { name: "Lime", expected: [198, 240, 53] },
+    ] as const;
+
+    for (const item of cases) {
+      await page.getByRole("button", { name: item.name }).click();
+      await page.mouse.move(200, 200);
+
+      await expect
+        .poll(async () => {
+          const box = await page
+            .locator(".cursor-magnetic__disc")
+            .boundingBox();
+          if (!box) return 1000;
+          return Math.max(
+            Math.abs(box.x + box.width / 2 - 200),
+            Math.abs(box.y + box.height / 2 - 200),
+          );
+        })
+        .toBeLessThan(3);
+
+      const shot = await page.screenshot({
+        clip: { x: 184, y: 184, width: 32, height: 32 },
+      });
+      const { data, info } = await sharp(shot)
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const offset = (16 * info.width + 16) * info.channels;
+      const pixel = Array.from(data.slice(offset, offset + 3));
+
+      for (let channel = 0; channel < 3; channel += 1) {
+        expect(
+          Math.abs(pixel[channel] - item.expected[channel]),
+          `${item.name} channel ${channel}: ${pixel.join(",")}`,
+        ).toBeLessThanOrEqual(4);
+      }
+    }
+  });
+
+  test("switches live and keeps the disc under a stationary pointer", async ({
+    page,
+  }) => {
+    await openLab(page);
+    await page.mouse.move(420, 320);
+
+    await page
+      .getByRole("button", { name: "Bone" })
+      .dispatchEvent("click");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "magnetic-bone",
+    );
+
+    await page
+      .getByRole("button", { name: "Lime" })
+      .dispatchEvent("click");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "magnetic-lime",
+    );
+
+    await expect
+      .poll(async () => {
+        const box = await page
+          .locator(".cursor-magnetic__disc")
+          .boundingBox();
+        if (!box) return 1000;
+        return Math.max(
+          Math.abs(box.x + box.width / 2 - 420),
+          Math.abs(box.y + box.height / 2 - 320),
+        );
+      })
+      .toBeLessThan(3);
+  });
+
+  test("supports keyboard selection", async ({ page }) => {
+    await openLab(page);
+
+    const bone = page.getByRole("button", { name: "Bone" });
+    await bone.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "magnetic-bone",
+    );
+    await expect(bone).toHaveAttribute("aria-pressed", "true");
+
+    const lime = page.getByRole("button", { name: "Lime" });
+    await lime.focus();
+    await page.keyboard.press("Space");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "magnetic-lime",
+    );
+    await expect(lime).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("does not carry the lab choice into production", async ({ page }) => {
+    await openLab(page);
+    await page.getByRole("button", { name: "Bone" }).click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "magnetic-bone",
+    );
+
+    await page.locator("header .site-header__brand").click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-cursor-variant",
+    );
+    await expect(page.locator(".cursor-magnetic__disc")).toHaveCSS(
+      "background-color",
+      "rgb(198, 240, 53)",
+    );
+  });
+});
+
+test.describe("custom cursor", () => {
+  test("uses Lime in production and expands with the role word", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-cursor", "on");
+    await expect(html).not.toHaveAttribute("data-cursor-variant");
+
+    const disc = page.locator(".cursor-magnetic__disc");
+    const label = page.locator(".cursor-magnetic__label");
+    await page.mouse.move(720, 450);
+    await expect(disc).toBeVisible();
+    await expect(disc).toHaveCSS("width", "16px");
+    await expect(disc).toHaveCSS("background-color", "rgb(198, 240, 53)");
+    await expect(label).toBeHidden();
+    await expect(page.locator(LEGACY_CURSOR_NODES)).toHaveCount(0);
+
+    const card = page.locator('[data-compression-target="project"]').first();
+    await card.scrollIntoViewIfNeeded();
+    await card.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "view");
+    await expect(disc).toHaveCSS("width", "64px");
+    await expect(label).toBeVisible();
+    await expect(label).toHaveText("VIEW");
+  });
+
+  test("replaces the native cursor and maps every role", async ({ page }) => {
+    await openLab(page);
+    const html = page.locator("html");
+    const disc = page.locator(".cursor-magnetic__disc");
+    const label = page.locator(".cursor-magnetic__label");
+
+    await expect(html).toHaveAttribute("data-cursor-visible", "false");
+
+    const link = page.getByRole("link", { name: "A normal link" });
+    await link.scrollIntoViewIfNeeded();
+    await link.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "link");
+    await expect(disc).toHaveCSS("width", "64px");
+    await expect(label).toHaveText("OPEN");
+
+    const view = page.locator('[data-cursor="view"]').first();
+    await view.scrollIntoViewIfNeeded();
+    await view.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "view");
+    await expect(label).toHaveText("VIEW");
+
+    const play = page.locator('[data-cursor="play"]');
+    await play.scrollIntoViewIfNeeded();
+    await play.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "play");
+    await expect(label).toHaveText("PLAY");
+
+    const textField = page.locator("input[type='text']");
+    await textField.scrollIntoViewIfNeeded();
+    await textField.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "text");
+    expect(
+      await textField.evaluate((element) => getComputedStyle(element).cursor),
+    ).toBe("text");
+    await expect(page.locator(".cursor-magnetic")).toHaveCSS("opacity", "0");
+
+    const disabled = page.locator('[data-cursor="disabled"]');
+    await disabled.scrollIntoViewIfNeeded();
+    await disabled.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "disabled");
+  });
+
+  test("the system-cursor escape hatch restores the OS pointer", async ({
+    page,
+  }) => {
+    await openLab(page);
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-cursor", "on");
+
+    await page.getByRole("button", { name: "Use system cursor" }).click();
+    await expect(html).toHaveAttribute("data-cursor", "off");
+    expect(
+      await page.evaluate(() => getComputedStyle(document.body).cursor),
+    ).toBe("auto");
+
+    await page.getByRole("button", { name: "Use custom cursor" }).click();
+    await expect(html).toHaveAttribute("data-cursor", "on");
+    expect(
+      await page.evaluate(() => getComputedStyle(document.body).cursor),
+    ).toBe("none");
+  });
+
+  test("updates the role on scroll with a stationary pointer", async ({
+    page,
+  }) => {
+    await openLab(page);
+    const html = page.locator("html");
+
+    const view = page.locator('[data-cursor="view"]').first();
+    await view.scrollIntoViewIfNeeded();
+    await view.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "view");
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(html).not.toHaveAttribute("data-cursor-state", "view");
+  });
+
+  test("keeps the custom cursor above the menu dialog", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+
+    await page.locator(".menu-trigger").dispatchEvent("click");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "open",
+    );
+
+    await page.mouse.move(720, 300);
+    await expect(page.locator(".cursor-magnetic")).toHaveCSS("opacity", "1");
+    expect(
+      await page
+        .locator(".cursor-layer")
+        .evaluate((element) => element.matches(":popover-open")),
+    ).toBe(true);
+  });
+
+  test("clears a stale role when the window shrinks", async ({ page }) => {
+    await openLab(page);
+    const html = page.locator("html");
+
+    const view = page.locator('[data-cursor="view"]').first();
+    await view.scrollIntoViewIfNeeded();
+    await view.hover();
+    await expect(html).toHaveAttribute("data-cursor-state", "view");
+
+    await page.setViewportSize({ width: 500, height: 400 });
+    await expect(html).not.toHaveAttribute("data-cursor-state", "view");
+  });
+
+  test("survives a client navigation", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await page
+      .locator("header")
+      .getByRole("link", { name: "Work" })
+      .click();
+
+    await expect(page).toHaveURL(/\/work$/);
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await expect(page.locator(".cursor-magnetic")).toHaveCount(1);
+    await expect(page.locator(".cursor-magnetic__disc")).toHaveCSS(
+      "background-color",
+      "rgb(198, 240, 53)",
+    );
+  });
+
+  test("honors a live reduced-motion change without trailing", async ({
+    page,
+  }) => {
+    await openLab(page);
+    await page.mouse.move(100, 100);
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-visible",
+      "true",
+    );
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    const distance = await page.evaluate(async () => {
+      document.dispatchEvent(
+        new PointerEvent("pointermove", {
+          clientX: 320,
+          clientY: 260,
+          pointerType: "mouse",
+        }),
+      );
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+      const disc = document.querySelector(".cursor-magnetic__disc");
+      if (!disc) return 1000;
+      const box = disc.getBoundingClientRect();
+      return Math.max(
+        Math.abs(box.x + box.width / 2 - 320),
+        Math.abs(box.y + box.height / 2 - 260),
+      );
+    });
+
+    expect(distance).toBeLessThan(1);
+  });
+
+  test.describe("reduced motion", () => {
+    test.use({ reducedMotion: "reduce" });
+
+    test("snaps the disc to the pointer without a lerp", async ({ page }) => {
+      await openLab(page);
+      await expect(page.locator(".cursor-magnetic")).toBeAttached();
+      await page.mouse.move(320, 260);
+
+      await expect
+        .poll(async () => {
+          const box = await page
+            .locator(".cursor-magnetic__disc")
+            .boundingBox();
+          if (!box) return 1000;
+          return Math.max(
+            Math.abs(box.x + box.width / 2 - 320),
+            Math.abs(box.y + box.height / 2 - 260),
+          );
+        })
+        .toBeLessThan(1);
+    });
+  });
+
+  test.describe("touch", () => {
+    test.use({
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 2,
+      isMobile: true,
+      hasTouch: true,
+    });
+
+    test("never mounts the custom cursor", async ({ page }) => {
+      await page.goto("/lab/cursor");
+      await expect(page.locator(".cursor-magnetic")).toHaveCount(0);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.dataset.cursor ?? null,
+        ),
+      ).toBeNull();
+      expect(
+        await page.evaluate(() => getComputedStyle(document.body).cursor),
+      ).toBe("auto");
+    });
+
+    test("reports the system cursor and disables unavailable controls", async ({
+      page,
+    }) => {
+      await page.goto("/lab/cursor");
+      await expect(page.getByText("System · touch")).toBeVisible();
+      await expect(page.getByRole("button", { name: "Lime" })).toBeDisabled();
+      await expect(page.getByRole("button", { name: "Bone" })).toBeDisabled();
+      await expect(
+        page.getByRole("button", { name: "Use custom cursor" }),
+      ).toBeDisabled();
+    });
+
+    test("the live site never mounts it either", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator(".cursor-magnetic")).toHaveCount(0);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.dataset.cursor ?? null,
+        ),
+      ).toBeNull();
+    });
+  });
+
+  test.describe("no JavaScript", () => {
+    test.use({ javaScriptEnabled: false });
+
+    test("keeps the native pointer", async ({ page }) => {
+      await page.goto("/lab/cursor");
+      await expect(page.locator(".cursor-magnetic")).toHaveCount(0);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.dataset.cursor ?? null,
+        ),
+      ).toBeNull();
+    });
+
+    test("the live site keeps the native pointer", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator(".cursor-magnetic")).toHaveCount(0);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.dataset.cursor ?? null,
+        ),
+      ).toBeNull();
+    });
+  });
+});
