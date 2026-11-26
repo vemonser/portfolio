@@ -162,7 +162,7 @@ REGRESSION AREAS: every route's cursor, menu/dialog stacking, text controls,
 | --- | --- | --- | --- | --- | --- |
 | CURSOR-TC-01 | CURSOR-AC-01 | Lab offers only Bone and Lime and starts on Lime | Fine pointer | Open `/lab/cursor` | One variant group; exactly Bone/Lime; Lime pressed; old options absent |
 | CURSOR-TC-02 | CURSOR-AC-02 | Production defaults to Lime | Fine pointer | Open `/`; rest; hover a project card | Lime 16 px disc at rest; 64 px disc with `VIEW` on hover; no legacy nodes |
-| CURSOR-TC-03 | CURSOR-AC-03 | Both magnetic variants keep their visual contract | Lab open | Select each variant; inspect rest and interactive states | Lime 16 → 64 px with 10 px label; Bone 10 / 64 / 82 px with 14 px label |
+| CURSOR-TC-03 | CURSOR-AC-03 | Both magnetic variants keep their visual contract | Lab open | Select each variant; inspect rest and interactive states | Lime 16 → 64 px with 14 px label; Bone 10 / 64 / 82 px with 14 px label |
 | CURSOR-TC-04 | CURSOR-AC-03 | Both variants map every interactive role | Lab open | Hover/dispatch pointerover for link, view, play, mailto and external link | `OPEN`, `VIEW`, `PLAY`, `HELLO`, `VISIT`; disc returns to 16 px on neutral surface |
 | CURSOR-TC-05 | CURSOR-AC-03 | Bone inversion and Lime colour render correctly | Lab open; black/white swatches | Select each variant; move to swatch; sample centre pixel | Bone `245,241,232` on black and `10,14,23` on white; Lime `198,240,53` |
 | CURSOR-TC-06 | CURSOR-AC-04 | Existing role and fallback contracts survive consolidation | Fine pointer | Exercise link/view/play/text/disabled, system toggle, menu, scroll, resize, navigation, reduced motion, touch and no-JS | Each existing contract still passes |
@@ -259,7 +259,9 @@ ROLLBACK/GATING: revert the Bone-motion commit; Lime production is unchanged.
 - BONE-AC-03 — Interactive Bone roles use an 82 px normal-blended Bone disc with
   ink text for `VIEW`, `PLAY`, `OPEN`, `HELLO` and `VISIT`.
 - BONE-AC-04 — Disc scale uses a 360 ms compositor transition, labels use a
-  240 ms fade/scale transition, press feedback remains, and reduced motion snaps.
+  240 ms fade/scale transition, press feedback uses a 100 ms transform and
+  releases on `transitionend` with reduced-motion/normal fallbacks, and reduced
+  motion snaps.
 - BONE-AC-05 — Intro, About lead and case-study lead carry the manual emphasis
   attribute; Lime remains 16 → 64 px and the contact form is untouched.
 

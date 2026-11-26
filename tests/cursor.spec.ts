@@ -151,7 +151,7 @@ test.describe("cursor variants lab", () => {
         focusWidth: 64,
         restBlend: "normal",
         focusBlend: "normal",
-        labelSize: "10px",
+        labelSize: "14px",
       },
     ] as const;
 
@@ -509,35 +509,63 @@ test.describe("custom cursor", () => {
     });
     await showCursor(page);
 
-    const result = await page.evaluate(async () => {
-      const html = document.documentElement;
-      const disc = document.querySelector(".cursor-magnetic__disc");
-      if (!disc) return { reached: false, pressed: false };
-      document.dispatchEvent(
-        new PointerEvent("pointerdown", { pointerType: "mouse" }),
-      );
-      let reached = false;
-      let pressed = true;
-      for (let frame = 0; frame < 30 && pressed; frame += 1) {
-        await new Promise<void>((resolve) => {
-          requestAnimationFrame(() => resolve());
-        });
-        pressed = html.dataset.cursorDown === "true";
-        reached =
-          reached ||
-          getComputedStyle(disc).transform ===
-            "matrix(0.75, 0, 0, 0.75, 0, 0)";
-      }
-      return { reached, pressed };
+    const html = page.locator("html");
+    const disc = page.locator(".cursor-magnetic__disc");
+    await expect(html).toHaveAttribute("data-cursor-down", "false");
+    await expect
+      .poll(() => disc.evaluate((element) => getComputedStyle(element).transform))
+      .toBe("matrix(1, 0, 0, 1, 0, 0)");
+    expect(
+      await disc.evaluate(
+        (element) => getComputedStyle(element).transitionDuration,
+      ),
+    ).toContain("0.1s");
+    await disc.evaluate((element) => {
+      element.style.transitionDuration = "360ms, 300ms, 300ms";
+    });
+    expect(
+      await disc.evaluate(
+        (element) => getComputedStyle(element).transitionDuration,
+      ),
+    ).toContain("0.3s");
+    await disc.evaluate((element) => {
+      const probe = { completed: "" };
+      (
+        window as Window & {
+          __pressProbe?: typeof probe;
+        }
+      ).__pressProbe = probe;
+      const root = document.documentElement;
+      const onTransitionEnd: EventListener = (event) => {
+        if (
+          (event as TransitionEvent).propertyName === "transform" &&
+          root.dataset.cursorDown === "true"
+        ) {
+          probe.completed = getComputedStyle(element).transform;
+        }
+      };
+      element.addEventListener("transitionend", onTransitionEnd);
     });
 
-    expect(result.reached).toBe(true);
-    expect(result.pressed).toBe(false);
-    expect(
-      await page
-        .locator(".cursor-magnetic__disc")
-        .evaluate((element) => getComputedStyle(element).transitionDuration),
-    ).toContain("0.1s");
+    await page.mouse.move(420, 320);
+    await page.mouse.down();
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const probe = (
+            window as Window & {
+              __pressProbe?: { completed: string };
+            }
+          ).__pressProbe;
+          return probe?.completed ?? "";
+        }),
+      )
+      .toBe("matrix(0.75, 0, 0, 0.75, 0, 0)");
+    await page.mouse.up();
+    await expect(html).toHaveAttribute("data-cursor-down", "false");
+    await disc.evaluate((element) => {
+      element.style.removeProperty("transition-duration");
+    });
   });
 
   test("the system-cursor escape hatch restores the OS pointer", async ({

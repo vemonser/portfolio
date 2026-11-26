@@ -165,8 +165,7 @@ html.lenis body {
   --parallax-scale: 1.08;
   --cursor-magnetic-size: 16px;
   --cursor-magnetic-focus-scale: 4;
-  --cursor-magnetic-label: 10px;
-  --cursor-bone-label-size: 14px;
+  --cursor-magnetic-label: 14px;
   --cursor-bone-rest-scale: 0.625;
   --cursor-bone-focus-scale: 4;
   --cursor-bone-label-scale: 5.125;

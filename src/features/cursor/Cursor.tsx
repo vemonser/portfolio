@@ -285,13 +285,25 @@ export default function Cursor() {
       setRole(node ? roleAt(node) : "default");
     };
 
+    const releasePress = () => {
+      window.clearTimeout(downTimer);
+      html.dataset.cursorDown = "false";
+    };
+
+    const onPressTransitionEnd = (event: TransitionEvent) => {
+      if (
+        event.propertyName === "transform" &&
+        html.dataset.cursorDown === "true"
+      ) {
+        releasePress();
+      }
+    };
+
     const onDown = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
       html.dataset.cursorDown = "true";
       window.clearTimeout(downTimer);
-      downTimer = window.setTimeout(() => {
-        html.dataset.cursorDown = "false";
-      }, 140);
+      downTimer = window.setTimeout(releasePress, reduced.matches ? 120 : 600);
     };
 
     const onLeave = () => {
@@ -305,6 +317,7 @@ export default function Cursor() {
     document.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerover", onOver, { passive: true });
     document.addEventListener("pointerdown", onDown, { passive: true });
+    cursor.addEventListener("transitionend", onPressTransitionEnd);
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("scroll", scheduleRole, { passive: true });
@@ -314,6 +327,7 @@ export default function Cursor() {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerdown", onDown);
+      cursor.removeEventListener("transitionend", onPressTransitionEnd);
       document.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("scroll", scheduleRole);

@@ -111,10 +111,6 @@ html[data-cursor-variant="magnetic-bone"] .cursor-layer {
   mix-blend-mode: exclusion;
 }
 
-html[data-cursor-variant="magnetic-bone"] .cursor-magnetic__label {
-  font-size: var(--cursor-bone-label-size);
-}
-
 html[data-cursor-variant="magnetic-bone"] .cursor-magnetic__disc {
   --cursor-scale: var(--cursor-bone-rest-scale);
 
