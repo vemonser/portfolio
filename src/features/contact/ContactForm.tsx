@@ -1,34 +1,14 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import useContactForm from "@/features/contact/use-contact-form";
+import { CONTACT_IDS as IDS } from "@/features/contact/contact-types";
+import type { ContactLabels } from "@/features/contact/contact-types";
 
 import Turnstile from "@/features/contact/Turnstile";
 
 import Field from "@/features/ui/Field";
 import StatusMessage from "@/features/ui/StatusMessage";
 import { roundButton } from "@/features/ui/styles";
-
-type FieldName = "name" | "email" | "message";
-
-type Labels = {
-  name: string;
-  email: string;
-  message: string;
-  send: string;
-  hint: string;
-  subjectPrefix: string;
-  requiredName: string;
-  requiredEmail: string;
-  invalidEmail: string;
-  requiredMessage: string;
-  sending: string;
-  sent: string;
-  ready: string;
-  openMail: string;
-  failed: string;
-  privacy: string;
-  verifyRequired: string;
-};
 
 type Props = {
   to: string;
@@ -38,25 +18,11 @@ type Props = {
    * changes when the transport does.
    */
   endpoint?: string;
-  labels: Labels;
+  labels: ContactLabels;
 };
-
-type Values = Record<FieldName, string>;
-type Errors = Partial<Record<FieldName, string>>;
-type Status = "idle" | "submitting" | "success" | "error";
-
-const IDS: Record<FieldName, string> = {
-  name: "contact-name",
-  email: "contact-email",
-  message: "contact-message",
-};
-
-const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const controlClasses =
   "w-full rounded-none border-0 border-b border-bone/30 bg-transparent px-2 py-[0.95rem] font-body text-t-20 text-bone transition-colors duration-300 focus:border-lime aria-[invalid=true]:border-lime";
-
-const EMPTY: Values = { name: "", email: "", message: "" };
 
 /**
  * Contact form. Values are controlled, so an invalid submission keeps every
@@ -73,141 +39,22 @@ export default function ContactForm({
   endpoint = "/api/contact",
   labels,
 }: Props) {
-  const [values, setValues] = useState<Values>(EMPTY);
-  const [company, setCompany] = useState("");
-  const [errors, setErrors] = useState<Errors>({});
-  const [status, setStatus] = useState<Status>("idle");
-  const [mailto, setMailto] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileReset, setTurnstileReset] = useState(0);
-  const [verificationError, setVerificationError] = useState(false);
-  const turnstileRequired = Boolean(
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-  );
-
-  const onTurnstile = useCallback((token: string | null) => {
-    setTurnstileToken(token ?? "");
-    setVerificationError(false);
-  }, []);
-
-  const fieldError = (field: FieldName, value: string): string | undefined => {
-    const trimmed = value.trim();
-
-    if (field === "name") {
-      return trimmed ? undefined : labels.requiredName;
-    }
-
-    if (field === "email") {
-      if (!trimmed) return labels.requiredEmail;
-      return EMAIL_SHAPE.test(trimmed) ? undefined : labels.invalidEmail;
-    }
-
-    return trimmed ? undefined : labels.requiredMessage;
-  };
-
-  const validate = (): Errors => {
-    const next: Errors = {};
-
-    for (const field of Object.keys(IDS) as FieldName[]) {
-      const error = fieldError(field, values[field]);
-      if (error) next[field] = error;
-    }
-
-    return next;
-  };
-
-  const onChange = (field: FieldName, value: string) => {
-    setValues((current) => ({ ...current, [field]: value }));
-
-    // Editing clears the old message; it does not validate untouched fields.
-    setErrors((current) =>
-      current[field] ? { ...current, [field]: undefined } : current,
-    );
-  };
-
-  const onBlur = (field: FieldName) => {
-    setErrors((current) => ({
-      ...current,
-      [field]: fieldError(field, values[field]),
-    }));
-  };
-
-  const composeMailto = (payload: Values) => {
-    const subject = `${labels.subjectPrefix} ${payload.name}`;
-    const body = `${payload.message}\n\n— ${payload.name} <${payload.email}>`;
-    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const form = event.currentTarget;
-    const target = (form.dataset.contactEndpoint ?? endpoint).trim();
-
-    setStatus("idle");
-    setMailto(null);
-
-    const next = validate();
-    setErrors(next);
-
-    const firstInvalid = (Object.keys(IDS) as FieldName[]).find(
-      (field) => next[field],
-    );
-    if (firstInvalid) {
-      document.getElementById(IDS[firstInvalid])?.focus();
-      return;
-    }
-
-    if (turnstileRequired && !turnstileToken) {
-      setVerificationError(true);
-      return;
-    }
-
-    const payload = {
-      name: values.name.trim(),
-      email: values.email.trim(),
-      message: values.message.trim(),
-    };
-
-    setStatus("submitting");
-
-    try {
-      const response = await fetch(target, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          company,
-          turnstileToken,
-        }),
-      });
-
-      // The route has no provider key yet: keep the message and hand it to the
-      // visitor's mail app rather than reporting a delivery that did not happen.
-      if (response.status === 503) {
-        setMailto(composeMailto(values));
-        setStatus("success");
-        return;
-      }
-
-      if (!response.ok) throw new Error("contact endpoint rejected the message");
-
-      setValues(EMPTY);
-      setCompany("");
-      setStatus("success");
-    } catch {
-      // Deliberately generic: the visitor gets an action, not a status code.
-      setStatus("error");
-    } finally {
-      if (turnstileRequired) {
-        setTurnstileToken("");
-        setTurnstileReset((value) => value + 1);
-      }
-      setVerificationError(false);
-    }
-  };
-
-  const submitting = status === "submitting";
+  const {
+    values,
+    errors,
+    status,
+    mailto,
+    company,
+    setCompany,
+    turnstileToken,
+    turnstileReset,
+    verificationError,
+    submitting,
+    onTurnstile,
+    changeField,
+    blurField,
+    submit,
+  } = useContactForm({ to, endpoint, labels });
 
   return (
     <form
@@ -215,7 +62,7 @@ export default function ContactForm({
       data-contact-endpoint={endpoint}
       aria-busy={submitting || undefined}
       className="grid w-full gap-[var(--space-3)]"
-      onSubmit={onSubmit}
+      onSubmit={submit}
       noValidate
     >
       {/*
@@ -249,8 +96,8 @@ export default function ContactForm({
             autoComplete="name"
             maxLength={100}
             value={values.name}
-            onChange={(event) => onChange("name", event.target.value)}
-            onBlur={() => onBlur("name")}
+            onChange={(event) => changeField("name", event.target.value)}
+            onBlur={() => blurField("name")}
           />
         )}
       </Field>
@@ -267,8 +114,8 @@ export default function ContactForm({
             maxLength={200}
             dir="ltr"
             value={values.email}
-            onChange={(event) => onChange("email", event.target.value)}
-            onBlur={() => onBlur("email")}
+            onChange={(event) => changeField("email", event.target.value)}
+            onBlur={() => blurField("email")}
           />
         )}
       </Field>
@@ -282,8 +129,8 @@ export default function ContactForm({
             rows={5}
             maxLength={2000}
             value={values.message}
-            onChange={(event) => onChange("message", event.target.value)}
-            onBlur={() => onBlur("message")}
+            onChange={(event) => changeField("message", event.target.value)}
+            onBlur={() => blurField("message")}
           />
         )}
       </Field>
