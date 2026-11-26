@@ -51,9 +51,10 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
 - Prose is split after hydration in a layout effect; the article is hidden
   until every block has its masks.
 - Cursor: Lime is the production default: a 16 px filled disc at rest that
-  expands to 64 px with the role word VIEW/PLAY/OPEN/HELLO/VISIT. The lab offers
-  only Lime and Bone; Bone changes the fill colour while preserving the same
-  sizing, lag and role labels. Text entry keeps the native I-beam.
+  expands to 64 px with the role word VIEW/PLAY/OPEN/HELLO/VISIT. Bone is the
+  lab-only three-state treatment: 10 px inverted at rest, 64 px inverted for
+  `data-cursor="emphasis"`, and 82 px normal-blended with an ink role word.
+  Text entry keeps the native I-beam.
 - Project media: cards overscan their fixed frame (`scale(1.08)`) and drift
   `yPercent: -4 → 4` with scroll (`scrub: 0.6`). Scale and travel live on
   separate nodes so GSAP cannot erase the overscan. Reduced motion rests at
@@ -109,8 +110,8 @@ ROLLBACK/GATING: revert the cursor-consolidation commit. The native pointer
 
 - Lime is the default treatment without a lab override. Bone is the only
   opt-in override, exposed in the lab alongside Lime.
-- Both treatments use the same 16 px resting disc and 64 px interactive disc,
-  with role words `VIEW`, `PLAY`, `OPEN`, `HELLO` and `VISIT`.
+- Both treatments keep borderless magnetic geometry and all role labels. Lime
+  uses 16 → 64 px; Bone uses the three-state 10 / 64 / 82 px scale system.
 - Remove the old dot/arrow swap, ring treatments, Inverse blend workaround and
   their unused tokens/DOM. The magnetic disc and its label share one normal
   blended cursor layer again.
@@ -123,8 +124,9 @@ ROLLBACK/GATING: revert the cursor-consolidation commit. The native pointer
   and no longer exposes Orbit, Lime Target, Editorial Double or Inverse.
 - CURSOR-AC-02 — Production uses the Lime magnetic cursor by default: a 16 px
   lime disc at rest and a 64 px disc with the role word on interactive hover.
-- CURSOR-AC-03 — Bone and Lime preserve their colours, borderless 16 → 64 px
-  sizing, lagging movement and all five role labels.
+- CURSOR-AC-03 — Lime preserves its 16 → 64 px treatment; Bone preserves its
+  colours, lag and role labels while using 10 px inverted rest, 64 px inverted
+  emphasis and 82 px normal-blended label states.
 - CURSOR-AC-04 — Existing cursor contracts remain intact: native-pointer
   replacement, text I-beam, disabled state, system-cursor toggle, menu top
   layer, scroll/resize role refresh, client navigation, reduced motion, touch
@@ -160,9 +162,9 @@ REGRESSION AREAS: every route's cursor, menu/dialog stacking, text controls,
 | --- | --- | --- | --- | --- | --- |
 | CURSOR-TC-01 | CURSOR-AC-01 | Lab offers only Bone and Lime and starts on Lime | Fine pointer | Open `/lab/cursor` | One variant group; exactly Bone/Lime; Lime pressed; old options absent |
 | CURSOR-TC-02 | CURSOR-AC-02 | Production defaults to Lime | Fine pointer | Open `/`; rest; hover a project card | Lime 16 px disc at rest; 64 px disc with `VIEW` on hover; no legacy nodes |
-| CURSOR-TC-03 | CURSOR-AC-03 | Both magnetic variants keep their visual contract | Lab open | Select each variant; inspect rest and interactive states | Correct colour; borderless 16 → 64 px disc; 10 px role label |
+| CURSOR-TC-03 | CURSOR-AC-03 | Both magnetic variants keep their visual contract | Lab open | Select each variant; inspect rest and interactive states | Lime 16 → 64 px with 10 px label; Bone 10 / 64 / 82 px with 14 px label |
 | CURSOR-TC-04 | CURSOR-AC-03 | Both variants map every interactive role | Lab open | Hover/dispatch pointerover for link, view, play, mailto and external link | `OPEN`, `VIEW`, `PLAY`, `HELLO`, `VISIT`; disc returns to 16 px on neutral surface |
-| CURSOR-TC-05 | CURSOR-AC-03 | Bone and Lime render their literal colours | Lab open; white swatch | Select each variant; move to swatch; sample centre pixel | Bone `245,241,232`; Lime `198,240,53` |
+| CURSOR-TC-05 | CURSOR-AC-03 | Bone inversion and Lime colour render correctly | Lab open; black/white swatches | Select each variant; move to swatch; sample centre pixel | Bone `245,241,232` on black and `10,14,23` on white; Lime `198,240,53` |
 | CURSOR-TC-06 | CURSOR-AC-04 | Existing role and fallback contracts survive consolidation | Fine pointer | Exercise link/view/play/text/disabled, system toggle, menu, scroll, resize, navigation, reduced motion, touch and no-JS | Each existing contract still passes |
 | CURSOR-TC-07 | CURSOR-AC-05 | Lab choice does not leak | Lab open | Select Bone; navigate home | No lab override; production disc is Lime |
 | CURSOR-TC-08 | CURSOR-AC-06 | Lab controls clear hero content and precede the demo | Fine pointer | Open lab at 390/1440; inspect geometry; Tab through controls | No overlap; Scroll receives pointer; Lime/Bone precede View project |
@@ -223,3 +225,65 @@ UNCHANGED/SAFE AREAS: contact form implementation and layout, content, API,
 | AC-08 | `tests/lab-prototypes.spec.ts` text role | COVERED |
 | AC-09 | `tests/work-media.spec.ts` project image parallax | COVERED |
 | AC-10 | `tests/work-media.spec.ts` visit-site actions | COVERED |
+
+## Bone three-state magnetic cursor
+
+```text
+SCOPE: Bone-only 10 px inverted rest, 64 px inverted emphasis, 82 px
+  normal-blended role-label state; compositor scale/label transitions; manual
+  emphasis attributes on selected paragraphs.
+NON-GOALS: Lime visuals, contact form, copy/content changes, other cursor
+  variants, new dependencies.
+ACCEPTANCE CRITERIA: BONE-AC-01 … BONE-AC-05 below.
+AFFECTED AREAS: src/features/cursor/**, src/features/ui/TextReveal.tsx,
+  src/features/intro/IntroSection.tsx, src/app/about/page.tsx,
+  src/app/work/[slug]/page.tsx, src/app/lab/cursor/page.tsx,
+  src/app/globals.css, tests/cursor.spec.ts.
+RISK: MEDIUM
+BLAST RADIUS: SHARED (Cursor and TextReveal are shared; Bone is lab-only)
+COMMIT: b988334
+BRANCH: main
+PR: null
+VALIDATION: cursor Playwright, contact/a11y regression, scoped typecheck,
+  scoped lint, Vitest, browser screenshots/pixel checks, independent review,
+  Evidence Gate.
+ROLLBACK/GATING: revert the Bone-motion commit; Lime production is unchanged.
+```
+
+### Acceptance criteria
+
+- BONE-AC-01 — Bone rests as a 10 px exclusion-blended disc that inverts over
+  light and dark surfaces.
+- BONE-AC-02 — `data-cursor="emphasis"` expands Bone to 64 px while preserving
+  exclusion blending and hiding the label.
+- BONE-AC-03 — Interactive Bone roles use an 82 px normal-blended Bone disc with
+  ink text for `VIEW`, `PLAY`, `OPEN`, `HELLO` and `VISIT`.
+- BONE-AC-04 — Disc scale uses a 360 ms compositor transition, labels use a
+  240 ms fade/scale transition, press feedback remains, and reduced motion snaps.
+- BONE-AC-05 — Intro, About lead and case-study lead carry the manual emphasis
+  attribute; Lime remains 16 → 64 px and the contact form is untouched.
+
+### Test matrix
+
+| ID | Criterion | Case | Expected |
+| --- | --- | --- | --- |
+| BONE-TC-01 | BONE-AC-01 | Bone rest on black and white | 10 px; pixel `245,241,232` on black and `10,14,23` on white |
+| BONE-TC-02 | BONE-AC-02 | Hover `data-cursor="emphasis"` | 64 px; exclusion blend; label hidden |
+| BONE-TC-03 | BONE-AC-03 | Hover every interactive role | 82 px; normal blend; correct ink label |
+| BONE-TC-04 | BONE-AC-04 | Inspect computed motion and reduced-motion behavior | 360 ms scale; 240 ms label; no trailing under reduced motion |
+| BONE-TC-05 | BONE-AC-05 | Inspect selected paragraphs and production Lime | Attributes present; Lime 16 → 64 px; form diff empty |
+
+### Requirement-to-test coverage
+
+| Criterion | Test case(s) | Validation | Status |
+| --- | --- | --- | --- |
+| BONE-AC-01 | BONE-TC-01 | Playwright + pixel screenshot | PASS |
+| BONE-AC-02 | BONE-TC-02 | Playwright | PASS |
+| BONE-AC-03 | BONE-TC-03 | Playwright | PASS |
+| BONE-AC-04 | BONE-TC-04 | Playwright + computed styles | PASS |
+| BONE-AC-05 | BONE-TC-05 | Playwright + diff review | PASS |
+
+Evidence run: `.quality/runs/2026-11-26T11-08-26-000Z/evidence-manifest.json`.
+The cursor suite passes 27/27. The combined cursor/contact/a11y run passed 40/41;
+the one project-video `currentTime = 0` failure is outside the cursor scope and
+passed 3/3 isolated reruns. Scoped typecheck and lint pass; Vitest passes 77/77.

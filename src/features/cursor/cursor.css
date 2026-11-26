@@ -1,7 +1,8 @@
 /*
- * The site-wide magnetic cursor. Lime is the default; the lab can opt into
- * Bone with `data-cursor-variant="magnetic-bone"`. The native cursor is hidden
- * only after JS sets `html[data-cursor="on"]`, so no-JS visitors keep it.
+ * The site-wide magnetic cursor. Lime is the default treatment. Bone opts into
+ * three reference-inspired states: a small inverted disc, a larger inverted
+ * emphasis disc, and a normal-blended label disc. The native cursor is hidden
+ * only after JS sets `html[data-cursor="on"]`.
  */
 
 @media (hover: hover) and (pointer: fine) {
@@ -60,6 +61,8 @@
 }
 
 .cursor-magnetic__disc {
+  --cursor-scale: 1;
+
   position: absolute;
   top: 0;
   left: 0;
@@ -71,21 +74,25 @@
   border-radius: 999px;
   background: var(--color-lime);
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
-  scale: var(--cursor-press);
+  scale: var(--cursor-scale);
+  transform: scale(var(--cursor-press));
   transition:
-    width 300ms var(--ease-editorial),
-    height 300ms var(--ease-editorial),
-    margin 300ms var(--ease-editorial),
-    scale 180ms var(--cursor-follow-ease);
+    scale var(--cursor-scale-duration) var(--cursor-scale-ease),
+    transform 100ms var(--cursor-follow-ease),
+    background-color 300ms var(--ease-editorial);
+  will-change: scale, transform;
 }
 
 .cursor-magnetic__label {
-  display: none;
+  display: grid;
   position: absolute;
   top: 50%;
   left: 50%;
   width: max-content;
   transform: translate(-50%, -50%);
+  scale: 0.6;
+  visibility: hidden;
+  opacity: 0;
   color: var(--color-ink);
   font-family: var(--font-label);
   font-size: var(--cursor-magnetic-label);
@@ -94,9 +101,23 @@
   line-height: 1;
   white-space: nowrap;
   pointer-events: none;
+  transition:
+    opacity var(--cursor-label-duration) var(--cursor-scale-ease),
+    scale var(--cursor-label-duration) var(--cursor-scale-ease),
+    visibility 0s linear var(--cursor-label-duration);
+}
+
+html[data-cursor-variant="magnetic-bone"] .cursor-layer {
+  mix-blend-mode: exclusion;
+}
+
+html[data-cursor-variant="magnetic-bone"] .cursor-magnetic__label {
+  font-size: var(--cursor-bone-label-size);
 }
 
 html[data-cursor-variant="magnetic-bone"] .cursor-magnetic__disc {
+  --cursor-scale: var(--cursor-bone-rest-scale);
+
   background: var(--color-bone);
 }
 
@@ -104,7 +125,12 @@ html[data-cursor-variant="magnetic-lime"] .cursor-magnetic__disc {
   background: var(--color-lime);
 }
 
-html:is(
+html[data-cursor-variant="magnetic-bone"][data-cursor-state="emphasis"]
+  .cursor-magnetic__disc {
+  --cursor-scale: var(--cursor-bone-focus-scale);
+}
+
+html:not([data-cursor-variant="magnetic-bone"]):is(
     [data-cursor-state="link"],
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
@@ -112,10 +138,29 @@ html:is(
     [data-cursor-state="play"]
   )
   .cursor-magnetic__disc {
-  width: var(--cursor-magnetic-focus);
-  height: var(--cursor-magnetic-focus);
-  margin: calc(var(--cursor-magnetic-focus) / -2) 0 0
-    calc(var(--cursor-magnetic-focus) / -2);
+  --cursor-scale: var(--cursor-magnetic-focus-scale);
+}
+
+html[data-cursor-variant="magnetic-bone"]:is(
+    [data-cursor-state="link"],
+    [data-cursor-state="hello"],
+    [data-cursor-state="visit"],
+    [data-cursor-state="view"],
+    [data-cursor-state="play"]
+  )
+  .cursor-layer {
+  mix-blend-mode: normal;
+}
+
+html[data-cursor-variant="magnetic-bone"]:is(
+    [data-cursor-state="link"],
+    [data-cursor-state="hello"],
+    [data-cursor-state="visit"],
+    [data-cursor-state="view"],
+    [data-cursor-state="play"]
+  )
+  .cursor-magnetic__disc {
+  --cursor-scale: var(--cursor-bone-label-scale);
 }
 
 html:is(
@@ -126,7 +171,13 @@ html:is(
     [data-cursor-state="play"]
   )
   .cursor-magnetic__label {
-  display: grid;
+  scale: 1;
+  visibility: visible;
+  opacity: 1;
+  transition:
+    opacity var(--cursor-label-duration) var(--cursor-scale-ease),
+    scale var(--cursor-label-duration) var(--cursor-scale-ease),
+    visibility 0s linear 0s;
 }
 
 html[data-cursor-visible="true"] .cursor-magnetic {
@@ -164,7 +215,8 @@ html[data-cursor="on"][data-cursor-menu="native"] * {
 
 @media (prefers-reduced-motion: reduce) {
   .cursor-magnetic,
-  .cursor-magnetic__disc {
+  .cursor-magnetic__disc,
+  .cursor-magnetic__label {
     transition: none;
   }
 }

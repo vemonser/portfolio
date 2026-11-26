@@ -14,6 +14,8 @@ type Props = {
   stagger?: number;
   /** Optional native title, used by clamped captions. */
   title?: string;
+  /** Opt-in magnetic emphasis state for selected paragraphs. */
+  cursor?: "emphasis";
   as?: "p" | "h1" | "h2" | "h3" | "h4" | "span" | "div" | "li";
 };
 
@@ -34,6 +36,7 @@ export default function TextReveal({
   split,
   stagger,
   title,
+  cursor,
   as: Tag = "p",
 }: Props) {
   const ref = useRef<HTMLElement>(null);
@@ -58,6 +61,7 @@ export default function TextReveal({
       ref={ref as never}
       id={id}
       title={title}
+      data-cursor={cursor}
       className={className ? `text-reveal ${className}` : "text-reveal"}
     >
       {children}

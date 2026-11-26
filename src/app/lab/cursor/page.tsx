@@ -156,7 +156,7 @@ export default function CursorLabPage() {
             </div>
           </div>
 
-          <p className="mt-[var(--space-6)] max-w-[var(--measure-body)] text-t-14 uppercase tracking-[var(--track)] text-fg-subtle">
+          <p data-cursor="emphasis" className="mt-[var(--space-6)] max-w-[var(--measure-body)] text-t-14 uppercase tracking-[var(--track)] text-fg-subtle">
             Move through every block: the role readout follows. Keyboard focus
             rings are untouched; the custom cursor is aria-hidden and never
             receives a pointer.

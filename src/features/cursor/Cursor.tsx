@@ -17,6 +17,7 @@ type CursorRole =
   | "play"
   | "hello"
   | "visit"
+  | "emphasis"
   | "text"
   | "disabled";
 
@@ -112,6 +113,7 @@ export default function Cursor() {
         if (explicit === "view" || explicit === "play") return explicit;
         if (explicit === "hello") return "hello";
         if (explicit === "visit") return "visit";
+        if (explicit === "emphasis") return "emphasis";
         if (explicit === "text") return "text";
         if (explicit === "disabled") return "disabled";
       }
@@ -289,7 +291,7 @@ export default function Cursor() {
       window.clearTimeout(downTimer);
       downTimer = window.setTimeout(() => {
         html.dataset.cursorDown = "false";
-      }, 120);
+      }, 140);
     };
 
     const onLeave = () => {

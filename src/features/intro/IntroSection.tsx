@@ -31,7 +31,7 @@ export default function IntroSection() {
         </div>
 
         <div className="lg:col-span-4 lg:col-start-9 lg:mt-[var(--space-5)]">
-          <TextReveal as="p" className="m-0 max-w-[34ch] text-lede text-fg-muted">
+          <TextReveal as="p" cursor="emphasis" className="m-0 max-w-[34ch] text-lede text-fg-muted">
             {copy.intro.body}
           </TextReveal>
         </div>

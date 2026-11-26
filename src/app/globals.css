@@ -164,8 +164,15 @@ html.lenis body {
   /* Project media drift and the two approved magnetic cursor treatments. */
   --parallax-scale: 1.08;
   --cursor-magnetic-size: 16px;
-  --cursor-magnetic-focus: 64px;
+  --cursor-magnetic-focus-scale: 4;
   --cursor-magnetic-label: 10px;
+  --cursor-bone-label-size: 14px;
+  --cursor-bone-rest-scale: 0.625;
+  --cursor-bone-focus-scale: 4;
+  --cursor-bone-label-scale: 5.125;
+  --cursor-scale-duration: 360ms;
+  --cursor-label-duration: 240ms;
+  --cursor-scale-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --cursor-follow-ease: cubic-bezier(0.7, 0, 0.2, 1);
 
   --inset-edge: var(--gutter);

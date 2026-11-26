@@ -35,7 +35,7 @@ export default function AboutPage() {
           </TextReveal>
         </PageTitle>
 
-        <TextReveal as="p" className="m-0 mt-[var(--space-3)] max-w-[26ch] font-display text-statement font-medium text-fg">
+        <TextReveal as="p" cursor="emphasis" className="m-0 mt-[var(--space-3)] max-w-[26ch] font-display text-statement font-medium text-fg">
           {copy.about.lede}
         </TextReveal>
       </div>

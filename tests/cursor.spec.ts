@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
 
 import { expect, test } from "./support/fixtures";
@@ -15,6 +15,15 @@ async function showCursor(page: Page) {
   await page.evaluate(() => {
     document.documentElement.dataset.cursorVisible = "true";
   });
+}
+
+async function expectDiscWidth(locator: Locator, width: number) {
+  await expect
+    .poll(async () => {
+      const box = await locator.boundingBox();
+      return box?.width ?? 0;
+    })
+    .toBeCloseTo(width, 0);
 }
 
 test.describe("cursor variants lab", () => {
@@ -116,17 +125,34 @@ test.describe("cursor variants lab", () => {
     expect(demoIndex).toBeGreaterThan(limeIndex);
   });
 
-  test("magnetic variants keep their resting and focus sizes", async ({
+  test("magnetic variants keep their own sizing and motion contract", async ({
     page,
   }) => {
     await openLab(page);
 
     const disc = page.locator(".cursor-magnetic__disc");
     const label = page.locator(".cursor-magnetic__label");
+    const layer = page.locator(".cursor-layer");
     const viewTarget = page.locator('[data-cursor="view"]').first();
     const cases = [
-      { id: "bone", background: "rgb(245, 241, 232)" },
-      { id: "lime", background: "rgb(198, 240, 53)" },
+      {
+        id: "bone",
+        background: "rgb(245, 241, 232)",
+        restWidth: 10,
+        focusWidth: 82,
+        restBlend: "exclusion",
+        focusBlend: "normal",
+        labelSize: "14px",
+      },
+      {
+        id: "lime",
+        background: "rgb(198, 240, 53)",
+        restWidth: 16,
+        focusWidth: 64,
+        restBlend: "normal",
+        focusBlend: "normal",
+        labelSize: "10px",
+      },
     ] as const;
 
     for (const item of cases) {
@@ -145,20 +171,66 @@ test.describe("cursor variants lab", () => {
       await expect(disc).toBeVisible();
       await expect(disc).toHaveCSS("width", "16px");
       await expect(disc).toHaveCSS("height", "16px");
+      await expectDiscWidth(disc, item.restWidth);
       await expect(disc).toHaveCSS("background-color", item.background);
       await expect(disc).toHaveCSS("border-top-color", "rgba(0, 0, 0, 0)");
+      await expect(layer).toHaveCSS("mix-blend-mode", item.restBlend);
       await expect(label).toBeHidden();
+      await expect(label).toHaveCSS("opacity", "0");
+
+      const discMotion = await disc.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          property: style.transitionProperty,
+          duration: style.transitionDuration,
+        };
+      });
+      expect(discMotion.property).toContain("scale");
+      expect(discMotion.duration).toContain("0.36s");
 
       await viewTarget.dispatchEvent("pointerover", {
         pointerType: "mouse",
       });
-      await expect(disc).toHaveCSS("width", "64px");
-      await expect(disc).toHaveCSS("height", "64px");
+      await expectDiscWidth(disc, item.focusWidth);
+      await expect(layer).toHaveCSS("mix-blend-mode", item.focusBlend);
       await expect(label).toBeVisible();
       await expect(label).toHaveText("VIEW");
-      await expect(label).toHaveCSS("font-size", "10px");
+      await expect(label).toHaveCSS("font-size", item.labelSize);
       await expect(label).toHaveCSS("color", "rgb(23, 22, 20)");
+      await expect(label).toHaveCSS("opacity", "1");
+      expect(
+        await label.evaluate(
+          (element) => getComputedStyle(element).transitionDuration,
+        ),
+      ).toContain("0.24s");
     }
+  });
+
+  test("Bone grows and stays inverted for emphasis paragraphs", async ({
+    page,
+  }) => {
+    await openLab(page);
+    await page.getByRole("button", { name: "Bone" }).click();
+    await page.evaluate(() => {
+      const paragraph = document.createElement("p");
+      paragraph.dataset.cursor = "emphasis";
+      paragraph.textContent = "Important paragraph";
+      paragraph.style.cssText =
+        "position:fixed;left:80px;top:80px;width:240px;height:240px;display:grid;place-items:center;background:#fff;z-index:1000";
+      document.body.appendChild(paragraph);
+    });
+    await page.mouse.move(200, 200);
+
+    const html = page.locator("html");
+    const disc = page.locator(".cursor-magnetic__disc");
+    const label = page.locator(".cursor-magnetic__label");
+    await expect(html).toHaveAttribute("data-cursor-state", "emphasis");
+    await expectDiscWidth(disc, 64);
+    await expect(page.locator(".cursor-layer")).toHaveCSS(
+      "mix-blend-mode",
+      "exclusion",
+    );
+    await expect(label).toBeHidden();
   });
 
   test("maps every interactive role for both magnetic variants", async ({
@@ -183,37 +255,43 @@ test.describe("cursor variants lab", () => {
         await target.dispatchEvent("pointerover", { pointerType: "mouse" });
         await expect(label).toBeVisible();
         await expect(label).toHaveText(word);
-        await expect(disc).toHaveCSS("width", "64px");
+        await expectDiscWidth(disc, name === "Bone" ? 82 : 64);
       }
 
       await page.locator("body").dispatchEvent("pointerover", {
         pointerType: "mouse",
       });
       await expect(label).toBeHidden();
-      await expect(disc).toHaveCSS("width", "16px");
+      await expectDiscWidth(disc, name === "Bone" ? 10 : 16);
     }
   });
 
-  test("renders the literal Bone and Lime colours over white", async ({
-    page,
-  }) => {
+  test("renders Bone inversion and the literal Lime colour", async ({ page }) => {
     await openLab(page);
+    const disc = page.locator(".cursor-magnetic__disc");
 
     await page.evaluate(() => {
       const swatch = document.createElement("div");
       swatch.id = "cursor-color-swatch";
       swatch.style.cssText =
-        "position:fixed;left:80px;top:80px;width:240px;height:240px;background:#fff;z-index:1000";
+        "position:fixed;left:80px;top:80px;width:240px;height:240px;background:#000;z-index:1000";
       document.body.appendChild(swatch);
     });
 
     const cases = [
-      { name: "Bone", expected: [245, 241, 232] },
-      { name: "Lime", expected: [198, 240, 53] },
+      { name: "Bone", background: "#000", expected: [245, 241, 232] },
+      { name: "Bone", background: "#fff", expected: [10, 14, 23] },
+      { name: "Lime", background: "#fff", expected: [198, 240, 53] },
     ] as const;
 
     for (const item of cases) {
       await page.getByRole("button", { name: item.name }).click();
+      await page.locator("#cursor-color-swatch").evaluate(
+        (element, background) => {
+          (element as HTMLElement).style.background = background;
+        },
+        item.background,
+      );
       await page.mouse.move(200, 200);
 
       await expect
@@ -229,6 +307,16 @@ test.describe("cursor variants lab", () => {
         })
         .toBeLessThan(3);
 
+      await expectDiscWidth(disc, item.name === "Bone" ? 10 : 16);
+      await expect(disc).toHaveCSS(
+        "background-color",
+        item.name === "Bone" ? "rgb(245, 241, 232)" : "rgb(198, 240, 53)",
+      );
+      await expect(page.locator(".cursor-layer")).toHaveCSS(
+        "mix-blend-mode",
+        item.name === "Bone" ? "exclusion" : "normal",
+      );
+
       const shot = await page.screenshot({
         clip: { x: 184, y: 184, width: 32, height: 32 },
       });
@@ -241,7 +329,7 @@ test.describe("cursor variants lab", () => {
       for (let channel = 0; channel < 3; channel += 1) {
         expect(
           Math.abs(pixel[channel] - item.expected[channel]),
-          `${item.name} channel ${channel}: ${pixel.join(",")}`,
+          `${item.name} on ${item.background} channel ${channel}: ${pixel.join(",")}`,
         ).toBeLessThanOrEqual(4);
       }
     }
@@ -338,7 +426,7 @@ test.describe("custom cursor", () => {
     const label = page.locator(".cursor-magnetic__label");
     await page.mouse.move(720, 450);
     await expect(disc).toBeVisible();
-    await expect(disc).toHaveCSS("width", "16px");
+    await expectDiscWidth(disc, 16);
     await expect(disc).toHaveCSS("background-color", "rgb(198, 240, 53)");
     await expect(label).toBeHidden();
     await expect(page.locator(LEGACY_CURSOR_NODES)).toHaveCount(0);
@@ -347,9 +435,28 @@ test.describe("custom cursor", () => {
     await card.scrollIntoViewIfNeeded();
     await card.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "view");
-    await expect(disc).toHaveCSS("width", "64px");
+    await expectDiscWidth(disc, 64);
     await expect(label).toBeVisible();
     await expect(label).toHaveText("VIEW");
+  });
+
+  test("marks the selected portfolio paragraphs as emphasis", async ({ page }) => {
+    await page.goto("/");
+    await expect(
+      page.locator('[data-section="intro"] p.text-lede'),
+    ).toHaveAttribute("data-cursor", "emphasis");
+
+    await page.goto("/about");
+    await expect(page.locator(".chapter-open p.text-statement")).toHaveAttribute(
+      "data-cursor",
+      "emphasis",
+    );
+
+    await page.goto("/work/anom-creative");
+    await expect(page.locator("header p.text-lede")).toHaveAttribute(
+      "data-cursor",
+      "emphasis",
+    );
   });
 
   test("replaces the native cursor and maps every role", async ({ page }) => {
@@ -364,7 +471,7 @@ test.describe("custom cursor", () => {
     await link.scrollIntoViewIfNeeded();
     await link.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "link");
-    await expect(disc).toHaveCSS("width", "64px");
+    await expectDiscWidth(disc, 64);
     await expect(label).toHaveText("OPEN");
 
     const view = page.locator('[data-cursor="view"]').first();
@@ -392,6 +499,45 @@ test.describe("custom cursor", () => {
     await disabled.scrollIntoViewIfNeeded();
     await disabled.hover();
     await expect(html).toHaveAttribute("data-cursor-state", "disabled");
+  });
+
+  test("completes press feedback before releasing the disc", async ({ page }) => {
+    await openLab(page);
+    await page.getByRole("button", { name: "Bone" }).click();
+    await page.locator("body").dispatchEvent("pointerover", {
+      pointerType: "mouse",
+    });
+    await showCursor(page);
+
+    const result = await page.evaluate(async () => {
+      const html = document.documentElement;
+      const disc = document.querySelector(".cursor-magnetic__disc");
+      if (!disc) return { reached: false, pressed: false };
+      document.dispatchEvent(
+        new PointerEvent("pointerdown", { pointerType: "mouse" }),
+      );
+      let reached = false;
+      let pressed = true;
+      for (let frame = 0; frame < 30 && pressed; frame += 1) {
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => resolve());
+        });
+        pressed = html.dataset.cursorDown === "true";
+        reached =
+          reached ||
+          getComputedStyle(disc).transform ===
+            "matrix(0.75, 0, 0, 0.75, 0, 0)";
+      }
+      return { reached, pressed };
+    });
+
+    expect(result.reached).toBe(true);
+    expect(result.pressed).toBe(false);
+    expect(
+      await page
+        .locator(".cursor-magnetic__disc")
+        .evaluate((element) => getComputedStyle(element).transitionDuration),
+    ).toContain("0.1s");
   });
 
   test("the system-cursor escape hatch restores the OS pointer", async ({

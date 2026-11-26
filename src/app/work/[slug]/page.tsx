@@ -79,7 +79,7 @@ export default async function ProjectPage({ params }: Props) {
             </TextReveal>
           </PageTitle>
 
-          <TextReveal as="p" className="m-0 mt-[var(--space-3)] max-w-[44ch] text-lede leading-[1.6] text-warm">
+          <TextReveal as="p" cursor="emphasis" className="m-0 mt-[var(--space-3)] max-w-[44ch] text-lede leading-[1.6] text-warm">
             {project.tagline}
           </TextReveal>
 
