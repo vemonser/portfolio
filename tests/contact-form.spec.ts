@@ -180,8 +180,12 @@ test.describe("contact layout", () => {
     expect(
       Math.abs(submitBox!.x + submitBox!.width - (formBox!.x + formBox!.width)),
     ).toBeLessThan(2);
-    expect(hintBox!.y).toBeGreaterThan(submitBox!.y + submitBox!.height);
+    expect(hintBox!.y).toBeLessThan(submitBox!.y);
     expect(privacyBox!.y).toBeGreaterThan(hintBox!.y + hintBox!.height);
+    expect(privacyBox!.y + privacyBox!.height).toBeLessThan(submitBox!.y);
+    expect(submitBox!.y - (privacyBox!.y + privacyBox!.height)).toBeGreaterThan(
+      48,
+    );
     expect(Math.abs(privacyBox!.x - hintBox!.x)).toBeLessThan(2);
   });
 
