@@ -39,6 +39,25 @@ test.describe("navigation", () => {
     await expect(cta).toHaveAttribute("data-active", "true");
     await expect(cta).toHaveAttribute("aria-current", "page");
   });
+
+  test("header CTA has no arrow and the contact disc stays arrow-free", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const headerCta = page.locator("header").getByRole("link", {
+      name: "Contact",
+    });
+    await expect(headerCta).toHaveCount(1);
+    await expect(headerCta).toHaveAttribute("href", "/contact");
+    await expect(headerCta.locator("svg")).toHaveCount(0);
+
+    const disc = page
+      .locator('[data-section="contact-cta"]')
+      .getByRole("link", { name: "Get in touch" });
+    await expect(disc).toHaveCount(1);
+    await expect(disc.locator("svg")).toHaveCount(0);
+  });
 });
 
 test.describe("mobile header", () => {

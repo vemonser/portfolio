@@ -7,7 +7,6 @@ import { useGSAP } from "@gsap/react";
 import { useCallback, useRef, useState } from "react";
 
 import type { Social } from "@/content/socials";
-import { ArrowUpRight } from "@/features/ui/Arrow";
 
 import BurgerIcon from "./BurgerIcon";
 import MenuOverlay from "./MenuOverlay";
@@ -148,7 +147,6 @@ export default function SiteHeader({
           >
             <span className="header-cta__dot" aria-hidden="true" />
             {ctaLabel}
-            <ArrowUpRight className="header-cta__arrow" />
           </Link>
         </div>
       </header>

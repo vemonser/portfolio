@@ -449,15 +449,6 @@ html.lenis body {
   background: var(--color-ink);
 }
 
-.header-cta__arrow {
-  transition: transform var(--dur-base) var(--ease-editorial);
-}
-
-.header-cta:hover .header-cta__arrow,
-.header-cta:focus-visible .header-cta__arrow {
-  transform: translate(2px, -2px);
-}
-
 .contact-cta__value {
   font-size: var(--text-h2);
   line-height: 1.1;
@@ -919,11 +910,6 @@ html.lenis body {
 .header-cta:active,
 .link-line:active {
   transform: scale(0.97);
-}
-
-/* Arrow choreography — spring on press. */
-.header-cta:active .header-cta__arrow {
-  transform: translate(3px, -3px) scale(0.9);
 }
 
 /* Header links carry generous padding, so their line sits inside the box. */
