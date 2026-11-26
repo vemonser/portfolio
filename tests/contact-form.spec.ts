@@ -150,6 +150,40 @@ test.describe("contact form", () => {
 });
 
 test.describe("contact layout", () => {
+  test("aligns the submit action to the end and stacks the notes below", async ({
+    page,
+  }) => {
+    await openContact(page);
+
+    const form = page.locator(FORM);
+    const submit = page.getByRole("button", { name: copy.send });
+    const hint = page.getByText("I usually reply within two working days.", {
+      exact: true,
+    });
+    const privacy = page.getByText(
+      "Your details are used only to reply to this enquiry.",
+      { exact: true },
+    );
+
+    const [formBox, submitBox, hintBox, privacyBox] = await Promise.all([
+      form.boundingBox(),
+      submit.boundingBox(),
+      hint.boundingBox(),
+      privacy.boundingBox(),
+    ]);
+
+    expect(formBox).not.toBeNull();
+    expect(submitBox).not.toBeNull();
+    expect(hintBox).not.toBeNull();
+    expect(privacyBox).not.toBeNull();
+    expect(
+      Math.abs(submitBox!.x + submitBox!.width - (formBox!.x + formBox!.width)),
+    ).toBeLessThan(2);
+    expect(hintBox!.y).toBeGreaterThan(submitBox!.y + submitBox!.height);
+    expect(privacyBox!.y).toBeGreaterThan(hintBox!.y + hintBox!.height);
+    expect(Math.abs(privacyBox!.x - hintBox!.x)).toBeLessThan(2);
+  });
+
   for (const width of [360, 390]) {
     test(`fixed menu trigger clears the contact links (${width}px)`, async ({
       page,

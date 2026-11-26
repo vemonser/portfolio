@@ -306,7 +306,7 @@ export default function ContactForm({
         </p>
       ) : null}
 
-      <div className="mt-[var(--space-1)] flex flex-wrap items-center gap-[var(--space-4)]">
+      <div className="mt-[var(--space-1)] flex justify-end">
         <button
           type="submit"
           data-magnetic
@@ -316,13 +316,6 @@ export default function ContactForm({
           <span>{submitting ? labels.sending : labels.send}</span>
           <ArrowUpRight className="transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:translate-x-1 group-hover:-translate-y-1" />
         </button>
-
-        <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm">
-          {labels.hint}
-        </p>
-        <p className="m-0 max-w-[34ch] text-t-14 leading-[1.6] text-fg-subtle">
-          {labels.privacy}
-        </p>
       </div>
 
       <div
@@ -355,6 +348,15 @@ export default function ContactForm({
         {status === "error" ? (
           <StatusMessage kind="error">{labels.failed}</StatusMessage>
         ) : null}
+      </div>
+
+      <div className="mt-[var(--space-3)] grid gap-[var(--space-1)]">
+        <p className="m-0 max-w-[26ch] text-t-14 leading-[1.6] text-warm">
+          {labels.hint}
+        </p>
+        <p className="m-0 max-w-[34ch] text-t-14 leading-[1.6] text-fg-subtle">
+          {labels.privacy}
+        </p>
       </div>
     </form>
   );
