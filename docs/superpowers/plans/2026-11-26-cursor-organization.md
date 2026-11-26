@@ -79,9 +79,9 @@ git commit -m "refactor(navigation): remove the header CTA arrow"
 
 **Interfaces:**
 - Produces: `type CursorRole`, `ROLE_LABELS`, `roleFromDataset(value: string | undefined): CursorRole | null`, `resolveCursorRole(node: Element, menuOpen: boolean): CursorRole`.
-- `CursorRole` includes `open` and `close` in addition to existing roles.
-- `ROLE_LABELS.open === "OPEN"` and `ROLE_LABELS.close === "CLOSE"`.
-- `.menu-trigger` resolves to `open` when `menuOpen` is false; `.nav-close` resolves to `close` when true.
+- `CursorRole` includes `close` in addition to existing roles; the menu trigger keeps the existing link → `OPEN` behavior.
+- `ROLE_LABELS.close === "CLOSE"`.
+- `.nav-close` resolves to `close` when `menuOpen` is true; `.menu-trigger` continues to resolve to `link`/`OPEN` when closed.
 
 - [ ] **Step 1: Write failing unit tests for role mapping**
 
@@ -94,7 +94,7 @@ Expected: FAIL because the module does not exist.
 
 - [ ] **Step 3: Implement `cursor-roles.ts`**
 
-Move the existing role union, labels, and hit-testing rules out of `Cursor.tsx`. Add `open`/`close` and the pure `roleFromDataset` helper.
+Move the existing role union, labels, and hit-testing rules out of `Cursor.tsx`. Add only `close` and the pure `roleFromDataset` helper.
 
 - [ ] **Step 4: Add failing Playwright coverage for live menu labels**
 
@@ -107,7 +107,7 @@ Expected: FAIL because menu controls currently resolve to generic `OPEN`.
 
 - [ ] **Step 6: Wire the resolver and feedback into `Cursor.tsx`**
 
-Use `resolveCursorRole(node, isMenuOpen())` in pointerover and refresh paths. Add `open`/`close` to the CSS interactive selectors. On role changes to `open`/`close`, run a 180 ms GSAP scale/opacity feedback on the label without changing its final state.
+Use `resolveCursorRole(node, isMenuOpen())` in pointerover and refresh paths. Add `close` to the CSS interactive selectors. On role changes between the existing `link`/`OPEN` menu-trigger state and `close`/`CLOSE`, run a 180 ms GSAP scale/opacity feedback on the label without changing its final state.
 
 - [ ] **Step 7: Run unit and Playwright tests and verify they pass**
 

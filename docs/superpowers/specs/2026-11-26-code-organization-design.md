@@ -91,7 +91,7 @@ The approved form layout and submission behavior are frozen.
 ## Approved follow-up UI requirements
 
 - Remove the arrow from the header “Get in touch” CTA. The circular contact CTA already has no arrow and remains unchanged.
-- The cursor shows `OPEN` over the menu trigger while the menu is closed and `CLOSE` over the menu close control while it is open.
+- The cursor keeps the existing `OPEN` label over the menu trigger while the menu is closed and shows `CLOSE` over the menu close control while it is open. No additional menu role is introduced.
 - The label change includes a short scale/opacity feedback animation without introducing a new cursor variant.
 
 ## Testing strategy
