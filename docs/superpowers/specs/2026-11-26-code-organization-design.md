@@ -27,7 +27,7 @@ The user wants a gradual, feature-by-feature refactor performed with subagents a
 
 ## Non-goals
 
-- No visual, copy, route, API, content, or dependency changes.
+- No visual, copy, route, API, content, or dependency changes beyond the approved header-CTA arrow removal and menu-cursor feedback.
 - No contact-form layout or interaction changes.
 - No wholesale folder migration.
 - No repository/service abstractions that only forward calls.
@@ -87,6 +87,12 @@ The approved form layout and submission behavior are frozen.
 - Existing readiness and phase modules remain stable.
 
 `HeroStage.tsx` is evaluated only after the HeroScene extraction; it is not automatically refactored.
+
+## Approved follow-up UI requirements
+
+- Remove the arrow from the header “Get in touch” CTA. The circular contact CTA already has no arrow and remains unchanged.
+- The cursor shows `OPEN` over the menu trigger while the menu is closed and `CLOSE` over the menu close control while it is open.
+- The label change includes a short scale/opacity feedback animation without introducing a new cursor variant.
 
 ## Testing strategy
 
@@ -165,6 +171,8 @@ Rollback is `git revert` of the feature commit. No multi-feature commit is requi
 - ORG-05 — Hero shader/WebGL/puff responsibilities are separated without changing rendering, readiness, pause, or reduced-motion behavior.
 - ORG-06 — Each feature has a committed, independently revertible refactor with real test/static/browser evidence and an Evidence Gate pass.
 - ORG-07 — No pass-through-only modules, unrelated visual changes, or edits to excluded concurrent work are introduced.
+- ORG-08 — The header “Get in touch” CTA has no arrow, and the circular contact CTA remains arrow-free.
+- ORG-09 — The menu cursor reports `OPEN` when closed and `CLOSE` when open, with brief feedback and no role/navigation regressions.
 
 ## Open questions
 
