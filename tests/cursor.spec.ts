@@ -790,7 +790,19 @@ test.describe("custom cursor", () => {
         "position:fixed;left:300px;top:300px;width:100px;height:100px;display:block;background:#fff;z-index:1000";
       document.body.appendChild(element);
     });
-    await page.waitForTimeout(500);
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await expect(page.locator(".cursor-magnetic")).toBeAttached();
+    await page.waitForFunction(() => {
+      document.dispatchEvent(
+        new PointerEvent("pointermove", {
+          clientX: 320,
+          clientY: 320,
+          pointerType: "mouse",
+          bubbles: true,
+        }),
+      );
+      return document.documentElement.dataset.cursorVisible === "true";
+    });
     await page.evaluate(() => {
       document.dispatchEvent(
         new PointerEvent("pointermove", {
@@ -809,7 +821,6 @@ test.describe("custom cursor", () => {
         });
       })
       .not.toBe("");
-    await page.waitForTimeout(100);
     await page.evaluate(() => {
       document.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
     });
@@ -833,7 +844,19 @@ test.describe("custom cursor", () => {
         "position:fixed;left:300px;top:300px;width:100px;height:100px;display:block;background:#fff;z-index:1000";
       document.body.appendChild(element);
     });
-    await page.waitForTimeout(500);
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await expect(page.locator(".cursor-magnetic")).toBeAttached();
+    await page.waitForFunction(() => {
+      document.dispatchEvent(
+        new PointerEvent("pointermove", {
+          clientX: 320,
+          clientY: 320,
+          pointerType: "mouse",
+          bubbles: true,
+        }),
+      );
+      return document.documentElement.dataset.cursorVisible === "true";
+    });
     await page.evaluate(() => {
       document.dispatchEvent(
         new PointerEvent("pointermove", {
@@ -878,6 +901,27 @@ test.describe("custom cursor", () => {
     await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
     await expect(page.locator(".cursor-magnetic")).toHaveCount(1);
     await expect(page.locator(".cursor-layer")).toHaveCount(1);
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-cursor-down",
+      "true",
+    );
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-cursor-menu",
+      "native",
+    );
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await page.waitForFunction(() => {
+      document.dispatchEvent(
+        new PointerEvent("pointermove", {
+          clientX: 420,
+          clientY: 320,
+          pointerType: "mouse",
+          bubbles: true,
+        }),
+      );
+      return document.documentElement.dataset.cursorVisible === "true";
+    });
+    await expect(page.locator(".cursor-magnetic")).toHaveCount(1);
   });
 
   test("snaps without trailing under reduced motion", async ({ page }) => {
