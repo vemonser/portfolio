@@ -4,7 +4,6 @@ import { useCallback, useState, type FormEvent } from "react";
 
 import Turnstile from "@/features/contact/Turnstile";
 
-import { ArrowUpRight } from "@/features/ui/Arrow";
 import Field from "@/features/ui/Field";
 import StatusMessage from "@/features/ui/StatusMessage";
 import { roundButton } from "@/features/ui/styles";
@@ -314,7 +313,6 @@ export default function ContactForm({
           className={`${roundButton} cursor-pointer border-0 disabled:cursor-wait disabled:opacity-70`}
         >
           <span>{submitting ? labels.sending : labels.send}</span>
-          <ArrowUpRight className="transition-transform duration-[var(--dur-slow)] ease-[var(--ease-editorial)] group-hover:translate-x-1 group-hover:-translate-y-1" />
         </button>
       </div>
 

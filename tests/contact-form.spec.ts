@@ -157,6 +157,7 @@ test.describe("contact layout", () => {
 
     const form = page.locator(FORM);
     const submit = page.getByRole("button", { name: copy.send });
+    await expect(submit.locator("svg")).toHaveCount(0);
     const hint = page.getByText("I usually reply within two working days.", {
       exact: true,
     });
