@@ -763,6 +763,141 @@ test.describe("custom cursor", () => {
     expect(distance).toBeLessThan(1);
   });
 
+  test("moves the custom cursor to the pointer", async ({ page }) => {
+    await openLab(page);
+    await page.mouse.move(420, 320);
+    await expect
+      .poll(async () => {
+        const box = await page
+          .locator(".cursor-magnetic__disc")
+          .boundingBox();
+        if (!box) return 1000;
+        return Math.max(
+          Math.abs(box.x + box.width / 2 - 420),
+          Math.abs(box.y + box.height / 2 - 320),
+        );
+      })
+      .toBeLessThan(3);
+  });
+
+  test("resets magnetic targets when the pointer leaves", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => {
+      const element = document.createElement("a");
+      element.id = "motion-magnet-test";
+      element.dataset.magnetic = "";
+      element.style.cssText =
+        "position:fixed;left:300px;top:300px;width:100px;height:100px;display:block;background:#fff;z-index:1000";
+      document.body.appendChild(element);
+    });
+    await page.waitForTimeout(500);
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new PointerEvent("pointermove", {
+          clientX: 320,
+          clientY: 320,
+          pointerType: "mouse",
+          bubbles: true,
+        }),
+      );
+    });
+    await expect
+      .poll(async () => {
+        return await page.evaluate(() => {
+          const element = document.getElementById("motion-magnet-test");
+          return element?.style.translate ?? "";
+        });
+      })
+      .not.toBe("");
+    await page.waitForTimeout(100);
+    await page.evaluate(() => {
+      document.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
+    });
+    await expect
+      .poll(async () => {
+        return await page.evaluate(() => {
+          const element = document.getElementById("motion-magnet-test");
+          return element?.style.translate ?? "";
+        });
+      })
+      .toBe("");
+  });
+
+  test("resets magnetic targets when the menu opens", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => {
+      const element = document.createElement("a");
+      element.id = "motion-magnet-menu-test";
+      element.dataset.magnetic = "";
+      element.style.cssText =
+        "position:fixed;left:300px;top:300px;width:100px;height:100px;display:block;background:#fff;z-index:1000";
+      document.body.appendChild(element);
+    });
+    await page.waitForTimeout(500);
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new PointerEvent("pointermove", {
+          clientX: 320,
+          clientY: 320,
+          pointerType: "mouse",
+          bubbles: true,
+        }),
+      );
+    });
+    await expect
+      .poll(async () => {
+        return await page.evaluate(() => {
+          const element = document.getElementById("motion-magnet-menu-test");
+          return element?.style.translate ?? "";
+        });
+      })
+      .not.toBe("");
+    await page.locator(".menu-trigger").dispatchEvent("click");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "open",
+    );
+    await expect
+      .poll(async () => {
+        return await page.evaluate(() => {
+          const element = document.getElementById("motion-magnet-menu-test");
+          return element?.style.translate ?? "";
+        });
+      })
+      .toBe("");
+  });
+
+  test("cleans up the cursor on client navigation", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await page
+      .locator("header")
+      .getByRole("link", { name: "Work" })
+      .click();
+    await expect(page).toHaveURL(/\/work$/);
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+    await expect(page.locator(".cursor-magnetic")).toHaveCount(1);
+    await expect(page.locator(".cursor-layer")).toHaveCount(1);
+  });
+
+  test("snaps without trailing under reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await openLab(page);
+    await page.mouse.move(320, 260);
+    await expect
+      .poll(async () => {
+        const box = await page
+          .locator(".cursor-magnetic__disc")
+          .boundingBox();
+        if (!box) return 1000;
+        return Math.max(
+          Math.abs(box.x + box.width / 2 - 320),
+          Math.abs(box.y + box.height / 2 - 260),
+        );
+      })
+      .toBeLessThan(1);
+  });
+
   test.describe("reduced motion", () => {
     test.use({ reducedMotion: "reduce" });
 
