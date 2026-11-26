@@ -612,6 +612,59 @@ test.describe("cursor variants lab", () => {
     }
   });
 
+  test("inverse role word stays visible over mid-tone surfaces", async ({
+    page,
+  }) => {
+    await page.goto("/lab/cursor");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-cursor-variant",
+      "orbit",
+    );
+
+    await page.evaluate(() => {
+      const swatch = document.createElement("div");
+      swatch.setAttribute("data-cursor", "view");
+      swatch.style.cssText =
+        "position:fixed;left:80px;top:80px;width:240px;height:240px;background:#808080;z-index:1000";
+      document.body.appendChild(swatch);
+    });
+
+    await page.locator('[data-cursor-variant-option="magnetic-inverse"]').click();
+    await page.mouse.move(200, 200);
+    await expect
+      .poll(async () => {
+        const box = await page
+          .locator(".cursor-magnetic__disc")
+          .boundingBox();
+        if (!box) return 1000;
+        return Math.max(
+          Math.abs(box.x + box.width / 2 - 200),
+          Math.abs(box.y + box.height / 2 - 200),
+        );
+      })
+      .toBeLessThan(3);
+
+    const clip = { x: 168, y: 168, width: 64, height: 64 };
+    const withLabel = await page.screenshot({ clip });
+    await page.locator(".cursor-magnetic__label").evaluate((el) => {
+      el.style.display = "none";
+    });
+    const withoutLabel = await page.screenshot({ clip });
+
+    const a = await sharp(withLabel).raw().toBuffer({ resolveWithObject: true });
+    const b = await sharp(withoutLabel).raw().toBuffer({ resolveWithObject: true });
+    let changed = 0;
+    for (let i = 0; i < a.data.length; i += a.info.channels) {
+      const delta =
+        Math.abs(a.data[i] - b.data[i]) +
+        Math.abs(a.data[i + 1] - b.data[i + 1]) +
+        Math.abs(a.data[i + 2] - b.data[i + 2]);
+      if (delta > 12) changed += 1;
+    }
+
+    expect(changed).toBeGreaterThan(500);
+  });
+
   test("switches live and keeps the ring under the pointer", async ({ page }) => {
     await page.goto("/lab/cursor");
     await expect(page.locator("html")).toHaveAttribute(

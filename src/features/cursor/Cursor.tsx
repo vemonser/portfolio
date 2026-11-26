@@ -54,9 +54,11 @@ function hasRing(value: string | undefined): boolean {
  */
 export default function Cursor() {
   const layerRef = useRef<HTMLDivElement>(null);
+  const magneticLabelLayerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
+  const magneticLabelOriginRef = useRef<HTMLDivElement>(null);
   const magneticLabelRef = useRef<HTMLSpanElement>(null);
   const [enabled, setEnabled] = useState(false);
 
@@ -75,9 +77,11 @@ export default function Cursor() {
     const dot = dotRef.current;
     const ring = ringRef.current;
     const label = labelRef.current;
+    const magneticLabelOrigin = magneticLabelOriginRef.current;
     const magneticLabel = magneticLabelRef.current;
     const layer = layerRef.current;
-    if (!dot || !ring || !label || !magneticLabel || !layer) return;
+    const magneticLabelLayer = magneticLabelLayerRef.current;
+    if (!dot || !ring || !label || !magneticLabelOrigin || !magneticLabel || !layer || !magneticLabelLayer) return;
 
     const html = document.documentElement;
     const reduced = window.matchMedia(REDUCED);
@@ -90,6 +94,7 @@ export default function Cursor() {
     if (supportsPopover) {
       try {
         layer.showPopover();
+        magneticLabelLayer.showPopover();
       } catch {
         // A popover that is already open is fine; the menu handler re-shows.
       }
@@ -110,8 +115,14 @@ export default function Cursor() {
      * origin but a soft quickTo lag, so the two never fight over one transform.
      * Size, shape and colour state live in CSS and never force a React render.
      */
-    gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
-    gsap.set([dot, ring], { x: targetX, y: targetY });
+    gsap.set([dot, ring, magneticLabelOrigin], {
+      xPercent: -50,
+      yPercent: -50,
+    });
+    gsap.set([dot, ring, magneticLabelOrigin], {
+      x: targetX,
+      y: targetY,
+    });
     const moveRingX = gsap.quickTo(ring, "x", {
       duration: reduced.matches ? 0 : 0.18,
       ease: "power3.out",
@@ -125,6 +136,14 @@ export default function Cursor() {
       ease: "expo.out",
     });
     const moveMagneticY = gsap.quickTo(ring, "y", {
+      duration: reduced.matches ? 0 : 0.35,
+      ease: "expo.out",
+    });
+    const moveMagneticLabelX = gsap.quickTo(magneticLabelOrigin, "x", {
+      duration: reduced.matches ? 0 : 0.35,
+      ease: "expo.out",
+    });
+    const moveMagneticLabelY = gsap.quickTo(magneticLabelOrigin, "y", {
       duration: reduced.matches ? 0 : 0.35,
       ease: "expo.out",
     });
@@ -224,11 +243,13 @@ export default function Cursor() {
       if (menuOpen && supportsPopover) {
         try {
           layer.hidePopover();
+          magneticLabelLayer.hidePopover();
         } catch {
           // Not open yet; the show below is still correct.
         }
         try {
           layer.showPopover();
+          magneticLabelLayer.showPopover();
         } catch {
           // Popover unsupported despite the method check; native fallback.
         }
@@ -249,11 +270,13 @@ export default function Cursor() {
       if (supportsPopover) {
         try {
           layer.hidePopover();
+          magneticLabelLayer.hidePopover();
         } catch {
           // Not shown yet.
         }
         try {
           layer.showPopover();
+          magneticLabelLayer.showPopover();
         } catch {
           // Fall through to the native fallback below.
         }
@@ -314,7 +337,10 @@ export default function Cursor() {
       targetX = event.clientX;
       targetY = event.clientY;
       if (!hasPosition) {
-        gsap.set([dot, ring], { x: targetX, y: targetY });
+        gsap.set([dot, ring, magneticLabelOrigin], {
+          x: targetX,
+          y: targetY,
+        });
         hasPosition = true;
       }
       show();
@@ -323,6 +349,8 @@ export default function Cursor() {
       if (isMagnetic(html.dataset.cursorVariant)) {
         moveMagneticX(targetX);
         moveMagneticY(targetY);
+        moveMagneticLabelX(targetX);
+        moveMagneticLabelY(targetY);
       } else if (hasRing(html.dataset.cursorVariant)) {
         moveRingX(targetX);
         moveRingY(targetY);
@@ -377,13 +405,14 @@ export default function Cursor() {
       if (supportsPopover) {
         try {
           layer.hidePopover();
+          magneticLabelLayer.hidePopover();
         } catch {
           // Already hidden on teardown.
         }
       }
       window.clearTimeout(downTimer);
       cancelAnimationFrame(roleFrame);
-      gsap.killTweensOf([dot, ring]);
+      gsap.killTweensOf([dot, ring, magneticLabelOrigin]);
       delete html.dataset.cursorMenu;
       delete html.dataset.cursor;
       delete html.dataset.cursorState;
@@ -417,12 +446,7 @@ export default function Cursor() {
         </svg>
       </div>
       <div ref={ringRef} className="cursor-ring" aria-hidden="true">
-        <span className="cursor-magnetic__disc">
-          <span
-            ref={magneticLabelRef}
-            className="cursor-magnetic__label"
-          />
-        </span>
+        <span className="cursor-magnetic__disc" />
         <span className="cursor-ring__inner">
           <svg
             className="cursor-ring__arrow"
@@ -438,6 +462,20 @@ export default function Cursor() {
           </svg>
           <span ref={labelRef} className="cursor-ring__label" />
         </span>
+      </div>
+      <div
+        ref={magneticLabelLayerRef}
+        className="cursor-label-layer"
+        popover="manual"
+        aria-hidden="true"
+      >
+        <div
+          ref={magneticLabelOriginRef}
+          className="cursor-magnetic-label-origin"
+          aria-hidden="true"
+        >
+          <span ref={magneticLabelRef} className="cursor-magnetic__label" />
+        </div>
       </div>
     </div>
   );

@@ -55,7 +55,9 @@ ROLLBACK/GATING: revert the commit. Reveals are progressive enhancements: the
   ring with role words VIEW/PLAY/OPEN/HELLO/VISIT), Lime Target (lime/ink
   keyline, 44 px hover ring), Editorial Double (12 px keyed dot, 36 → 52 px
   double ring), and three magnetic variants (16 → 64 px lagging disc with role
-  words): Bone, Lime and true Inverse/difference on the cursor layer. Production uses the standalone
+  words): Bone, Lime and true Inverse/difference on the cursor layer. The
+  Inverse label uses a separate normal-blended layer so the word stays readable
+  while the disc inverts. Production uses the standalone
   arrow swap until a variant is chosen. Text entry keeps the native I-beam.
 - Project media: cards overscan their fixed frame (`scale(1.08)`) and drift
   `yPercent: -4 → 4` with scroll (`scrub: 0.6`). Scale and travel live on

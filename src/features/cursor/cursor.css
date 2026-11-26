@@ -32,7 +32,8 @@
   }
 }
 
-.cursor-layer {
+.cursor-layer,
+.cursor-label-layer {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -46,7 +47,8 @@
   pointer-events: none;
 }
 
-.cursor-layer:popover-open {
+.cursor-layer:popover-open,
+.cursor-label-layer:popover-open {
   display: block;
 }
 
@@ -167,8 +169,10 @@
 .cursor-magnetic__label {
   display: none;
   position: absolute;
-  inset: 0;
-  place-items: center;
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  transform: translate(-50%, -50%);
   color: var(--color-ink);
   font-family: var(--font-label);
   font-size: var(--cursor-magnetic-label);
@@ -179,11 +183,29 @@
   pointer-events: none;
 }
 
+.cursor-magnetic-label-origin {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms linear;
+  will-change: transform;
+}
+
 html[data-cursor-variant^="magnetic-"] .cursor-ring {
   display: block;
 }
 
 html[data-cursor-variant^="magnetic-"] .cursor-magnetic__disc {
+  display: block;
+}
+
+html[data-cursor-variant^="magnetic-"] .cursor-magnetic-label-origin {
   display: block;
 }
 
@@ -206,6 +228,9 @@ html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__disc {
 }
 
 html[data-cursor-variant="magnetic-inverse"] .cursor-magnetic__label {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: var(--color-ink);
   color: var(--color-bone);
 }
 
@@ -415,7 +440,8 @@ html:not([data-cursor-variant]):is(
 }
 
 html[data-cursor-visible="true"] .cursor-dot,
-html[data-cursor-visible="true"] .cursor-ring {
+html[data-cursor-visible="true"] .cursor-ring,
+html[data-cursor-visible="true"] .cursor-magnetic-label-origin {
   opacity: 1;
 }
 
@@ -435,13 +461,15 @@ html[data-cursor-state="play"] .cursor-arrow {
 
 /* Text entry: the OS I-beam takes over. */
 html[data-cursor-state="text"] .cursor-dot,
-html[data-cursor-state="text"] .cursor-ring {
+html[data-cursor-state="text"] .cursor-ring,
+html[data-cursor-state="text"] .cursor-magnetic-label-origin {
   opacity: 0 !important;
 }
 
 /* Disabled is visibly inert, but only while the pointer is present. */
 html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-dot,
-html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-ring {
+html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-ring,
+html[data-cursor-visible="true"][data-cursor-state="disabled"] .cursor-magnetic-label-origin {
   opacity: 0.4;
 }
 
@@ -453,14 +481,16 @@ html[data-cursor-down="true"] .cursor-ring {
 
 /* The escape hatch: native cursor, custom visuals gone. */
 html[data-cursor="off"] .cursor-dot,
-html[data-cursor="off"] .cursor-ring {
+html[data-cursor="off"] .cursor-ring,
+html[data-cursor="off"] .cursor-magnetic-label-origin {
   opacity: 0 !important;
 }
 
 /* Browsers without the Popover API fall back to the native pointer while the
    modal menu is open, because a dialog lives in the top layer. */
 html[data-cursor-menu="native"] .cursor-dot,
-html[data-cursor-menu="native"] .cursor-ring {
+html[data-cursor-menu="native"] .cursor-ring,
+html[data-cursor-menu="native"] .cursor-magnetic-label-origin {
   opacity: 0 !important;
 }
 
@@ -472,6 +502,7 @@ html[data-cursor="on"][data-cursor-menu="native"] * {
 @media (prefers-reduced-motion: reduce) {
   .cursor-dot,
   .cursor-ring,
+  .cursor-magnetic-label-origin,
   .cursor-dot__disc,
   .cursor-ring__inner,
   .cursor-magnetic__disc,
