@@ -24,7 +24,7 @@ No new visual tokens. The pass reuses `--color-black`, `--color-ink`,
 
 ```text
 SCOPE: skip link, route focus/announcement, persistent form live region,
-  email spellcheck, mobile Contact CTA, privacy note, optional Turnstile,
+  email spellcheck, mobile header CTA removal, privacy note, optional Turnstile,
   video/hero pause controls, theme color, JSON-LD, project/blog OG images,
   RSS, security headers.
 NON-GOALS: copy rewrites, CV/experience content, new projects, cursor selection,
@@ -43,7 +43,7 @@ ROLLBACK/GATING: revert the commit; Turnstile stays optional behind env keys.
 | Skip link is first keyboard stop and targets main | `tests/technical-a11y.spec.ts` | COVERED |
 | Client navigation focuses the new main | `tests/technical-a11y.spec.ts` | COVERED |
 | Form live region exists before request | `tests/technical-a11y.spec.ts` | COVERED |
-| Mobile Contact CTA clears the menu trigger | `tests/technical-a11y.spec.ts` | COVERED |
+| Mobile header keeps navigation in the menu and hides the CTA | `tests/technical-a11y.spec.ts` | COVERED |
 | Video pause/play is keyboard accessible | `tests/technical-a11y.spec.ts` | COVERED |
 | Hero motion pause/play works | `tests/technical-a11y.spec.ts` | COVERED |
 | Theme color + RSS alternate | `tests/seo.spec.ts` | COVERED |

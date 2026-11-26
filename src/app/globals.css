@@ -602,9 +602,8 @@ html.lenis body {
   stroke: currentColor !important;
 }
 
-/* No inline navigation on small screens; a compact Contact action and the
-   trigger carry the header. Its visibility is state-driven so it can step
-   aside over running copy. */
+/* No inline navigation or CTA on small screens; the trigger carries the
+   header. Its visibility is state-driven so it can step aside over copy. */
 @media (max-width: 767px) {
   .site-header__nav {
     display: none;
@@ -612,21 +611,14 @@ html.lenis body {
 
   .site-header {
     gap: var(--space-1);
-    padding-inline-end: calc(var(--gutter) + 4.75rem);
+    padding-inline-end: calc(var(--gutter) + 4.5rem);
   }
 
   .site-header__actions {
-    gap: var(--space-2);
+    gap: 0;
   }
 
   .header-cta {
-    min-block-size: 44px;
-    padding-inline: 0;
-    border: 0;
-    font-size: var(--text-t-12);
-  }
-
-  .header-cta__arrow {
     display: none;
   }
 }

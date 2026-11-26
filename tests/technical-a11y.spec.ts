@@ -62,24 +62,21 @@ test.describe("technical accessibility pass", () => {
     );
   });
 
-  test("mobile header keeps a compact contact action clear of the menu", async ({
-    page,
-  }) => {
+  test("mobile header keeps navigation inside the menu", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/contact");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
 
-    const cta = page.locator("header .header-cta");
+    await expect(page.locator("header .header-cta")).toBeHidden();
     const trigger = page.locator(".menu-trigger");
-    await expect(cta).toBeVisible();
     await expect(trigger).toBeVisible();
+    await trigger.click();
 
-    const [ctaBox, triggerBox] = await Promise.all([
-      cta.boundingBox(),
-      trigger.boundingBox(),
-    ]);
-    expect(ctaBox).not.toBeNull();
-    expect(triggerBox).not.toBeNull();
-    expect(ctaBox!.x + ctaBox!.width).toBeLessThan(triggerBox!.x);
+    const dialog = page.locator("#site-menu");
+    await expect(dialog).toHaveAttribute("data-state", "open");
+    await expect(
+      dialog.getByRole("link", { name: "Contact", exact: true }),
+    ).toBeVisible();
   });
 
   test("project recording exposes a keyboard pause control", async ({

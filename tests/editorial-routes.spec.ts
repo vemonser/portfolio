@@ -42,37 +42,25 @@ test.describe("navigation", () => {
 });
 
 test.describe("mobile header", () => {
-  test("keeps the Contact CTA beside the menu trigger", async ({ page }) => {
+  test("keeps mobile navigation in the menu trigger", async ({ page }) => {
     for (const width of [320, 360, 390]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/contact");
+      await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
 
       const cta = page.locator("header .header-cta");
       const trigger = page.locator(".menu-trigger");
-      const brand = page.locator("header .site-header__brand");
-
-      await expect(cta).toBeVisible();
+      await expect(cta).toBeHidden();
       await expect(trigger).toBeVisible();
 
-      const [ctaBox, triggerBox, brandBox] = await Promise.all([
-        cta.boundingBox(),
-        trigger.boundingBox(),
-        brand.boundingBox(),
-      ]);
-
-      expect(ctaBox).not.toBeNull();
-      expect(triggerBox).not.toBeNull();
-      expect(brandBox).not.toBeNull();
-
-      // The pill sits between the brand and the fixed trigger, never under
-      // either one.
-      expect(brandBox!.x + brandBox!.width).toBeLessThanOrEqual(ctaBox!.x);
-      expect(ctaBox!.x + ctaBox!.width).toBeLessThanOrEqual(triggerBox!.x);
-
-      const dot = await cta
-        .locator(".header-cta__dot")
-        .evaluate((node) => getComputedStyle(node).backgroundColor);
-      expect(dot).toBe("rgb(198, 240, 53)");
+      await trigger.click();
+      const dialog = page.locator("#site-menu");
+      await expect(dialog).toHaveAttribute("data-state", "open");
+      await expect(
+        dialog.getByRole("link", { name: "Contact", exact: true }),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(dialog).not.toHaveAttribute("data-state", "open");
     }
   });
 });
