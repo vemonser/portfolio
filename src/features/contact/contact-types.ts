@@ -43,13 +43,13 @@ export const CONTACT_FIELDS: readonly FieldName[] = [
   "message",
 ] as const;
 
-export const EMPTY_CONTACT_VALUES: ContactValues = {
+export const EMPTY_CONTACT_VALUES: Readonly<ContactValues> = {
   name: "",
   email: "",
   message: "",
 };
 
-export const CONTACT_IDS: Record<FieldName, string> = {
+export const CONTACT_IDS: Readonly<Record<FieldName, string>> = {
   name: "contact-name",
   email: "contact-email",
   message: "contact-message",
