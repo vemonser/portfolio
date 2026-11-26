@@ -131,7 +131,8 @@ html:not([data-cursor-variant="magnetic-bone"]):is(
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
     [data-cursor-state="view"],
-    [data-cursor-state="play"]
+    [data-cursor-state="play"],
+    [data-cursor-state="close"]
   )
   .cursor-magnetic__disc {
   --cursor-scale: var(--cursor-magnetic-focus-scale);
@@ -142,7 +143,8 @@ html[data-cursor-variant="magnetic-bone"]:is(
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
     [data-cursor-state="view"],
-    [data-cursor-state="play"]
+    [data-cursor-state="play"],
+    [data-cursor-state="close"]
   )
   .cursor-layer {
   mix-blend-mode: normal;
@@ -153,7 +155,8 @@ html[data-cursor-variant="magnetic-bone"]:is(
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
     [data-cursor-state="view"],
-    [data-cursor-state="play"]
+    [data-cursor-state="play"],
+    [data-cursor-state="close"]
   )
   .cursor-magnetic__disc {
   --cursor-scale: var(--cursor-bone-label-scale);
@@ -164,7 +167,8 @@ html:is(
     [data-cursor-state="hello"],
     [data-cursor-state="visit"],
     [data-cursor-state="view"],
-    [data-cursor-state="play"]
+    [data-cursor-state="play"],
+    [data-cursor-state="close"]
   )
   .cursor-magnetic__label {
   scale: 1;

@@ -611,6 +611,94 @@ test.describe("custom cursor", () => {
     ).toBe(true);
   });
 
+  test("menu cursor shows OPEN over trigger and CLOSE over nav close", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+
+    await page.evaluate(() => {
+      document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
+    });
+    await page.waitForTimeout(100);
+
+    const label = page.locator(".cursor-magnetic__label");
+    const trigger = page.locator(".menu-trigger");
+    const triggerBox = await trigger.boundingBox();
+    expect(triggerBox).not.toBeNull();
+    await page.mouse.move(
+      triggerBox!.x + triggerBox!.width / 2,
+      triggerBox!.y + triggerBox!.height / 2,
+    );
+    await expect(label).toHaveText("OPEN");
+
+    await trigger.dispatchEvent("click");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "open",
+    );
+
+    const closeBtn = page.locator(".nav-close");
+    const closeBox = await closeBtn.boundingBox();
+    expect(closeBox).not.toBeNull();
+    await page.mouse.move(
+      closeBox!.x + closeBox!.width / 2,
+      closeBox!.y + closeBox!.height / 2,
+    );
+    await expect(label).toHaveText("CLOSE");
+
+    await closeBtn.click();
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "closed",
+    );
+
+    await page.mouse.move(
+      triggerBox!.x + triggerBox!.width / 2,
+      triggerBox!.y + triggerBox!.height / 2,
+    );
+    await expect(label).toHaveText("OPEN");
+  });
+
+  test("menu cursor updates with a stationary pointer", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-cursor", "on");
+
+    await page.evaluate(() => {
+      document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
+    });
+    await page.waitForTimeout(100);
+
+    const label = page.locator(".cursor-magnetic__label");
+    const trigger = page.locator(".menu-trigger");
+    const triggerBox = await trigger.boundingBox();
+    expect(triggerBox).not.toBeNull();
+    await page.mouse.move(
+      triggerBox!.x + triggerBox!.width / 2,
+      triggerBox!.y + triggerBox!.height / 2,
+    );
+    await expect(label).toHaveText("OPEN");
+
+    await trigger.dispatchEvent("click");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "open",
+    );
+    await expect(label).toHaveText("CLOSE");
+
+    await page.keyboard.press("Escape");
+    await expect(page.locator("dialog#site-menu")).toHaveAttribute(
+      "data-state",
+      "closed",
+    );
+
+    await page.evaluate(() => {
+      document.querySelector(".menu-trigger")?.setAttribute("data-visible", "true");
+    });
+    await page.waitForTimeout(100);
+    await expect(label).toHaveText("OPEN");
+  });
+
   test("clears a stale role when the window shrinks", async ({ page }) => {
     await openLab(page);
     const html = page.locator("html");

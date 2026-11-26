@@ -5,29 +5,16 @@ import gsap from "gsap";
 
 import { isMenuOpen, subscribeMenu } from "@/features/navigation/menu-store";
 
+import {
+  type CursorRole,
+  ROLE_LABELS,
+  resolveCursorRole,
+} from "@/features/cursor/cursor-roles";
+
 import "./cursor.css";
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 const REDUCED = "(prefers-reduced-motion: reduce)";
-
-type CursorRole =
-  | "default"
-  | "link"
-  | "view"
-  | "play"
-  | "hello"
-  | "visit"
-  | "emphasis"
-  | "text"
-  | "disabled";
-
-const ROLE_LABELS: Partial<Record<CursorRole, string>> = {
-  link: "OPEN",
-  view: "VIEW",
-  play: "PLAY",
-  hello: "HELLO",
-  visit: "VISIT",
-};
 
 /**
  * The site-wide magnetic cursor. Lime is the default treatment; the cursor lab
@@ -98,54 +85,29 @@ export default function Cursor() {
 
     const setRole = (next: CursorRole) => {
       if (next === role) return;
+      const previous = role;
       role = next;
       html.dataset.cursorState = next;
       label.textContent = ROLE_LABELS[next] ?? "";
-    };
 
-    const roleAt = (node: Element): CursorRole => {
-      // An unavailable control tells the truth before any decorative role.
-      if (node.closest(":disabled, [aria-disabled='true']")) return "disabled";
-
-      const tagged = node.closest<HTMLElement>("[data-cursor]:not(html)");
-      if (tagged) {
-        const explicit = tagged.dataset.cursor;
-        if (explicit === "view" || explicit === "play") return explicit;
-        if (explicit === "hello") return "hello";
-        if (explicit === "visit") return "visit";
-        if (explicit === "emphasis") return "emphasis";
-        if (explicit === "text") return "text";
-        if (explicit === "disabled") return "disabled";
+      // Brief feedback when the menu trigger flips between OPEN and CLOSE.
+      const menuFlip =
+        (previous === "link" && next === "close") ||
+        (previous === "close" && next === "link");
+      if (menuFlip && !reduced.matches) {
+        gsap.fromTo(
+          label,
+          { scale: 0.6, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.18,
+            ease: "power2.out",
+            overwrite: true,
+            clearProps: "transform,opacity",
+          },
+        );
       }
-
-      const anchor = node.closest<HTMLAnchorElement>("a[href]");
-      if (anchor) {
-        const href = anchor.getAttribute("href") ?? "";
-        if (href.startsWith("mailto:") || href.startsWith("tel:")) return "hello";
-        if (anchor.target === "_blank") return "visit";
-      }
-
-      if (node.closest("textarea, select, [contenteditable='true']")) {
-        return "text";
-      }
-
-      const input = node.closest("input");
-      if (input) {
-        const type = (input as HTMLInputElement).type;
-        if (
-          type === "range" ||
-          type === "checkbox" ||
-          type === "radio" ||
-          type === "file" ||
-          type === "color"
-        ) {
-          return "link";
-        }
-        return "text";
-      }
-
-      if (node.closest("a, button, [role='button'], label[for]")) return "link";
-      return "default";
     };
 
     let roleFrame = 0;
@@ -170,7 +132,7 @@ export default function Cursor() {
       if (html.dataset.cursorVisible !== "true") return;
 
       const node = document.elementFromPoint(targetX, targetY);
-      setRole(node ? roleAt(node) : "default");
+      setRole(node ? resolveCursorRole(node, isMenuOpen()) : "default");
     };
 
     const scheduleRole = () => {
@@ -282,7 +244,7 @@ export default function Cursor() {
     const onOver = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
       const node = event.target instanceof Element ? event.target : null;
-      setRole(node ? roleAt(node) : "default");
+      setRole(node ? resolveCursorRole(node, isMenuOpen()) : "default");
     };
 
     const releasePress = () => {
